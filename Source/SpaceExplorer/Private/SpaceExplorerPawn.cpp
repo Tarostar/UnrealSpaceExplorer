@@ -6,11 +6,6 @@
 ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializeProperties& PCIP) 
 	: Super(PCIP)
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("ASpaceExplorerPawn"));
-	}
-
 	// Structure to hold one-time initialization
 	struct FConstructorStatics
 	{
@@ -32,8 +27,10 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	SpringArm->AttachTo(RootComponent);
 	SpringArm->TargetArmLength = 160.0f; // The camera follows at this distance behind the character	
 	SpringArm->SocketOffset = FVector(0.f, 0.f, 60.f);
-	SpringArm->bEnableCameraLag = false;
+	SpringArm->bEnableCameraLag = true;
 	SpringArm->CameraLagSpeed = 15.f;
+
+	DefaultSpringRotation = SpringArm->GetComponentRotation();
 
 	// Create camera component 
 	Camera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("Camera0"));
@@ -46,6 +43,11 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	MaxSpeed = 4000.f;
 	MinSpeed = 500.f;
 	CurrentForwardSpeed = 500.f;
+}
+
+void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Default: ") + DefaultSpringRotation.ToString());
 }
 
 void ASpaceExplorerPawn::Tick(float DeltaSeconds)
@@ -63,6 +65,20 @@ void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 
 	// Rotate plane
 	AddActorLocalRotation(DeltaRotation);
+
+	// rotate arm if necessary
+	if (!SpringArm->bUseControllerViewRotation && !DefaultSpringRotation.Equals(CurrentSpringRotation, 1.0f))
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Default: ") + DefaultSpringRotation.ToString());
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Cur: ") + CurrentSpringRotation.ToString());
+		}
+
+		// Smoothly interpolate
+		CurrentSpringRotation = FMath::RInterpTo(CurrentSpringRotation, DefaultSpringRotation, GetWorld()->GetDeltaSeconds(), 2.f);
+		SpringArm->SetRelativeRotation(CurrentSpringRotation);
+	}
 
 	// Call any parent class Tick implementation
 	Super::Tick(DeltaSeconds);
@@ -85,7 +101,59 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAxis("Thrust", this, &ASpaceExplorerPawn::ThrustInput);
 	InputComponent->BindAxis("MoveUp", this, &ASpaceExplorerPawn::MoveUpInput);
 	InputComponent->BindAxis("MoveRight", this, &ASpaceExplorerPawn::MoveRightInput);
+
+	InputComponent->BindAction("ResetCamera", IE_Pressed, this, &ASpaceExplorerPawn::CamReset);
+	InputComponent->BindAction("MouseLook", IE_Pressed, this, &ASpaceExplorerPawn::StartMouseLook);
+	InputComponent->BindAction("MouseLook", IE_Released, this, &ASpaceExplorerPawn::StopMouseLook);
+
+	InputComponent->BindAxis("Turn", this, &ASpaceExplorerPawn::AddControllerYawInput);
+	InputComponent->BindAxis("LookUp", this, &ASpaceExplorerPawn::AddControllerPitchInput);
 }
+
+void ASpaceExplorerPawn::CamReset()
+{
+	// The spring rotation, around itself
+//	FRotator SpringRotation = SpringArm->GetComponentRotation();
+	//SpringRotation.Pitch += Val;
+
+	// Smoothly inerpolate to target pitch speed
+	// CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
+
+	// We need to rotate the spring arm along the Y axis
+	//SpringArm->SetRelativeRotation(DefaultSpringRotation);
+
+	// Make the camera look at the spring pivot
+//	FRotator CameraRotation = (Camera->GetComponentLocation() - SpringArm->GetComponentLocation()).Rotation();
+//	Camera->SetRelativeRotation(CameraRotation);
+
+	CurrentSpringRotation = SpringArm->GetComponentRotation();
+}
+
+void ASpaceExplorerPawn::StartMouseLook()
+{
+	// rotate the arm based on the controller
+	SpringArm->bUseControllerViewRotation = true;
+}
+
+void ASpaceExplorerPawn::StopMouseLook()
+{
+	// set arm so cam is back behind player
+	SpringArm->bUseControllerViewRotation = false;
+	CamReset();
+}
+
+void ASpaceExplorerPawn::AddControllerYawInput(float Val)
+{
+	if (SpringArm->bUseControllerViewRotation)
+		Super::AddControllerYawInput(Val);
+}
+
+void ASpaceExplorerPawn::AddControllerPitchInput(float Val)
+{
+	if (SpringArm->bUseControllerViewRotation)
+		Super::AddControllerPitchInput(Val);
+}
+
 
 void ASpaceExplorerPawn::ThrustInput(float Val)
 {
@@ -107,7 +175,7 @@ void ASpaceExplorerPawn::MoveUpInput(float Val)
 	// When steering, we decrease pitch slightly
 	TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.2f);
 
-	// Smoothly inerpolate to target pitch speed
+	// Smoothly interpolate to target pitch speed
 	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 

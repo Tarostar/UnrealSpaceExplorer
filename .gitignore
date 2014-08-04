@@ -1,6 +1,7 @@
 # gitignore for just source and config (mostly)
 Binaries/
 Intermediate/
+Intermediate
 Saved/
 Content/
 *.opensdf
