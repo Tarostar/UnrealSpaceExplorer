@@ -1,0 +1,9 @@
+# gitignore for just source and config (mostly)
+Binaries/
+Intermediate/
+Saved/
+Content/
+*.opensdf
+*.sdf
+*.sln
+*.v12.suo
