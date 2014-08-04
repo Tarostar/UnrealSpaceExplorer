@@ -47,7 +47,8 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Default: ") + DefaultSpringRotation.ToString());
+	//GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Default Spring Rot: ") + DefaultSpringRotation.ToString());
+	
 }
 
 void ASpaceExplorerPawn::Tick(float DeltaSeconds)
@@ -69,15 +70,16 @@ void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 	// rotate arm if necessary
 	if (!SpringArm->bUseControllerViewRotation && !DefaultSpringRotation.Equals(CurrentSpringRotation, 1.0f))
 	{
-		if (GEngine)
+		/*if (GEngine)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Default: ") + DefaultSpringRotation.ToString());
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Cur: ") + CurrentSpringRotation.ToString());
-		}
+		}*/
 
 		// Smoothly interpolate
 		CurrentSpringRotation = FMath::RInterpTo(CurrentSpringRotation, DefaultSpringRotation, GetWorld()->GetDeltaSeconds(), 2.f);
-		SpringArm->SetRelativeRotation(CurrentSpringRotation);
+		SpringArm->SetWorldRotation(CurrentSpringRotation);
+		ClientSetRotation(CurrentSpringRotation);
 	}
 
 	// Call any parent class Tick implementation
@@ -112,20 +114,6 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 
 void ASpaceExplorerPawn::CamReset()
 {
-	// The spring rotation, around itself
-//	FRotator SpringRotation = SpringArm->GetComponentRotation();
-	//SpringRotation.Pitch += Val;
-
-	// Smoothly inerpolate to target pitch speed
-	// CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-
-	// We need to rotate the spring arm along the Y axis
-	//SpringArm->SetRelativeRotation(DefaultSpringRotation);
-
-	// Make the camera look at the spring pivot
-//	FRotator CameraRotation = (Camera->GetComponentLocation() - SpringArm->GetComponentLocation()).Rotation();
-//	Camera->SetRelativeRotation(CameraRotation);
-
 	CurrentSpringRotation = SpringArm->GetComponentRotation();
 }
 
