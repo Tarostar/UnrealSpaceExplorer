@@ -32,10 +32,6 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
 	// End APawn overrides
 
-	void CamReset();
-	void StartMouseLook();
-	void StopMouseLook();
-
 	/** Bound to the vertical axis */
 	void ThrustInput(float Val);
 	
@@ -45,11 +41,20 @@ protected:
 	/** */
 	void MoveRightInput(float Val);
 
+	/** Axis controls */
 	void Zoom(float Val);
-
 	virtual void AddControllerYawInput(float Val) override;
 	virtual void AddControllerPitchInput(float Val) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Action Input */
+	void CamReset();
+	void StartMouseLook();
+	void StopMouseLook();
+	void Fire();
+	void FreeMouseLook();
+	void ZoomIn();
+	void ZoomOut();
 
 private:
 
@@ -81,7 +86,10 @@ private:
 	/** Current roll speed */
 	float CurrentRollSpeed;
 
-	// default rotation for arm
-	FRotator DefaultSpringRotation;
-	FRotator CurrentSpringRotation;
+	float CurrentZoom;
+	
+	// free look or follow pawn
+	bool bFreeMouseLook;
+
+	float MinimumArmTargetDistance;
 };

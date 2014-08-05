@@ -23,31 +23,38 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	RootComponent = PlaneMesh;
 
 	// Create a spring arm component
+	MinimumArmTargetDistance = 160.0f;
 	SpringArm = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("SpringArm0"));
 	SpringArm->AttachTo(RootComponent);
-	SpringArm->TargetArmLength = 160.0f; // The camera follows at this distance behind the character	
+	SpringArm->TargetArmLength = MinimumArmTargetDistance; // The camera follows at this distance behind the character	
 	SpringArm->SocketOffset = FVector(0.f, 0.f, 60.f);
-	SpringArm->bEnableCameraLag = true;
-	SpringArm->CameraLagSpeed = 15.f;
-
-	DefaultSpringRotation = SpringArm->GetComponentRotation();
-
+	SpringArm->bEnableCameraLag = false;
+	SpringArm->bDoCollisionTest = false;
+	SpringArm->CameraLagSpeed = 0.f;
+	SpringArm->bInheritRoll = false;
+	//SpringArm->bInheritPitch = false;
+	//SpringArm->bInheritYaw = false;
+	
 	// Create camera component 
 	Camera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("Camera0"));
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
 	Camera->bUseControllerViewRotation = false; // Don't rotate camera with controller
 
 	// Set handling parameters
-	Acceleration = 500.f;
-	TurnSpeed = 50.f;
-	MaxSpeed = 4000.f;
-	MinSpeed = 500.f;
-	CurrentForwardSpeed = 500.f;
+	Acceleration = 1000.f;
+	TurnSpeed = 100.f;
+	MaxSpeed = 8000.f;
+	MinSpeed = 0.f;
+	CurrentForwardSpeed = 0.f;
+
+	CurrentZoom = 1.f;
+
+	bFreeMouseLook = false;
 }
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Default Spring Rot: ") + DefaultSpringRotation.ToString());
+	//GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Default Spring Rot: ") + TargetSpringRotation.ToString());
 	
 }
 
@@ -67,19 +74,19 @@ void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 	// Rotate plane
 	AddActorLocalRotation(DeltaRotation);
 
-	// rotate arm if necessary
-	if (!SpringArm->bUseControllerViewRotation && !DefaultSpringRotation.Equals(CurrentSpringRotation, 1.0f))
+	if (!bFreeMouseLook && !SpringArm->bUseControllerViewRotation)
 	{
-		/*if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Default: ") + DefaultSpringRotation.ToString());
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Cur: ") + CurrentSpringRotation.ToString());
-		}*/
+		// user is not rotating camera, smoothly interpolate to target position
 
-		// Smoothly interpolate
-		CurrentSpringRotation = FMath::RInterpTo(CurrentSpringRotation, DefaultSpringRotation, GetWorld()->GetDeltaSeconds(), 2.f);
-		SpringArm->SetWorldRotation(CurrentSpringRotation);
-		ClientSetRotation(CurrentSpringRotation);
+		FRotator CurrentSpringRotation = SpringArm->GetComponentRotation();
+		FRotator TargetRot = GetActorRotation();
+
+		// set spring arm back
+		if (!TargetRot.Equals(CurrentSpringRotation, 0.000001f))
+		{
+			CurrentSpringRotation = FMath::RInterpTo(CurrentSpringRotation, TargetRot, GetWorld()->GetDeltaSeconds(), 2.f);
+			SpringArm->SetWorldRotation(CurrentSpringRotation);
+		}
 	}
 
 	// Call any parent class Tick implementation
@@ -99,35 +106,97 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 {
 	check(InputComponent);
 
-	// Fine up and right axes
+	// axes
 	InputComponent->BindAxis("Thrust", this, &ASpaceExplorerPawn::ThrustInput);
 	InputComponent->BindAxis("MoveUp", this, &ASpaceExplorerPawn::MoveUpInput);
 	InputComponent->BindAxis("MoveRight", this, &ASpaceExplorerPawn::MoveRightInput);
+	InputComponent->BindAxis("Turn", this, &ASpaceExplorerPawn::AddControllerYawInput);
+	InputComponent->BindAxis("LookUp", this, &ASpaceExplorerPawn::AddControllerPitchInput);
+	InputComponent->BindAxis("Zoom", this, &ASpaceExplorerPawn::Zoom);
 
+	// actions
 	InputComponent->BindAction("ResetCamera", IE_Pressed, this, &ASpaceExplorerPawn::CamReset);
 	InputComponent->BindAction("MouseLook", IE_Pressed, this, &ASpaceExplorerPawn::StartMouseLook);
 	InputComponent->BindAction("MouseLook", IE_Released, this, &ASpaceExplorerPawn::StopMouseLook);
+	InputComponent->BindAction("Fire", IE_Pressed, this, &ASpaceExplorerPawn::Fire);
+	InputComponent->BindAction("CameraFollow", IE_Pressed, this, &ASpaceExplorerPawn::FreeMouseLook);
+	InputComponent->BindAction("ZoomIn", IE_Pressed, this, &ASpaceExplorerPawn::ZoomIn);
+	InputComponent->BindAction("ZoomOut", IE_Pressed, this, &ASpaceExplorerPawn::ZoomOut);
+}
 
-	InputComponent->BindAxis("Turn", this, &ASpaceExplorerPawn::AddControllerYawInput);
-	InputComponent->BindAxis("LookUp", this, &ASpaceExplorerPawn::AddControllerPitchInput);
+void ASpaceExplorerPawn::ZoomIn()
+{
+	Zoom(-1.0f);
+}
+
+void ASpaceExplorerPawn::ZoomOut()
+{
+	Zoom(1.0f);
+}
+
+void ASpaceExplorerPawn::Fire()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Bang!"));
+}
+
+void ASpaceExplorerPawn::FreeMouseLook()
+{
+	bFreeMouseLook = !bFreeMouseLook;
+
+	// enable or disable mouse control of camera depending on mode
+	if (bFreeMouseLook)
+		SpringArm->bUseControllerViewRotation = true;
+	else
+		SpringArm->bUseControllerViewRotation = false;
 }
 
 void ASpaceExplorerPawn::CamReset()
 {
-	CurrentSpringRotation = SpringArm->GetComponentRotation();
+	// set controller rotation (for when resuming camera look control)
+	
+	// SpringArm->SetWorldRotation(GetActorRotation());
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Rot: ") + TargetSpringRotation.ToString());
 }
 
 void ASpaceExplorerPawn::StartMouseLook()
 {
+	// check mode - i.e. if camera follow is disable mouse look is default
+	if (bFreeMouseLook)
+		return;
+
+	// set controller to current arm position
+	ClientSetRotation(SpringArm->GetComponentRotation());
+
 	// rotate the arm based on the controller
 	SpringArm->bUseControllerViewRotation = true;
 }
 
 void ASpaceExplorerPawn::StopMouseLook()
 {
+	// check mode - i.e. if camera follow is disable mouse look is default
+	if (bFreeMouseLook)
+		return;
+	
 	// set arm so cam is back behind player
-	SpringArm->bUseControllerViewRotation = false;
 	CamReset();
+	SpringArm->bUseControllerViewRotation = false;
+}
+
+void ASpaceExplorerPawn::Zoom(float Val)
+{
+	if (FMath::IsNearlyEqual(Val, 0.f))
+		return; // nothing going on...
+
+	if(Val < 0.f && CurrentZoom <= 1.0f)
+		return; // can't zoom in further
+
+	if (Val > 0.f && CurrentZoom >= 3.0f)
+		return; // can't zoom out further
+
+	CurrentZoom += Val;
+
+	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, TEXT("Zoom: ") + FString::SanitizeFloat(Val));
+	
 }
 
 void ASpaceExplorerPawn::AddControllerYawInput(float Val)
@@ -147,12 +216,18 @@ void ASpaceExplorerPawn::ThrustInput(float Val)
 {
 	// Is there no input?
 	bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
-	// If input is not held down, reduce speed
-	float CurrentAcc = bHasInput ? (Val * Acceleration) : (-0.5f * Acceleration);
+	// acceleration
+	float CurrentAcc = bHasInput ? (Val * Acceleration) : 0.0f;//(-0.5f * Acceleration);
 	// Calculate new speed
 	float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
 	// Clamp between MinSpeed and MaxSpeed
 	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
+
+	//SpringArm->TargetArmLength = bHasInput ? MinimumArmTargetDistance * (2 - CurrentForwardSpeed / (MaxSpeed - MinSpeed)) : MaximumArmTargetDistance * (2 - CurrentForwardSpeed / (MaxSpeed - MinSpeed));
+	SpringArm->TargetArmLength = MinimumArmTargetDistance * CurrentZoom * (2 - CurrentForwardSpeed / (MaxSpeed - MinSpeed));
+	
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, TEXT("Distance: ") + FString::SanitizeFloat(SpringArm->TargetArmLength));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, TEXT("Speed Mod: ") + FString::SanitizeFloat(2 - CurrentForwardSpeed / (MaxSpeed - MinSpeed)));
 }
 
 void ASpaceExplorerPawn::MoveUpInput(float Val)
