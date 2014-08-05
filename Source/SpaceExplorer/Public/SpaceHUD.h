@@ -5,6 +5,7 @@
 #include "GameFramework/HUD.h"
 #include "SpaceHUD.generated.h"
 
+class ASpaceExplorerPawn;
 
 USTRUCT()
 struct FCustomButtonStruct
@@ -65,6 +66,9 @@ class SPACEEXPLORER_API ASpaceHUD : public AHUD
 	/** HUD Scaling */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CustomHUD)
 	float GlobalHUDMult;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CustomHUD)
+	ASpaceExplorerPawn* PlayerPawn;
 
 	// T2D 
 	/** Cursor */
@@ -293,7 +297,6 @@ public:
 	void DrawToolTip();
 
 	// blueprint interface to active HUD
-	//UFUNCTION(BlueprintImplementableEvent, Category = ActiveHUD)
 	UFUNCTION(BlueprintCallable, Category = ActiveHUD)
 	void AddActiveHudButton(const FString& label, const FString& tooltip, float x, float y, float width, float height);
 

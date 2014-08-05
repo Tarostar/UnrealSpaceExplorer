@@ -9,14 +9,14 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 	: Super(PCIP)
 {
 	// set default pawn class to our flying pawn
-	DefaultPawnClass = ASpaceExplorerPawn::StaticClass();
+	//DefaultPawnClass = ASpaceExplorerPawn::StaticClass();
 
 	// code for if I want to use blueprint
-	/*static ConstructorHelpers::FObjectFinder<UBlueprint> PlayerPawnObject(TEXT("Blueprint'/Game/Blueprints/BP_UFO.BP_UFO'"));
+	static ConstructorHelpers::FObjectFinder<UBlueprint> PlayerPawnObject(TEXT("Blueprint'/Game/Blueprints/BP_SpaceExplorer.BP_SpaceExplorer'"));
 	if (PlayerPawnObject.Object != NULL)
 	{
 		DefaultPawnClass = (UClass*)PlayerPawnObject.Object->GeneratedClass;
-	}*/
+	}
 
 	// HUD
 	static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/Blueprints/BP_SpaceHUD.BP_SpaceHUD'"));

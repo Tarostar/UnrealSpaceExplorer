@@ -68,13 +68,6 @@ void ASpaceHUD::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	//AddActiveHudButton("TEST", "BLAH", 100, 100, 150, 60);
-	
-	// how to get a ref to your custom PC
-	//AYourPlayerController* YourChar = Cast<AYourPlayerController>(PlayerOwner);
-
-	// how to get the character
-	// ASpaceExplorerPawn* YourChar = Cast<ASpaceExplorerPawn>(GetOwningPawn());
-
 }
 
 //===============
@@ -518,6 +511,11 @@ void ASpaceHUD::DrawHUD()
 
 void ASpaceHUD::DrawActiveHud()
 {
+	// proof of concept code...
+	/*ASpaceExplorerPawn *pawn = Cast<ASpaceExplorerPawn>(GetOwningPlayerController()->GetControlledPawn());
+	if (pawn && GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 60.f, FColor::Blue, TEXT("Cur Speed: ") + FString::SanitizeFloat(pawn->CurrentForwardSpeed));*/
+
 	for (int32 b = 0; b < ButtonsHud.Num(); b++)
 	{
 		DrawCustomText(HUDFont, ButtonsHud[b].label, ButtonsHud[b].x + 30, ButtonsHud[b].y + 20, LC_Yellow, DefaultFontScale, true);
