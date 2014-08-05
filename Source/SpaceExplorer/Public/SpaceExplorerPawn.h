@@ -21,10 +21,47 @@ public:
 	UPROPERTY(Category=Camera, VisibleDefaultsOnly, BlueprintReadOnly)
 	TSubobjectPtr<class UCameraComponent> Camera;
 
-	// Begin AActor overrides
-	virtual void Tick(float DeltaSeconds) override;
-	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
-	// End AActor overrides
+	/** How quickly forward speed changes */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float Acceleration;
+
+	/** How quickly pawn can steer */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float TurnSpeed;
+
+	/** Max forward speed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float MaxSpeed;
+
+	/** Min forward speed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float MinSpeed;
+
+	/** Current forward speed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float CurrentForwardSpeed;
+
+	/** Current yaw speed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float CurrentYawSpeed;
+
+	/** Current pitch speed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float CurrentPitchSpeed;
+
+	/** Current roll speed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float CurrentRollSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float CurrentZoom;
+
+	// free look or follow pawn
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		bool bFreeMouseLook;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float MinimumArmTargetDistance;
 
 protected:
 
@@ -43,9 +80,13 @@ protected:
 
 	/** Axis controls */
 	void Zoom(float Val);
+	// Begin AActor overrides
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void AddControllerYawInput(float Val) override;
 	virtual void AddControllerPitchInput(float Val) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
+	// End AActor overrides
 
 	/** Action Input */
 	void CamReset();
@@ -55,41 +96,4 @@ protected:
 	void FreeMouseLook();
 	void ZoomIn();
 	void ZoomOut();
-
-private:
-
-	/** How quickly forward speed changes */
-	UPROPERTY(Category=Plane, EditAnywhere)
-	float Acceleration;
-
-	/** How quickly pawn can steer */
-	UPROPERTY(Category=Plane, EditAnywhere)
-	float TurnSpeed;
-
-	/** MAx forward speed */
-	UPROPERTY(Category = Pitch, EditAnywhere)
-	float MaxSpeed;
-
-	/** Min forward speed */
-	UPROPERTY(Category=Yaw, EditAnywhere)
-	float MinSpeed;
-
-	/** Current forward speed */
-	float CurrentForwardSpeed;
-
-	/** Current yaw speed */
-	float CurrentYawSpeed;
-
-	/** Current pitch speed */
-	float CurrentPitchSpeed;
-
-	/** Current roll speed */
-	float CurrentRollSpeed;
-
-	float CurrentZoom;
-	
-	// free look or follow pawn
-	bool bFreeMouseLook;
-
-	float MinimumArmTargetDistance;
 };
