@@ -4,6 +4,7 @@
 #include "SpaceHUD.h"
 #include "SpaceExplorerPawn.h"
 
+#define BUTTONTYPE_UNDEFINED 		0
 #define BUTTONTYPE_MAIN_RESTART 	1
 #define BUTTONTYPE_MAIN_EXIT 		2
 
@@ -43,7 +44,7 @@ ASpaceHUD::ASpaceHUD(const class FPostConstructInitializeProperties& PCIP) : Sup
 {
 	// Draw HUD?
 	bDrawHUD = true;
-	bDrawMainMenu = true;
+	bDrawMainMenu = false;
 
 	//States
 	ConfirmDialogOpen = false;
@@ -65,6 +66,8 @@ ASpaceHUD::ASpaceHUD(const class FPostConstructInitializeProperties& PCIP) : Sup
 void ASpaceHUD::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	//AddActiveHudButton("TEST", "BLAH", 100, 100, 150, 60);
 	
 	// how to get a ref to your custom PC
 	//AYourPlayerController* YourChar = Cast<AYourPlayerController>(PlayerOwner);
@@ -122,14 +125,14 @@ void ASpaceHUD::DrawConfirm(const FString& Title)
 //Buttons
 void ASpaceHUD::DrawMainMenuButtons()
 {
-	//Start Point
+	// Start Point
 	float xStart = 100;
 	float yStart = 110;
 
-	//Background
+	// Background
 	VDrawTile(ButtonBackground, xStart, yStart, 150, 80, FColor(255, 255, 255, 120)); //alpha 120/255
 
-	//Text
+	// Text
 	DrawCustomText(
 		HUDFont, "Restart", xStart + 30, yStart + 20,
 		LC_Black, DefaultFontScale,
@@ -145,10 +148,10 @@ void ASpaceHUD::DrawMainMenuButtons()
 		FCustomButtonStruct newButton = FCustomButtonStruct();
 		newButton.type = BUTTONTYPE_MAIN_RESTART;
 		newButton.toolTip = "Restart the Game!";
-		newButton.minX = xStart;
-		newButton.maxX = xStart + 150;
-		newButton.minY = yStart;
-		newButton.maxY = yStart + 80;
+		newButton.x = xStart;
+		newButton.width = xStart + 150;
+		newButton.y = yStart;
+		newButton.height = yStart + 80;
 
 		//Add to correct array
 		ButtonsMain.Add(newButton);
@@ -172,10 +175,10 @@ void ASpaceHUD::DrawMainMenuButtons()
 		FCustomButtonStruct newButton = FCustomButtonStruct();
 		newButton.type = BUTTONTYPE_MAIN_EXIT;
 		newButton.toolTip = "Exit the Game!";
-		newButton.minX = xStart;
-		newButton.maxX = xStart + 150;
-		newButton.minY = yStart;
-		newButton.maxY = yStart + 80;
+		newButton.x = xStart;
+		newButton.width = xStart + 150;
+		newButton.y = yStart;
+		newButton.height = yStart + 80;
 
 		//Add to correct array
 		ButtonsMain.Add(newButton);
@@ -202,12 +205,12 @@ void ASpaceHUD::DrawConfirmButtons()
 		FCustomButtonStruct newButton = FCustomButtonStruct();
 		newButton.type = BUTTONTYPE_CONFIRM_YES;
 		newButton.toolTip = "";
-		newButton.minX = xStart;
-		newButton.maxX = xStart + 75;
-		newButton.minY = yStart + 20;
-		newButton.maxY = yStart + 60;
+		newButton.x = xStart;
+		newButton.width = 75;
+		newButton.y = yStart + 20;
+		newButton.height = 60;
 
-		//could use GetTextSize to streamline this
+		// could use GetTextSize to streamline this
 
 		//Add to correct array
 		ButtonsConfirm.Add(newButton);
@@ -232,12 +235,12 @@ void ASpaceHUD::DrawConfirmButtons()
 		FCustomButtonStruct newButton = FCustomButtonStruct();
 		newButton.type = BUTTONTYPE_CONFIRM_NO;
 		newButton.toolTip = "";
-		newButton.minX = xStart;
-		newButton.maxX = xStart + 75;
-		newButton.minY = yStart + 20;
-		newButton.maxY = yStart + 60;
+		newButton.x = xStart;
+		newButton.width = 75;
+		newButton.y = yStart + 20;
+		newButton.height = 60;
 
-		//could use GetTextSize to streamline this
+		// could use GetTextSize to streamline this
 
 		//Add to correct array
 		ButtonsConfirm.Add(newButton);
@@ -254,8 +257,8 @@ int32 ASpaceHUD::CheckCursorInButton(const TArray<FCustomButtonStruct>& ButtonAr
 		CurCheckButton = &ButtonArray[b];
 
 		//check cursor in bounds
-		if (CurCheckButton->minX <= MouseLocation.X && MouseLocation.X <= CurCheckButton->maxX &&
-			CurCheckButton->minY <= MouseLocation.Y && MouseLocation.Y <= CurCheckButton->maxY)
+		if (CurCheckButton->x <= MouseLocation.X && MouseLocation.X <= CurCheckButton->x + CurCheckButton->width &&
+			CurCheckButton->y <= MouseLocation.Y && MouseLocation.Y <= CurCheckButton->x + CurCheckButton->height)
 		{
 
 			//Active Button Type
@@ -412,7 +415,7 @@ void ASpaceHUD::PlayerInputChecks()
 	// check out this tutorial of mine for a list of all EKeys::
 	// http://forums.epicgames.com/threads/972861-Tutorials-C-for-UE4-Code-Samples-gt-gt-New-Video-Freeze-Render-When-Tabbed-Out?p=31660286&viewfull=1#post31660286
 
-	if (PlayerOwner->WasInputKeyJustPressed(EKeys::Escape))
+	if (PlayerOwner->WasInputKeyJustPressed(EKeys::Escape) || PlayerOwner->WasInputKeyJustPressed(EKeys::M))
 	{
 		bDrawMainMenu = !bDrawMainMenu;
 		SetCursorMoveOnly(false);
@@ -480,8 +483,7 @@ void ASpaceHUD::DrawHUD()
 	//Draw HUD?
 	if (!bDrawHUD) 
 		return;
-	//~~
-
+	
 	//Super
 	Super::DrawHUD();
 
@@ -504,6 +506,8 @@ void ASpaceHUD::DrawHUD()
 	//Draw Dialogs
 	DrawHUD_DrawDialogs();
 
+	DrawActiveHud();
+
 	//### Do Last ###
 	//Draw Cursor
 	DrawHUD_DrawCursor();
@@ -512,4 +516,29 @@ void ASpaceHUD::DrawHUD()
 	//PlayerOwner->ClientMessage("HUD Loop Completed!");
 }
 
+void ASpaceHUD::DrawActiveHud()
+{
+	for (int32 b = 0; b < ButtonsHud.Num(); b++)
+	{
+		DrawCustomText(HUDFont, ButtonsHud[b].label, ButtonsHud[b].x + 30, ButtonsHud[b].y + 20, LC_Yellow, DefaultFontScale, true);
+	}
+}
+
+void ASpaceHUD::AddActiveHudButton(const FString& label, const FString& tooltip, float x, float y, float width, float height)
+{
+	FCustomButtonStruct newButton = FCustomButtonStruct();
+	// TODO: need to set type...
+	newButton.type = BUTTONTYPE_UNDEFINED;
+	newButton.label = label;
+	newButton.toolTip = tooltip;
+	newButton.x = x;
+	newButton.y = y;
+	newButton.width = width;
+	newButton.height = height;
+
+	//Add to correct array
+	ButtonsHud.Add(newButton);
+
+	
+}
 

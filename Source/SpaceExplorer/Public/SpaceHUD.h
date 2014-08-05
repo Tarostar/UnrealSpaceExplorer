@@ -11,24 +11,32 @@ struct FCustomButtonStruct
 {
 	GENERATED_USTRUCT_BODY()
 
-	//Vars
+	// text
+	FString		text;
+
+	// background
+	bool		bVisible;
+
+	// button
 	int32 		type;
+	FString		label;
 	FString		toolTip;
-	float 		minX;
-	float 		maxX;
-	float 		minY;
-	float 		maxY;
+	float 		x;
+	float 		y;
+	float 		width;
+	float 		height;
 
 	//default properties
 
 	FCustomButtonStruct()
 	{
 		type = -1;
+		text = "";
 		toolTip = "";
-		minX = 0;
-		maxX = 0;
-		minY = 0;
-		maxY = 0;
+		x = 0;
+		y = 0;
+		width = 0;
+		height = 0;
 	}
 };
 
@@ -94,6 +102,8 @@ public:
 public:
 	TArray<FCustomButtonStruct> ButtonsMain;
 	TArray<FCustomButtonStruct> ButtonsConfirm;
+
+	TArray<FCustomButtonStruct> ButtonsHud;
 
 	//Cursor In buttons
 	void DrawHUD_CheckCursorInButtons();
@@ -282,6 +292,11 @@ public:
 public:
 	void DrawToolTip();
 
+	// blueprint interface to active HUD
+	//UFUNCTION(BlueprintImplementableEvent, Category = ActiveHUD)
+	UFUNCTION(BlueprintCallable, Category = ActiveHUD)
+	void AddActiveHudButton(const FString& label, const FString& tooltip, float x, float y, float width, float height);
+
 	//Core
 public:
 	void PlayerInputChecks();
@@ -289,6 +304,7 @@ protected:
 	//Draw HUD
 	void DrawHUD_Reset();
 	virtual void DrawHUD() override;
+	void DrawActiveHud();
 
 	/** after all game elements are created */
 	virtual void PostInitializeComponents() override;
