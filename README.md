@@ -23,4 +23,17 @@ The C++ classes will generally be exposed to blueprints for easy in-editor tweak
 
 ## C++
 
-* [HUD, Canvas](https://wiki.unrealengine.com/HUD,_Canvas,_Code_Sample_of_800%2B_Lines,_Create_Buttons_%26_Draw_Materials)
+* [HUD using Canvas](https://wiki.unrealengine.com/HUD,_Canvas,_Code_Sample_of_800%2B_Lines,_Create_Buttons_%26_Draw_Materials)
+* [C++ FPS Tutorial](https://wiki.unrealengine.com/First_Person_Shooter_C%2B%2B_Tutorial)
+
+## Tutorials
+
+* [YouTube Channel - Tesla Dev](https://www.youtube.com/channel/UC3QBWg9pMnaFF-q0qjXPDEg)
+* [YouTube Inventoy System - Savai Kun](https://www.youtube.com/channel/UCLCVZLOs3tdcKYGjmXZWK2Q)
+
+## Official
+
+* [Unreal Engine Docs](https://docs.unrealengine.com)
+* [Unreal Blueprint Content Example](https://docs.unrealengine.com/latest/INT/Resources/ContentExamples/Blueprints/index.html)
+* [Unreal Wiki Tutorials](https://wiki.unrealengine.com/Category:Tutorials)
+* [Damage](https://www.unrealengine.com/blog/damage-in-ue4)
