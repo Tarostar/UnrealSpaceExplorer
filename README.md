@@ -15,4 +15,25 @@ You will need of course to assign inputs which may look something like this:
 
 # Blueprints
 
-Blueprints may also be used, but may not be included here. The C++ code should eventually be exposed to blueprints, but this is not the immediate priority.
+Some blueprints are committed, but will generally be based on C++ custom classes so that the underlying code can easily be modified. Such as the CustomHud class which is the basis for the blueprint HUD.
+
+The C++ classes will generally be exposed to blueprints for easy in-editor tweaks.
+
+# Learning Sources
+
+## C++
+
+* [HUD using Canvas](https://wiki.unrealengine.com/HUD,_Canvas,_Code_Sample_of_800%2B_Lines,_Create_Buttons_%26_Draw_Materials)
+* [C++ FPS Tutorial](https://wiki.unrealengine.com/First_Person_Shooter_C%2B%2B_Tutorial)
+
+## Tutorials
+
+* [YouTube Channel - Tesla Dev](https://www.youtube.com/channel/UC3QBWg9pMnaFF-q0qjXPDEg)
+* [YouTube Inventoy System - Savai Kun](https://www.youtube.com/channel/UCLCVZLOs3tdcKYGjmXZWK2Q)
+
+## Official
+
+* [Unreal Engine Docs](https://docs.unrealengine.com)
+* [Unreal Blueprint Content Example](https://docs.unrealengine.com/latest/INT/Resources/ContentExamples/Blueprints/index.html)
+* [Unreal Wiki Tutorials](https://wiki.unrealengine.com/Category:Tutorials)
+* [Damage](https://www.unrealengine.com/blog/damage-in-ue4)
