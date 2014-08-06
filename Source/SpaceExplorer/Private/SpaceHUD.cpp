@@ -1,21 +1,19 @@
-
-
 #include "SpaceExplorer.h"
 #include "SpaceHUD.h"
 #include "SpaceExplorerPawn.h"
 
-#define BUTTONTYPE_UNDEFINED 		0
-#define BUTTONTYPE_MAIN_RESTART 	1
-#define BUTTONTYPE_MAIN_EXIT 		2
+#define BUTTONTYPE_UNDEFINED 0
+#define BUTTONTYPE_MAIN_RESTART 1
+#define BUTTONTYPE_MAIN_EXIT 2
 
-#define BUTTONTYPE_CONFIRM_YES 	1
-#define BUTTONTYPE_CONFIRM_NO 	2
+#define BUTTONTYPE_CONFIRM_YES 1
+#define BUTTONTYPE_CONFIRM_NO 2
 
 #define CANVAS_WHITE if(Canvas) Canvas->SetDrawColor(FColor_White);
 
 //Cursor Draw Offset
-//		use this to position texture over the point of your cursor, 
-//			if the point is not at exactly 0,0
+// use this to position texture over the point of your cursor,
+// if the point is not at exactly 0,0
 #define CURSOR_DRAW_OFFSET 3
 
 //
@@ -28,13 +26,13 @@ const FString ASpaceHUD::S_Title_Confirm = FString("Exit Game?");
 const FString ASpaceHUD::S_Button_Restart = FString("Restart");
 const FString ASpaceHUD::S_Button_Exit = FString("Exit");
 
-// Colors 
+// Colors
 const FColor ASpaceHUD::FColorBlack = FColor(0, 0, 0, 255);
 const FColor ASpaceHUD::FColorRed = FColor(255, 0, 0, 255);
 const FColor ASpaceHUD::FColorYellow = FColor(255, 255, 0, 255);
 const FColor ASpaceHUD::FColorBlue = FColor(0, 0, 255, 255);
 const FColor ASpaceHUD::FColor_White = FColor(255, 255, 255, 255);
-// Backgrounds 
+// Backgrounds
 const FLinearColor ASpaceHUD::LC_Black = FLinearColor(0, 0, 0, 1);
 const FLinearColor ASpaceHUD::LC_Green = FLinearColor(0, 1, 0, 1);
 const FLinearColor ASpaceHUD::LC_Red = FLinearColor(1, 0, 0, 1);
@@ -52,16 +50,16 @@ ASpaceHUD::ASpaceHUD(const class FPostConstructInitializeProperties& PCIP) : Sup
 
 	//Scale
 	GlobalHUDMult = 1;
-	DefaultFontScale = 0.7;   //scaling down a size 36 font
+	DefaultFontScale = 0.7; //scaling down a size 36 font
 
-	//	 I recommend creating fonts at a high resolution / size like 36
-	//			then you can scale down the font as needed to any size of your choice
+	// I recommend creating fonts at a high resolution / size like 36
+	// then you can scale down the font as needed to any size of your choice
 
 	// this avoids needing to make multiple fonts for different sizes, but have a high
 	// resolution when you use larger font sizes
 }
 
-//Core 
+//Core
 
 void ASpaceHUD::PostInitializeComponents()
 {
@@ -78,7 +76,7 @@ void ASpaceHUD::DrawHUD_DrawDialogs()
 	if (bDrawMainMenu)
 		DrawMainMenu();
 
-	if (ConfirmDialogOpen) 
+	if (ConfirmDialogOpen)
 		DrawConfirm("");
 }
 
@@ -106,10 +104,10 @@ void ASpaceHUD::DrawConfirm(const FString& Title)
 
 	//Confirm Title
 	/*DrawCustomText(
-		HUDFont, Title, xStart + 30, yStart + 20,
-		LC_Black, DefaultFontScale,
-		true, LC_Red
-		);*/
+	HUDFont, Title, xStart + 30, yStart + 20,
+	LC_Black, DefaultFontScale,
+	true, LC_Red
+	);*/
 
 	//Draw buttons
 	DrawConfirmButtons();
@@ -347,7 +345,7 @@ void ASpaceHUD::DrawToolTip()
 		DefaultFontScale * 2
 		);
 
-	// decide draw to Left or to the Right 
+	// decide draw to Left or to the Right
 
 	// draw to the Left
 	if (xStart + RV_xLength >= Canvas->SizeX - 40)
@@ -355,17 +353,17 @@ void ASpaceHUD::DrawToolTip()
 		xStart -= 150 + 140 + 64 + RV_xLength;
 
 		// if text is too long, bring it closer to the cursor
-		if (xStart < 33) 
+		if (xStart < 33)
 			xStart = 33;
 	}
 
 	// background
 	/*DrawCustomRect(
-		xStart, yStart,
-		RV_xLength + 70,
-		80,
-		FLinearColor(0, 0, 1, 0.5) //alpha 0.7
-		);*/
+	xStart, yStart,
+	RV_xLength + 70,
+	80,
+	FLinearColor(0, 0, 1, 0.5) //alpha 0.7
+	);*/
 
 	// tool tip
 	DrawText(
@@ -374,20 +372,20 @@ void ASpaceHUD::DrawToolTip()
 		xStart, yStart + 20,
 		TooltipFont,
 		DefaultFontScale * 2,
-		false		// scale position of message with HUD scale
+		false	// scale position of message with HUD scale
 		);
 }
 void ASpaceHUD::DrawHUD_DrawCursor()
 {
 	// tool tip
-	if (ActiveButton_Tip != "") 
+	if (ActiveButton_Tip != "")
 		DrawToolTip();
 
 	// cursor hovering in a button?
 	if (CursorHoveringInButton)
 	{
 		// pointer tex found?
-		if (!CursorHoveringButton) 
+		if (!CursorHoveringButton)
 			return;
 
 		DrawFullSizeTile(CursorHoveringButton, MouseLocation.X - CURSOR_DRAW_OFFSET, MouseLocation.Y - CURSOR_DRAW_OFFSET, FColor_White);
@@ -396,7 +394,7 @@ void ASpaceHUD::DrawHUD_DrawCursor()
 	else
 	{
 		// check if cursor texture found
-		if (!CursorMain) 
+		if (!CursorMain)
 			return;
 
 		DrawFullSizeTile(CursorMain, MouseLocation.X - CURSOR_DRAW_OFFSET, MouseLocation.Y - CURSOR_DRAW_OFFSET, FColor_White);
@@ -463,7 +461,7 @@ void ASpaceHUD::DrawHUD()
 		return;
 
 	//Multiplayer Safety Check
-	if (!PlayerOwner->PlayerInput) 
+	if (!PlayerOwner->PlayerInput)
 		return; //not valid for first seconds of a multiplayer client
 	//~~
 	//==============================
@@ -474,14 +472,14 @@ void ASpaceHUD::DrawHUD()
 	PlayerInputChecks();
 
 	//Draw HUD?
-	if (!bDrawHUD) 
+	if (!bDrawHUD)
 		return;
-	
+
 	//Super
 	Super::DrawHUD();
 
 	//No Canvas?
-	if (!Canvas) 
+	if (!Canvas)
 		return;
 	//
 
@@ -514,7 +512,7 @@ void ASpaceHUD::DrawActiveHud()
 	// proof of concept code...
 	/*ASpaceExplorerPawn *pawn = Cast<ASpaceExplorerPawn>(GetOwningPlayerController()->GetControlledPawn());
 	if (pawn && GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 60.f, FColor::Blue, TEXT("Cur Speed: ") + FString::SanitizeFloat(pawn->CurrentForwardSpeed));*/
+	GEngine->AddOnScreenDebugMessage(-1, 60.f, FColor::Blue, TEXT("Cur Speed: ") + FString::SanitizeFloat(pawn->CurrentForwardSpeed));*/
 
 	for (int32 b = 0; b < ButtonsHud.Num(); b++)
 	{
@@ -537,6 +535,5 @@ void ASpaceHUD::AddActiveHudButton(const FString& label, const FString& tooltip,
 	//Add to correct array
 	ButtonsHud.Add(newButton);
 
-	
-}
 
+}

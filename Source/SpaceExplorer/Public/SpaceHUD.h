@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "GameFramework/HUD.h"
@@ -13,19 +11,19 @@ struct FCustomButtonStruct
 	GENERATED_USTRUCT_BODY()
 
 	// text
-	FString		text;
+	FString	text;
 
 	// background
-	bool		bVisible;
+	bool	bVisible;
 
 	// button
-	int32 		type;
-	FString		label;
-	FString		toolTip;
-	float 		x;
-	float 		y;
-	float 		width;
-	float 		height;
+	int32 type;
+	FString	label;
+	FString	toolTip;
+	float x;
+	float y;
+	float width;
+	float height;
 
 	//default properties
 
@@ -42,60 +40,60 @@ struct FCustomButtonStruct
 };
 
 /**
- * This HUD class is built from the example HUD created by RAMA https://wiki.unrealengine.com/User:Rama - Thank you for sharing!
- */
+* This HUD class is built from the example HUD created by RAMA https://wiki.unrealengine.com/User:Rama - Thank you for sharing!
+*/
 UCLASS()
 class SPACEEXPLORER_API ASpaceHUD : public AHUD
 {
 	GENERATED_UCLASS_BODY()
 
-	// Font 
-	//		I recommend creating the font at a high resolution / size like 36
-	//			then you can scale down the font as needed to any size of your choice
+	// Font
+	// I recommend creating the font at a high resolution / size like 36
+	// then you can scale down the font as needed to any size of your choice
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CustomHUD)
 	UFont* HUDFont;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CustomHUD)
-	UFont* TooltipFont;
+		UFont* TooltipFont;
 
 	/** Font Scaling Used By Your HUD Code */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CustomHUD)
-	float DefaultFontScale;
+		float DefaultFontScale;
 
 	/** HUD Scaling */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CustomHUD)
-	float GlobalHUDMult;
+		float GlobalHUDMult;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CustomHUD)
-	ASpaceExplorerPawn* PlayerPawn;
+		ASpaceExplorerPawn* PlayerPawn;
 
-	// T2D 
+	// T2D
 	/** Cursor */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = T2D)
-	UTexture2D* CursorMain;
+		UTexture2D* CursorMain;
 
 	/** Hovering */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = T2D)
-	UTexture2D* CursorHoveringButton;
+		UTexture2D* CursorHoveringButton;
 
 	/** Button */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = T2D)
-	UTexture2D* ButtonBackground;
+		UTexture2D* ButtonBackground;
 
-	// Materials 
+	// Materials
 	/** Events */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Materials)
-	UMaterialInterface* MaterialBackground;
-	
+		UMaterialInterface* MaterialBackground;
+
 	// Options
 
 	/* Draw Hud? */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Options)
-	bool bDrawHUD;
+		bool bDrawHUD;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Options)
-	bool bDrawMainMenu;
+		bool bDrawMainMenu;
 
 	//Cursor
 public:
@@ -121,19 +119,19 @@ public:
 	bool ConfirmDialogOpen;
 	bool InMainMenu;
 
-	int32 		ActiveButton_Type;
-	FString 	ActiveButton_Tip;
+	int32 ActiveButton_Type;
+	FString ActiveButton_Tip;
 	bool CursorHoveringInButton;
 	//Colors
 public:
 	const FLinearColor * ColorPtr;
 
 	// Colors
-	static const FColor		FColorBlack;
-	static const FColor		FColorRed;
-	static const FColor		FColorYellow;
-	static const FColor		FColorBlue;
-	static const FColor		FColor_White;
+	static const FColor	FColorBlack;
+	static const FColor	FColorRed;
+	static const FColor	FColorYellow;
+	static const FColor	FColorBlue;
+	static const FColor	FColor_White;
 
 	static const FLinearColor LC_Black;
 	static const FLinearColor LC_Green;
@@ -148,21 +146,21 @@ public:
 	static const FString S_Button_Restart;
 	static const FString S_Button_Exit;
 
-	// Utility 
+	// Utility
 
 	// Stop Camera From Moving With Mouse
 	FORCEINLINE void SetCursorMoveOnly(bool CursorOnly)
 	{
-		if (!PlayerOwner) 
+		if (!PlayerOwner)
 			return;
-		
+
 		PlayerOwner->SetIgnoreLookInput(CursorOnly);
 
 	}
 
 	// DrawLine
 	FORCEINLINE void DrawCustomLine
-	(
+		(
 		const FVector2D& Start,
 		const FVector2D& End,
 		const FLinearColor& TheColor,
@@ -248,7 +246,7 @@ public:
 		Canvas->DrawTile(
 			tex, x, y, //z pos
 			tex->GetSurfaceWidth(), //screen width
-			tex->GetSurfaceHeight(),  //screen height
+			tex->GetSurfaceHeight(), //screen height
 			0, //texture start width
 			0, //texture start height
 			tex->GetSurfaceWidth(), //texture width from start
@@ -271,7 +269,7 @@ public:
 		Canvas->DrawTile(
 			tex, x, y, //z pos
 			screenX, //screen width
-			screenY,  //screen height
+			screenY, //screen height
 			0, //texture start width
 			0, //texture start height
 			tex->GetSurfaceWidth(), //texture width from start
@@ -298,7 +296,7 @@ public:
 
 	// blueprint interface to active HUD
 	UFUNCTION(BlueprintCallable, Category = ActiveHUD)
-	void AddActiveHudButton(const FString& label, const FString& tooltip, float x, float y, float width, float height);
+		void AddActiveHudButton(const FString& label, const FString& tooltip, float x, float y, float width, float height);
 
 	//Core
 public:

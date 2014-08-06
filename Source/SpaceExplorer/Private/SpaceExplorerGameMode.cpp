@@ -8,10 +8,10 @@
 ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	// set default pawn class to our flying pawn
+	// static character pawn
 	//DefaultPawnClass = ASpaceExplorerPawn::StaticClass();
 
-	// code for if I want to use blueprint
+	// Character Pawn
 	static ConstructorHelpers::FObjectFinder<UBlueprint> PlayerPawnObject(TEXT("Blueprint'/Game/Blueprints/BP_SpaceExplorer.BP_SpaceExplorer'"));
 	if (PlayerPawnObject.Object != NULL)
 	{
@@ -19,11 +19,10 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 	}
 
 	// HUD
-	static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/Blueprints/BP_SpaceHUD.BP_SpaceHUD'"));
+	static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/HUD/BP_CustomHUD.BP_CustomHUD'"));
+	//static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/ExampleContent/HUD/Blueprints/BP_HUD_Example.BP_HUD_Example'"));
 	if (TheHUDOb.Object != NULL)
 	{
 		HUDClass = (UClass*)TheHUDOb.Object->GeneratedClass;
 	}
-
-	//HUDClass = ASpaceHUD::StaticClass();
 }
