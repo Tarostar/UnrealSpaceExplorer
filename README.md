@@ -15,4 +15,6 @@ You will need of course to assign inputs which may look something like this:
 
 # Blueprints
 
-Blueprints may also be used, but may not be included here. The C++ code should eventually be exposed to blueprints, but this is not the immediate priority.
+Some blueprints are committed, but will generally be based on C++ custom classes so that the underlying code can easily be modified. Such as the CustomHud class which is the basis for the blueprint HUD.
+
+The C++ classes will generally be exposed to blueprints for easy in-editor tweaks.
