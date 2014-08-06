@@ -23,4 +23,4 @@ The C++ classes will generally be exposed to blueprints for easy in-editor tweak
 
 ## C++
 
-**HUD, Canvas: ** https://wiki.unrealengine.com/HUD,_Canvas,_Code_Sample_of_800%2B_Lines,_Create_Buttons_%26_Draw_Materials
+* [HUD, Canvas](https://wiki.unrealengine.com/HUD,_Canvas,_Code_Sample_of_800%2B_Lines,_Create_Buttons_%26_Draw_Materials)
