@@ -21,6 +21,8 @@ public:
 	UPROPERTY(Category=Camera, VisibleDefaultsOnly, BlueprintReadOnly)
 	TSubobjectPtr<class UCameraComponent> Camera;
 
+	// MOVEMENT
+
 	/** How quickly forward speed changes */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 		float Acceleration;
@@ -62,6 +64,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float MinimumArmTargetDistance;
+
+	// DAMAGE
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
+		float CurrentDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
+		float MaxDamage;
 
 protected:
 

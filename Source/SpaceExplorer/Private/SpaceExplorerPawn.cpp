@@ -48,8 +48,10 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	CurrentForwardSpeed = 0.f;
 
 	CurrentZoom = 1.f;
-
 	bFreeMouseLook = false;
+
+	CurrentDamage = 0.f;
+	MaxDamage = MaxSpeed;
 }
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
