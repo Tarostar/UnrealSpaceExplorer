@@ -18,3 +18,10 @@ You will need of course to assign inputs which may look something like this:
 Some blueprints are committed, but will generally be based on C++ custom classes so that the underlying code can easily be modified. Such as the CustomHud class which is the basis for the blueprint HUD.
 
 The C++ classes will generally be exposed to blueprints for easy in-editor tweaks.
+
+# Learning Sources
+
+## C++
+
+**HUD, Canvas**
+https://wiki.unrealengine.com/HUD,_Canvas,_Code_Sample_of_800%2B_Lines,_Create_Buttons_%26_Draw_Materials
