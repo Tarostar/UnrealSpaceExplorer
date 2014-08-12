@@ -15,6 +15,8 @@ You will need of course to assign inputs which may look something like this:
 
 # Blueprints
 
+Update: Because blueprints have turned out to be so fun and powerful I have developed all of the HUD and inventory system in blueprints. I've tried to include all the relevant uassets, materials and textures but this is still not a complete project.
+
 Some blueprints are committed, but will generally be based on C++ custom classes so that the underlying code can easily be modified. Such as the CustomHud class which is the basis for the blueprint HUD.
 
 The C++ classes will generally be exposed to blueprints for easy in-editor tweaks.
