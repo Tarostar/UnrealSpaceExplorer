@@ -37,3 +37,10 @@ The C++ classes will generally be exposed to blueprints for easy in-editor tweak
 * [Unreal Blueprint Content Example](https://docs.unrealengine.com/latest/INT/Resources/ContentExamples/Blueprints/index.html)
 * [Unreal Wiki Tutorials](https://wiki.unrealengine.com/Category:Tutorials)
 * [Damage](https://www.unrealengine.com/blog/damage-in-ue4)
+
+Technology details
+-----------------
+
+This project uses the Unreal® Engine. Unreal® is a trademark or registered trademark of Epic Games, Inc. in the United States of America and elsewhere.
+
+Unreal® Engine, Copyright 1998 – 2014, Epic Games, Inc. All rights reserved.
