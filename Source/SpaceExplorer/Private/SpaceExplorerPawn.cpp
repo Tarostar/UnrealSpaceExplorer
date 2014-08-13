@@ -30,7 +30,7 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	SpringArm->SocketOffset = FVector(0.f, 0.f, 60.f);
 	SpringArm->bEnableCameraLag = false;
 	SpringArm->bDoCollisionTest = false;
-	SpringArm->CameraLagSpeed = 0.f;
+	SpringArm->CameraLagSpeed = 0.0f;
 	SpringArm->bInheritRoll = false;
 	//SpringArm->bInheritPitch = false;
 	//SpringArm->bInheritYaw = false;
@@ -52,6 +52,8 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 
 	CurrentDamage = 0.f;
 	MaxDamage = MaxSpeed;
+
+	bool bFirstPersonView = false;
 }
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
@@ -60,10 +62,34 @@ void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
 	
 }
 
+void ASpaceExplorerPawn::ToggleFirstPerson()
+{
+	if (bFirstPersonView)
+	{
+		// toggle back to springarm
+		Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);		
+		Camera->RelativeLocation = FVector(0, 0, 0);
+		PlaneMesh->SetVisibility(true);
+	}
+	else
+	{
+		// toggle to first person (better to use socket for cockpit and do relative to that or at least get the location at the tip of the ship...)
+		Camera->AttachTo(PlaneMesh);
+		Camera->RelativeLocation = FVector(100.0f, 0, 00.0f);
+
+		// cheating...
+		PlaneMesh->SetVisibility(false);
+		//PlaneMesh->SetHiddenInGame
+		
+	}
+
+	bFirstPersonView = !bFirstPersonView;
+}
+
 void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 {
 	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
-
+	
 	// Move plan forwards (with sweep so we stop when we collide with things)
 	AddActorLocalOffset(LocalMove, true);
 
@@ -124,6 +150,7 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAction("CameraFollow", IE_Pressed, this, &ASpaceExplorerPawn::FreeMouseLook);
 	InputComponent->BindAction("ZoomIn", IE_Pressed, this, &ASpaceExplorerPawn::ZoomIn);
 	InputComponent->BindAction("ZoomOut", IE_Pressed, this, &ASpaceExplorerPawn::ZoomOut);
+	InputComponent->BindAction("ToggleFirstPerson", IE_Pressed, this, &ASpaceExplorerPawn::ToggleFirstPerson);
 }
 
 void ASpaceExplorerPawn::ZoomIn()

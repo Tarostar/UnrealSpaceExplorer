@@ -65,6 +65,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float MinimumArmTargetDistance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		bool bFirstPersonView;
+
 	// DAMAGE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
 		float CurrentDamage;
@@ -105,4 +108,5 @@ protected:
 	void FreeMouseLook();
 	void ZoomIn();
 	void ZoomOut();
+	void ToggleFirstPerson();
 };
