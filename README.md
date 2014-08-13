@@ -15,6 +15,8 @@ You will need of course to assign inputs which may look something like this:
 
 # Blueprints
 
+Update: Because blueprints have turned out to be so fun and powerful I have developed all of the HUD and inventory system in blueprints. I've tried to include all the relevant uassets, materials and textures but this is still not a complete project.
+
 Some blueprints are committed, but will generally be based on C++ custom classes so that the underlying code can easily be modified. Such as the CustomHud class which is the basis for the blueprint HUD.
 
 The C++ classes will generally be exposed to blueprints for easy in-editor tweaks.
@@ -37,3 +39,10 @@ The C++ classes will generally be exposed to blueprints for easy in-editor tweak
 * [Unreal Blueprint Content Example](https://docs.unrealengine.com/latest/INT/Resources/ContentExamples/Blueprints/index.html)
 * [Unreal Wiki Tutorials](https://wiki.unrealengine.com/Category:Tutorials)
 * [Damage](https://www.unrealengine.com/blog/damage-in-ue4)
+
+Technology details
+-----------------
+
+This project is free and open source for you to use as you see fit, but uses the Unreal® Engine and Unreal® is a trademark or registered trademark of Epic Games, Inc. in the United States of America and elsewhere.
+
+Unreal® Engine, Copyright 1998 – 2014, Epic Games, Inc. All rights reserved.
