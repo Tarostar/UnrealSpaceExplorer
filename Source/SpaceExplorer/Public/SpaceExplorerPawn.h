@@ -3,23 +3,23 @@
 
 #include "SpaceExplorerPawn.generated.h"
 
-UCLASS(config=Game)
+UCLASS(config = Game)
 class ASpaceExplorerPawn : public APawn
 {
 public:
 	GENERATED_UCLASS_BODY()
 
-	/** StaticMesh component that will be the visuals for our flying pawn */
-	UPROPERTY(Category=Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-	TSubobjectPtr<class UStaticMeshComponent> PlaneMesh;
+		/** StaticMesh component that will be the visuals for our flying pawn */
+		UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
+		TSubobjectPtr<class UStaticMeshComponent> PlaneMesh;
 
 	/** Spring arm that will offset the camera */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-	TSubobjectPtr<class USpringArmComponent> SpringArm;
+		TSubobjectPtr<class USpringArmComponent> SpringArm;
 
 	/** Camera component that will be our viewpoint */
-	UPROPERTY(Category=Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-	TSubobjectPtr<class UCameraComponent> Camera;
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
+		TSubobjectPtr<class UCameraComponent> Camera;
 
 	// MOVEMENT
 
@@ -76,14 +76,13 @@ public:
 		float MaxDamage;
 
 protected:
-
 	// Begin APawn overrides
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
 	// End APawn overrides
 
 	/** Bound to the vertical axis */
 	void ThrustInput(float Val);
-	
+
 	/** Bound to the horizontal axis */
 	void MoveUpInput(float Val);
 
@@ -105,8 +104,11 @@ protected:
 	void StartMouseLook();
 	void StopMouseLook();
 	void Fire();
-	void FreeMouseLook();
+	void ToggleFreeMouseLook();
 	void ZoomIn();
 	void ZoomOut();
 	void ToggleFirstPerson();
+
+	/** Helpers */
+	void SetMouseLook(bool bMouseLook);
 };
