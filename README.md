@@ -32,6 +32,7 @@ The C++ classes will generally be exposed to blueprints for easy in-editor tweak
 
 * [YouTube Channel - Tesla Dev](https://www.youtube.com/channel/UC3QBWg9pMnaFF-q0qjXPDEg)
 * [YouTube Inventoy System - Savai Kun](https://www.youtube.com/channel/UCLCVZLOs3tdcKYGjmXZWK2Q)
+* [How to creat a space skybox](https://answers.unrealengine.com/questions/15307/how-to-create-simple-space-skybox.html)
 
 ## Official
 
@@ -39,6 +40,10 @@ The C++ classes will generally be exposed to blueprints for easy in-editor tweak
 * [Unreal Blueprint Content Example](https://docs.unrealengine.com/latest/INT/Resources/ContentExamples/Blueprints/index.html)
 * [Unreal Wiki Tutorials](https://wiki.unrealengine.com/Category:Tutorials)
 * [Damage](https://www.unrealengine.com/blog/damage-in-ue4)
+
+## Tools
+
+* [The excellent Spacescape space skybox creator by Alex C Peterson](http://alexcpeterson.com/spacescape)
 
 Technology details
 -----------------
