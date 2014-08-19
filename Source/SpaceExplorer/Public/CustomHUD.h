@@ -35,6 +35,7 @@ struct FButtonData
 	
 	// button position
 	FVector2D m_location;
+	FVector2D m_size;
 
 	// scale texture (default is 1)
 	float m_scale;
@@ -58,6 +59,8 @@ struct FButtonData
 		m_hitboxName = "";
 		m_location.X = 0;
 		m_location.Y = 0;
+		m_size.X = 256.0f;
+		m_size.Y = 128.0f;
 		m_scale = 1;
 		m_buttonState = EButtonState::ButtonNormal;
 		m_type = EButtonType::MainMenu;
@@ -92,8 +95,8 @@ private:
 	void SetInventoryPositions();
 
 	/* helpers*/
-	void ScaleToScreensize(float& ratio);
-	void ScaleToScreensize(float& sizeX, float& sizeY, float& ratio);
+	float ScaleToScreensize();
+	float ScaleToScreensize(float& sizeX, float& sizeY);
 
 	/** after all game elements are created */
 	virtual void PostInitializeComponents() override;
@@ -103,6 +106,9 @@ public:
 	/* screen dimensions for HUD and menu */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
 	FVector2D VScreenDimensions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
+	float CurrentRatio;
 
 	/* flag whether menu is open */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
@@ -119,7 +125,10 @@ public:
 
 	/* add main menu button*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
-	void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font);
+	void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
+
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+		void AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
 
 	/* draw button*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
