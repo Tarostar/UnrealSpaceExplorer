@@ -40,7 +40,7 @@ struct FButtonData
 	// scale texture (default is 1)
 	float m_scale;
 
-	// mainly for displaying button texture appropriate to its state
+	// used for textures and handling click/release
 	EButtonState m_buttonState;
 
 	// button font
@@ -79,6 +79,60 @@ class SPACEEXPLORER_API ACustomHUD : public AHUD
 {
 	GENERATED_UCLASS_BODY()
 
+public:
+	/* screen dimensions for HUD and menu */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
+		FVector2D VScreenDimensions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
+		float CurrentRatio;
+
+	/* flag whether menu is open */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
+		bool bMenuOpen;
+
+	/* flag whether inventory is open */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+		bool bInventoryMode;
+
+public:
+	/* update the screen dimensions if changed and then update HUD and inventory*/
+	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
+		void UpdateScreenDimensions(int32 SizeX, int32 SizeY);
+
+	/* draw the HUD*/
+	UFUNCTION(BlueprintCallable, Category = HUD)
+		void DrawHUDComponents();
+
+	/* add main menu button*/
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+		void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
+
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+		void AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
+
+	/* draw button*/
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+		void DrawButton(const FButtonData& button);
+
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+		void OnReceiveDrawHUD(int32 SizeX, int32 SizeY);
+
+	/* CustomHUD Events*/
+
+	// BlueprintImplementableEvent allows these to be declared in the blueprint
+	UFUNCTION(BlueprintImplementableEvent, Category = HUD_Menu)
+		void MenuDrawCompleted();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = HUD)
+		void HUDDrawCompleted();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = HUD_Menu)
+		void ReceiveHitBoxClickCompleted(const FName BoxName);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = HUD_Menu)
+		void ReceiveHitBoxReleaseCompleted(const FName BoxName);
+
 public: // TODO: review 
 	// list of all buttons in the main menu
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
@@ -86,54 +140,27 @@ public: // TODO: review
 
 private:
 	/* signal to draw the HUD or menu */
-	//virtual void ReceiveDrawHUD(int32 SizeX, int32 SizeY) override;
+	virtual void ReceiveDrawHUD(int32 SizeX, int32 SizeY) override;
+	/* signal for menu item interaction*/
+	virtual void ReceiveHitBoxClick(const FName BoxName) override;
+	virtual void ReceiveHitBoxRelease(const FName BoxName) override;
 	
 	/* menu */
 	void DrawMenu(const TArray<FButtonData>& buttons);
 
+	/* button actions*/
+	void ReceiveHitBox(const FName BoxName, bool bClick);
+	void Resume(bool bClick);
+	void Quit(bool bClick);
+
 	/* inventory */
 	void SetInventoryPositions();
+	void ItemDrag(bool bPickup);
 
 	/* helpers*/
 	float ScaleToScreensize();
-	float ScaleToScreensize(float& sizeX, float& sizeY);
+	float ScaleToScreensize(float& OutSizeX, float& OutSizeY);
 
 	/** after all game elements are created */
 	virtual void PostInitializeComponents() override;
-
-
-public:
-	/* screen dimensions for HUD and menu */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
-	FVector2D VScreenDimensions;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
-	float CurrentRatio;
-
-	/* flag whether menu is open */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
-	bool bMenuOpen2;
-
-public:
-	/* update the screen dimensions if changed and then update HUD and inventory*/
-	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
-	void UpdateScreenDimensions(int32 SizeX, int32 SizeY);
-
-	/* draw the HUD*/
-	UFUNCTION(BlueprintCallable, Category = HUD)
-	void DrawHUDComponents();
-
-	/* add main menu button*/
-	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
-	void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
-
-	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
-		void AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
-
-	/* draw button*/
-	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
-	void DrawButton(const FButtonData& button);
-
-	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
-	void OnReceiveDrawHUD(int32 SizeX, int32 SizeY);
 };
