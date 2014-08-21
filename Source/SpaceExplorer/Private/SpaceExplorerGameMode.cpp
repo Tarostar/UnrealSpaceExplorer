@@ -26,3 +26,15 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 		HUDClass = (UClass*)TheHUDOb.Object->GeneratedClass;
 	}
 }
+
+void ASpaceExplorerGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	AGameMode::InitGame(MapName, Options, ErrorMessage);
+
+	if (GEngine && GEngine->GameViewport)
+	{
+		// remove pause text
+		GEngine->GameViewport->SetSuppressTransitionMessage(true);
+	}
+}
+

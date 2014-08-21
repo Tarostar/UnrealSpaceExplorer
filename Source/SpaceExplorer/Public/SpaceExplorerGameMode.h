@@ -8,6 +8,7 @@ class ASpaceExplorerGameMode : public AGameMode
 {
 	GENERATED_UCLASS_BODY()
 
+	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 };
 
 

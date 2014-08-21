@@ -5,71 +5,24 @@
 #include "GameFramework/HUD.h"
 #include "CustomHUD.generated.h"
 
-enum EButtonState
+namespace EButtonState
 {
-	ButtonNormal,
-	ButtonHover,
-	ButtonPressed,
-};
 
-enum EButtonType
-{
-	MainMenu,
-};
-
-USTRUCT()
-struct FButtonData
-{
-	GENERATED_USTRUCT_BODY()
-
-	// displayed button text (would have preferred FText, but GetTextSize, etc. all expect FString)
-	FString m_text;
-
-	// hitbox name
-	FName m_hitboxName;
-
-	// button texture
-	UTexture * m_textureNormal;
-	UTexture * m_textureHover;
-	UTexture * m_texturePressed;
-	
-	// button position
-	FVector2D m_location;
-	FVector2D m_size;
-
-	// scale texture (default is 1)
-	float m_scale;
-
-	// used for textures and handling click/release
-	EButtonState m_buttonState;
-
-	// button font
-	UFont* m_font;
-
-	// type - mostly for selecting texture
-	EButtonType m_type;
-
-	// future?
-	// FText toolTip;
-	// float scale
-
-	FButtonData()
+	enum Type
 	{
-		m_text = TEXT("");
-		m_hitboxName = "";
-		m_location.X = 0;
-		m_location.Y = 0;
-		m_size.X = 256.0f;
-		m_size.Y = 128.0f;
-		m_scale = 1;
-		m_buttonState = EButtonState::ButtonNormal;
-		m_type = EButtonType::MainMenu;
+		ButtonNormal,
+		ButtonHover,
+		ButtonPressed,
+	};
+}
 
-		m_textureNormal = NULL;
-		m_textureHover = NULL;
-		m_texturePressed = NULL;
-	}
-};
+namespace EButtonType
+{
+	enum Type
+	{
+		MainMenu,
+	};
+}
 
 /**
 * Custom HUD class built by Claus
@@ -78,6 +31,64 @@ UCLASS()
 class SPACEEXPLORER_API ACustomHUD : public AHUD
 {
 	GENERATED_UCLASS_BODY()
+
+public:
+	typedef void(ACustomHUD::*Func)();
+
+	struct FButtonData
+	{
+		// displayed button text (would have preferred FText, but GetTextSize, etc. all expect FString)
+		FString m_text;
+
+		// hitbox name
+		FName m_hitboxName;
+
+		// button texture
+		UTexture * m_textureNormal;
+		UTexture * m_textureHover;
+		UTexture * m_texturePressed;
+
+		// button position
+		FVector2D m_location;
+		FVector2D m_size;
+
+		// scale texture (default is 1)
+		float m_scale;
+
+		// used for textures and handling click/release
+		EButtonState::Type m_buttonState;
+
+		// button font
+		UFont* m_font;
+
+		// type - mostly for selecting texture
+		EButtonType::Type m_type;
+
+		Func ButtonFunc;
+
+		// future?
+		// FText toolTip;
+		// float scale
+
+		FButtonData()
+		{
+			m_text = TEXT("");
+			m_hitboxName = "";
+			m_location.X = 0;
+			m_location.Y = 0;
+			m_size.X = 256.0f;
+			m_size.Y = 128.0f;
+			m_scale = 1;
+			m_buttonState = EButtonState::ButtonNormal;
+			m_type = EButtonType::MainMenu;
+
+			m_textureNormal = NULL;
+			m_textureHover = NULL;
+			m_texturePressed = NULL;
+
+			//ButtonFunc = NULL;
+		}
+	};
 
 public:
 	/* screen dimensions for HUD and menu */
@@ -104,17 +115,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = HUD)
 		void DrawHUDComponents();
 
-	/* add main menu button*/
+	/*
+	// TODO: should offer an add button to blueprints, but must first figure out how to expose it to blueprints
 	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
-		void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
+		void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size, Func& f);
+	*/
 
 	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
 		void AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
 
-	/* draw button*/
-	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
-		void DrawButton(const FButtonData& button);
-
+	/* Draw HUD / Menu*/
+	
 	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
 		void OnReceiveDrawHUD(int32 SizeX, int32 SizeY);
 
@@ -133,9 +144,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = HUD_Menu)
 		void ReceiveHitBoxReleaseCompleted(const FName BoxName);
 
-public: // TODO: review 
+private:
 	// list of all buttons in the main menu
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
 	TArray<FButtonData> mainMenuButtons;
 
 private:
@@ -147,11 +157,12 @@ private:
 	
 	/* menu */
 	void DrawMenu(const TArray<FButtonData>& buttons);
+	void DrawButton(const FButtonData& button);
 
 	/* button actions*/
 	void ReceiveHitBox(const FName BoxName, bool bClick);
-	void Resume(bool bClick);
-	void Quit(bool bClick);
+	void Resume();
+	void Quit();
 
 	/* inventory */
 	void SetInventoryPositions();

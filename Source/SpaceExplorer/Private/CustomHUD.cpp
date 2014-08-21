@@ -95,11 +95,11 @@ void ACustomHUD::DrawButton(const FButtonData& button)
 	UTexture* texture;
 	switch (button.m_buttonState)
 	{
-		case ButtonNormal: texture = button.m_textureNormal;
+		case EButtonState::ButtonNormal: texture = button.m_textureNormal;
 			break;
-		case ButtonHover: texture = button.m_textureHover;
+		case EButtonState::ButtonHover: texture = button.m_textureHover;
 			break;
-		case ButtonPressed: texture = button.m_texturePressed;
+		case EButtonState::ButtonPressed: texture = button.m_texturePressed;
 			break;
 		default: // something went wrong, invalid button state
 			// TODO: handle error
@@ -177,11 +177,17 @@ void ACustomHUD::AutoGenerateMainMenu(FVector2D location, UTexture * textureNorm
 {
 	// auto generate main menu based on starting location, size, textures and font
 
+	// TODO: this needs to be written in more elegant and robust code
 	// this list determines names and number of buttons
 	TArray<FString> texts;
 	texts.SetNum(2);
 	texts[0] = "Resume";
 	texts[1] = "Quit";
+
+	TArray<Func> funcs;
+	funcs.SetNum(2);
+	funcs[0] = &ACustomHUD::Resume;
+	funcs[1] = &ACustomHUD::Quit;
 
 	// init main menu button number to text labels
 	mainMenuButtons.Empty();
@@ -208,13 +214,16 @@ void ACustomHUD::AutoGenerateMainMenu(FVector2D location, UTexture * textureNorm
 		button.m_location.Y += size.Y * 1.5f * i;
 		button.m_text = texts[i];
 		button.m_hitboxName = FName(*texts[i]);
+		button.ButtonFunc = funcs[i];
 
 		// add to button array
 		mainMenuButtons[i] = button;
 	}
 }
 
-void ACustomHUD::AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size)
+// TODO: should offer an add button to blueprints, but must first figure out how to expose it to blueprints
+/*
+void ACustomHUD::AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size, Func& f)
 {
 	FButtonData button;
 
@@ -233,8 +242,11 @@ void ACustomHUD::AddMainButton(FVector2D location, const FString& text, const FN
 
 	button.m_font = font;
 
+	button.ButtonFunc = f;
+
 	mainMenuButtons.Add(button);
 }
+*/
 
 /* Menu Events */
 
@@ -250,18 +262,31 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 
 void ACustomHUD::ReceiveHitBox(const FName BoxName, bool bClick)
 {
-	// TODO: review and see if instead button can include its own function pointer which defaults to NULL - especially cool if this can be implemented in blueprints... otherwise maybe some simple event functions that simply reflect the click back to the blueprint...
-
-	if (BoxName.Compare("Resume") == 0)
+	// hitbox click or release
+	
+	// loop and see if any of the buttons fit the hitbox name, and execute its function
+	int i = 0;
+	while (i < mainMenuButtons.Num())
 	{
-		Resume(bClick);
-		return;
-	}
+		if (mainMenuButtons[i].m_hitboxName.Compare(BoxName) == 0)
+		{
+			if (bClick)
+			{
 
-	if (BoxName.Compare("Quit") == 0)
-	{
-		Quit(bClick);
-		return;
+				// update to being pressed
+				mainMenuButtons[i].m_buttonState = EButtonState::ButtonPressed;
+				return;
+			}
+			else if (mainMenuButtons[i].m_buttonState == EButtonState::ButtonPressed)
+			{
+				// button release: execute button action through its function pointer
+				(this->* (mainMenuButtons[i].ButtonFunc))();
+				return;
+			}
+		}
+
+		// next hitbox
+		i++;
 	}
 
 	if (bInventoryMode)
@@ -271,41 +296,37 @@ void ACustomHUD::ReceiveHitBox(const FName BoxName, bool bClick)
 	}
 }
 
-void ACustomHUD::Resume(bool bClick)
+void ACustomHUD::Resume()
 {
-	FButtonData * button = NULL;
+	// execute resume
+	 bMenuOpen = false;
 
-	int i;
-	for (i = 0; i < mainMenuButtons.Num(); i++)
+	AGameMode* const GameMode = GetWorld()->GetAuthGameMode();
+	GameMode->ClearPause();
+}
+
+void ACustomHUD::Quit()
+{
+	// execute quit
+	PlayerOwner->ConsoleCommand("Exit");
+}
+/*
+bool ACustomHUD::SetPause(bool bPause, FCanUnpause CanUnpauseDelegate)
+{
+	bool bResult = false;
+	if (GetNetMode() != NM_Client)
 	{
-		if (mainMenuButtons[i].m_hitboxName.Compare("Resume") == 0)
+		AGameMode* const GameMode = GetWorld()->GetAuthGameMode();
+		if (bPause)
 		{
-			button = &mainMenuButtons[i];
-			break;
+			// Pause gamepad rumbling too if needed
+			bResult = GameMode->SetPause(this, CanUnpauseDelegate);
+		}
+		else
+		{
+			GameMode->ClearPause();
 		}
 	}
-
-	if (button == NULL)
-	{
-		// could not find resume button
-		// TODO: throw error...
-		return;
-	}
-
-	if (bClick)
-	{
-		button->m_buttonState = ButtonPressed;
-		return;
-	}
-
-	// button was not clicked
-
-	// TODO: implement....
+	return bResult;
 }
-
-void ACustomHUD::Quit(bool bClick)
-{
-	// TODO: implement....
-
-	// NOTE: better to change ReceiveHitBox, see for comment
-}
+*/
