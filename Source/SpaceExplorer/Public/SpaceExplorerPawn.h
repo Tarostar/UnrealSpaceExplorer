@@ -1,6 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
 
+#include "UsableActor.h"
 #include "SpaceExplorerPawn.generated.h"
 
 UCLASS(config = Game)
@@ -9,8 +10,13 @@ class ASpaceExplorerPawn : public APawn
 public:
 	GENERATED_UCLASS_BODY()
 
-		/** StaticMesh component that will be the visuals for our flying pawn */
-		UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
+	/** Use the actor currently in view (if derived from UsableActor) */
+	UFUNCTION(BlueprintCallable, WithValidation, Server, Reliable, Category = PlayerAbility)
+	virtual void Use();
+
+public:
+	/** StaticMesh component that will be the visuals for our flying pawn */
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
 		TSubobjectPtr<class UStaticMeshComponent> PlaneMesh;
 
 	/** Spring arm that will offset the camera */
@@ -75,10 +81,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
 		float MaxDamage;
 
+	/* Max distance to use/focus on actors. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		float MaxUseDistance;
+
 protected:
 	// Begin APawn overrides
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
 	// End APawn overrides
+
+	/** Get actor derived from UsableActor currently looked at by the player */
+	class AUsableActor* GetUsableInView();
+	void HandleUsableActor();
 
 	/** Bound to the vertical axis */
 	void ThrustInput(float Val);
@@ -111,4 +125,11 @@ protected:
 
 	/** Helpers */
 	void SetMouseLook(bool bMouseLook);
+
+private:
+	/* True only in first frame when focused on new usable actor. */
+	bool bHasNewFocus;
+
+	/* Actor derived from UsableActor currently in center-view. */
+	AUsableActor* FocusedUsableActor;
 };

@@ -7,4 +7,6 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFlying, Log, All);
 
+#define COLLISION_PROJECTILE    ECC_GameTraceChannel1
+
 #endif

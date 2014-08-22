@@ -54,6 +54,9 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	MaxDamage = MaxSpeed;
 
 	bool bFirstPersonView = false;
+
+	MaxUseDistance = 800;
+	bHasNewFocus = true;
 }
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
@@ -89,6 +92,9 @@ void ASpaceExplorerPawn::ToggleFirstPerson()
 
 void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 {
+	// Call any parent class Tick implementation
+	Super::Tick(DeltaSeconds);
+
 	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
 
 	// Move plan forwards (with sweep so we stop when we collide with things)
@@ -130,8 +136,40 @@ void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 		}
 	}
 
-	// Call any parent class Tick implementation
-	Super::Tick(DeltaSeconds);
+	HandleUsableActor();
+}
+
+void ASpaceExplorerPawn::HandleUsableActor()
+{
+	// Update actor currently being looked at by player.
+	/*if (Controller && Controller->IsLocalController())
+	{
+		AUsableActor* usable = GetUsableInView();
+
+		// End Focus
+		if (FocusedUsableActor != usable)
+		{
+			if (FocusedUsableActor)
+			{
+				FocusedUsableActor->EndFocusItem();
+			}
+
+			bHasNewFocus = true;
+		}
+
+		// Assign new Focus
+		FocusedUsableActor = usable;
+
+		// Start Focus.
+		if (usable)
+		{
+			if (bHasNewFocus)
+			{
+				usable->StartFocusItem();
+				bHasNewFocus = false;
+			}
+		}
+	}*/
 }
 
 void ASpaceExplorerPawn::ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
@@ -308,4 +346,50 @@ void ASpaceExplorerPawn::MoveRightInput(float Val)
 
 	// Smoothly interpolate roll speed
 	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
+}
+
+/*
+Performs raytrace to find closest looked-at UsableActor.
+*/
+AUsableActor* ASpaceExplorerPawn::GetUsableInView()
+{
+	
+	FVector camLoc;
+	FRotator camRot;
+
+	if (Controller == NULL)
+		return NULL;
+
+	Controller->GetPlayerViewPoint(camLoc, camRot);
+	const FVector start_trace = camLoc;
+	const FVector direction = camRot.Vector();
+	const FVector end_trace = start_trace + (direction * MaxUseDistance);
+
+	FCollisionQueryParams TraceParams(FName(TEXT("")), true, this);
+	TraceParams.bTraceAsyncScene = true;
+	TraceParams.bReturnPhysicalMaterial = false;
+	TraceParams.bTraceComplex = true;
+
+	FHitResult Hit(ForceInit);
+	GetWorld()->LineTraceSingle(Hit, start_trace, end_trace, COLLISION_PROJECTILE, TraceParams);
+
+	return Cast<AUsableActor>(Hit.GetActor());
+}
+
+/*
+Runs on Server. Perform "OnUsed" on currently viewed UsableActor if implemented.
+*/
+void ASpaceExplorerPawn::Use_Implementation()
+{
+	AUsableActor* usable = GetUsableInView();
+	if (usable)
+	{
+		usable->OnUsed(this);
+	}
+}
+
+bool ASpaceExplorerPawn::Use_Validate()
+{
+	// No special server-side validation performed.
+	return true;
 }

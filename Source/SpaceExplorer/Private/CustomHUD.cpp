@@ -137,6 +137,77 @@ void ACustomHUD::DrawHUDComponents()
 void ACustomHUD::SetInventoryPositions()
 {
 	// TODO...
+
+	SetHotbarStartPosition();
+
+	SetInventoryStartPosition();
+
+	SetHitBoxPositionArray();
+}
+
+void ACustomHUD::SetHotbarStartPosition()
+{
+	FVector2D HotbarStartPos;
+
+	// number of slots (i.e. inventory boxes) in the hotbar
+	int32 HotbarCount = 5;
+
+	// size of one hotbar slot
+	float HotbarSlotSize = 64.f;
+
+	// size of entire hotbar
+	float HotbarSize = HotbarSlotSize * CurrentRatio * HotbarCount;
+
+	// start (upper, left corner) of vertical hotbar
+	HotbarStartPos = FVector2D(VScreenDimensions.X / 2.0f - HotbarSize / 2, VScreenDimensions.Y - HotbarSlotSize * CurrentRatio);
+}
+
+void ACustomHUD::SetInventoryStartPosition()
+{
+/*	FVector2D InvStartPos;
+	float InvSlotSize;
+	int32 InvWidthCount = 10;
+	int32 InvHeightCount = 5;
+
+	// inventory width
+	float InvWidth = InvSlotSize * CurrentRatio * InvWidthCount;
+
+	// inventory positioned to the right (minus its width and margin)
+	float Margin = InvSlotSize;
+	float X = VScreenDimensions.X - InvWidth - Margin;
+
+	// inventory position above hotbar
+	float Y = HotbarStartPos.Y - InvSlotSize * CurrentRatio * InvHeightCount;
+
+	InvStartPos = FVector2D(X, Y);*/
+}
+
+void ACustomHUD::SetHitBoxPositionArray()
+{
+	/*TArray<FVector2D> InvHitBoxPositions;
+	TArray<FVector2D> HotbarHitBoxPositions;
+
+	int i;
+	for (i = 0; i < InvHitBoxPositions.Num(); i++)
+	{
+		int32 Column = i / InvHeightCount;
+		int32 Row = i - Column * InvWidthCount;
+
+		float X = Row * InvSlotSize * CurrentRatio + InvStartPos.X + InventoryBorder * CurrentRatio;
+		float Y = Column * InvSlotSize * CurrentRatio + InvStartPos.Y + InventoryBorder * CurrentRatio;
+
+		InvHitBoxPositions[i] = FVector2D(X, Y);
+	}
+
+	for (i = 0; i < HotbarHitBoxPositions.Num(); i++)
+	{
+		// use a fraction of the hotbar size
+		float Spacing = HotbarSlotSize * CurrentRatio / 10.0f * i;
+		float X = (i + 1) * HotbarSlotSize * CurrentRatio + Spacing + HotbarStartPos.X;
+
+		HotbarHitBoxPositions[i] = FVector2D(X, HotbarStartPos.Y);
+	}
+	*/
 }
 
 void ACustomHUD::ItemDrag(bool bPickup)
@@ -252,11 +323,15 @@ void ACustomHUD::AddMainButton(FVector2D location, const FString& text, const FN
 
 void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 {
+	Super::ReceiveHitBoxClick(BoxName);
+
 	ReceiveHitBox(BoxName, true);
 }
 
 void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 {
+	Super::ReceiveHitBoxRelease(BoxName);
+
 	ReceiveHitBox(BoxName, false);	
 }
 
@@ -265,14 +340,13 @@ void ACustomHUD::ReceiveHitBox(const FName BoxName, bool bClick)
 	// hitbox click or release
 	
 	// loop and see if any of the buttons fit the hitbox name, and execute its function
-	int i = 0;
-	while (i < mainMenuButtons.Num())
+	int i;
+	for (i = 0; i < mainMenuButtons.Num(); i++)
 	{
 		if (mainMenuButtons[i].m_hitboxName.Compare(BoxName) == 0)
 		{
 			if (bClick)
 			{
-
 				// update to being pressed
 				mainMenuButtons[i].m_buttonState = EButtonState::ButtonPressed;
 				return;
@@ -284,9 +358,6 @@ void ACustomHUD::ReceiveHitBox(const FName BoxName, bool bClick)
 				return;
 			}
 		}
-
-		// next hitbox
-		i++;
 	}
 
 	if (bInventoryMode)
@@ -310,23 +381,43 @@ void ACustomHUD::Quit()
 	// execute quit
 	PlayerOwner->ConsoleCommand("Exit");
 }
-/*
-bool ACustomHUD::SetPause(bool bPause, FCanUnpause CanUnpauseDelegate)
+
+void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 {
-	bool bResult = false;
-	if (GetNetMode() != NM_Client)
+	Super::ReceiveHitBoxBeginCursorOver(BoxName);
+
+	if (bInventoryMode)
 	{
-		AGameMode* const GameMode = GetWorld()->GetAuthGameMode();
-		if (bPause)
+		CursorOverHitBoxName = BoxName;
+		bCursorOverHitBox = true;
+		return;
+	}
+
+	UpdateButtonState(BoxName, EButtonState::ButtonHover);
+}
+
+void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
+{
+	Super::ReceiveHitBoxEndCursorOver(BoxName);
+
+	if (bInventoryMode)
+	{
+		bCursorOverHitBox = false;
+		return;
+	}
+
+	UpdateButtonState(BoxName, EButtonState::ButtonNormal);
+}
+
+void ACustomHUD::UpdateButtonState(const FName BoxName, EButtonState::Type ButtonState)
+{
+	// loop and see if any of the buttons fit the hitbox name, and set its button state
+	int i;
+	for (i = 0; i < mainMenuButtons.Num(); i++)
+	{
+		if (mainMenuButtons[i].m_hitboxName.Compare(BoxName) == 0)
 		{
-			// Pause gamepad rumbling too if needed
-			bResult = GameMode->SetPause(this, CanUnpauseDelegate);
-		}
-		else
-		{
-			GameMode->ClearPause();
+			mainMenuButtons[i].m_buttonState = ButtonState;
 		}
 	}
-	return bResult;
 }
-*/

@@ -106,6 +106,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
 		bool bInventoryMode;
 
+	/* cursor over hitbox */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+		bool bCursorOverHitBox;
+
+	/* hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+		FName CursorOverHitBoxName;
+
 public:
 	/* update the screen dimensions if changed and then update HUD and inventory*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
@@ -154,10 +162,13 @@ private:
 	/* signal for menu item interaction*/
 	virtual void ReceiveHitBoxClick(const FName BoxName) override;
 	virtual void ReceiveHitBoxRelease(const FName BoxName) override;
+	virtual void ReceiveHitBoxBeginCursorOver(const FName BoxName) override;
+	virtual void ReceiveHitBoxEndCursorOver(const FName BoxName) override;
 	
 	/* menu */
 	void DrawMenu(const TArray<FButtonData>& buttons);
 	void DrawButton(const FButtonData& button);
+	void UpdateButtonState(const FName BoxName, EButtonState::Type ButtonState);
 
 	/* button actions*/
 	void ReceiveHitBox(const FName BoxName, bool bClick);
@@ -167,6 +178,9 @@ private:
 	/* inventory */
 	void SetInventoryPositions();
 	void ItemDrag(bool bPickup);
+	void SetHotbarStartPosition();
+	void SetInventoryStartPosition();
+	void SetHitBoxPositionArray();
 
 	/* helpers*/
 	float ScaleToScreensize();
