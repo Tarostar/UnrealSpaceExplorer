@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Hotbar.h"
 #include "Menu.h"
 #include "Inventory.h"
 #include "GameFramework/HUD.h"
@@ -18,31 +19,27 @@ class SPACEEXPLORER_API ACustomHUD : public AHUD
 public:
 	/* screen dimensions for HUD and menu */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
-		FVector2D VScreenDimensions;
+	FVector2D VScreenDimensions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
-		float CurrentRatio;
-
-	/* flag whether inventory is open */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-		bool bInventoryMode;
+	float CurrentRatio;
 
 	/* cursor over hitbox */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-		bool bCursorOverHitBox;
+	bool bCursorOverHitBox;
 
 	/* hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-		FName CursorOverHitBoxName;
+	FName CursorOverHitBoxName;
 
 public:
 	/* update the screen dimensions if changed and then update HUD and inventory*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
-		void UpdateScreenDimensions(int32 SizeX, int32 SizeY);
+	void UpdateScreenDimensions(int32 SizeX, int32 SizeY);
 
 	/* draw the HUD*/
 	UFUNCTION(BlueprintCallable, Category = HUD)
-		void DrawHUDComponents();
+	void DrawHUDComponents();
 
 	/* Draw HUD / Menu*/
 	
@@ -71,6 +68,9 @@ private:
 	// inventory class responsible for drawing inventory
 	Inventory m_inventory;
 
+	// hotbar class responsible for drawing hotbar
+	Hotbar m_hotbar;
+
 private:
 	/* signal to draw the HUD or menu */
 	virtual void ReceiveDrawHUD(int32 SizeX, int32 SizeY) override;
@@ -80,13 +80,6 @@ private:
 	virtual void ReceiveHitBoxBeginCursorOver(const FName BoxName) override;
 	virtual void ReceiveHitBoxEndCursorOver(const FName BoxName) override;
 	
-	/* inventory */
-	void SetInventoryPositions();
-	void ItemDrag(bool bPickup);
-	void SetHotbarStartPosition();
-	void SetInventoryStartPosition();
-	void SetHitBoxPositionArray();
-
 	/* helpers*/
 	float ScaleToScreensize();
 	float ScaleToScreensize(float& OutSizeX, float& OutSizeY);

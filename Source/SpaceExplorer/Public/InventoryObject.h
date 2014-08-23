@@ -13,6 +13,12 @@ class SPACEEXPLORER_API AInventoryObject : public AActor
 {
 	GENERATED_UCLASS_BODY()
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	int32 InvWidthCount;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	int32 InvHeightCount;
+
 	
 };

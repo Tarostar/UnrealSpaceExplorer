@@ -12,7 +12,6 @@ ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
 	CurrentRatio = 1.0f;
-	bInventoryMode = false;
 	VScreenDimensions.Set(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 }
 
@@ -21,6 +20,8 @@ void ACustomHUD::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	m_menu.Init(this);
+	m_hotbar.Init(this);
+	m_inventory.Init(this, &m_hotbar);
 }
 
 /* HUD and Menu Draw */
@@ -68,7 +69,9 @@ void ACustomHUD::UpdateScreenDimensions(int32 SizeX, int32 SizeY)
 	CurrentRatio = ScaleToScreensize();
 
 	// update inventory hitboxes, etc.
-	SetInventoryPositions();
+	m_hotbar.UpdatePositions();
+
+	m_inventory.UpdatePositions();
 }
 
 void ACustomHUD::DrawHUDComponents()
@@ -77,90 +80,9 @@ void ACustomHUD::DrawHUDComponents()
 
 	//DrawHUDBars();
 
-	//DrawInventory();
-}
+	m_hotbar.DrawHotbar();
 
-/* Inventory - TODO: implement as its own class*/
-
-void ACustomHUD::SetInventoryPositions()
-{
-	// TODO...
-
-	SetHotbarStartPosition();
-
-	SetInventoryStartPosition();
-
-	SetHitBoxPositionArray();
-}
-
-void ACustomHUD::SetHotbarStartPosition()
-{
-	FVector2D HotbarStartPos;
-
-	// number of slots (i.e. inventory boxes) in the hotbar
-	int32 HotbarCount = 5;
-
-	// size of one hotbar slot
-	float HotbarSlotSize = 64.f;
-
-	// size of entire hotbar
-	float HotbarSize = HotbarSlotSize * CurrentRatio * HotbarCount;
-
-	// start (upper, left corner) of vertical hotbar
-	HotbarStartPos = FVector2D(VScreenDimensions.X / 2.0f - HotbarSize / 2, VScreenDimensions.Y - HotbarSlotSize * CurrentRatio);
-}
-
-void ACustomHUD::SetInventoryStartPosition()
-{
-/*	FVector2D InvStartPos;
-	float InvSlotSize;
-	int32 InvWidthCount = 10;
-	int32 InvHeightCount = 5;
-
-	// inventory width
-	float InvWidth = InvSlotSize * CurrentRatio * InvWidthCount;
-
-	// inventory positioned to the right (minus its width and margin)
-	float Margin = InvSlotSize;
-	float X = VScreenDimensions.X - InvWidth - Margin;
-
-	// inventory position above hotbar
-	float Y = HotbarStartPos.Y - InvSlotSize * CurrentRatio * InvHeightCount;
-
-	InvStartPos = FVector2D(X, Y);*/
-}
-
-void ACustomHUD::SetHitBoxPositionArray()
-{
-	/*TArray<FVector2D> InvHitBoxPositions;
-	TArray<FVector2D> HotbarHitBoxPositions;
-
-	int i;
-	for (i = 0; i < InvHitBoxPositions.Num(); i++)
-	{
-		int32 Column = i / InvHeightCount;
-		int32 Row = i - Column * InvWidthCount;
-
-		float X = Row * InvSlotSize * CurrentRatio + InvStartPos.X + InventoryBorder * CurrentRatio;
-		float Y = Column * InvSlotSize * CurrentRatio + InvStartPos.Y + InventoryBorder * CurrentRatio;
-
-		InvHitBoxPositions[i] = FVector2D(X, Y);
-	}
-
-	for (i = 0; i < HotbarHitBoxPositions.Num(); i++)
-	{
-		// use a fraction of the hotbar size
-		float Spacing = HotbarSlotSize * CurrentRatio / 10.0f * i;
-		float X = (i + 1) * HotbarSlotSize * CurrentRatio + Spacing + HotbarStartPos.X;
-
-		HotbarHitBoxPositions[i] = FVector2D(X, HotbarStartPos.Y);
-	}
-	*/
-}
-
-void ACustomHUD::ItemDrag(bool bPickup)
-{
-
+	m_inventory.DrawInventory();
 }
 
 /* Helpers */
@@ -199,10 +121,10 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, true))
 		return;
 
-	if (bInventoryMode)
+	if (m_inventory.IsInvOpen())
 	{
 		// in item mode, check for item pickup
-		ItemDrag(true);
+		m_inventory.ItemDrag(true);
 	}
 }
 
@@ -213,10 +135,10 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, false))
 		return;
 
-	if (bInventoryMode)
+	if (m_inventory.IsInvOpen())
 	{
 		// in item mode, check for item pickup
-		ItemDrag(false);
+		m_inventory.ItemDrag(false);
 	}
 }
 
@@ -225,7 +147,7 @@ void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxBeginCursorOver(BoxName);
 
-	if (bInventoryMode)
+	if (m_inventory.IsInvOpen())
 	{
 		CursorOverHitBoxName = BoxName;
 		bCursorOverHitBox = true;
@@ -239,7 +161,7 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxEndCursorOver(BoxName);
 
-	if (bInventoryMode)
+	if (m_inventory.IsInvOpen())
 	{
 		bCursorOverHitBox = false;
 		return;

@@ -104,6 +104,7 @@ public:
 
 	/* Draw the main menu */
 	void DrawMainMenu();
+
 	bool IsMenuOpen();
 
 	/* Add custom buttons - should be accesible through the HUD from blueprints */
