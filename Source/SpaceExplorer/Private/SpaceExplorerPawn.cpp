@@ -136,29 +136,29 @@ void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 		}
 	}
 
-	HandleUsableActor();
+	HandleUsableObject();
 }
 
-void ASpaceExplorerPawn::HandleUsableActor()
+void ASpaceExplorerPawn::HandleUsableObject()
 {
 	// Update actor currently being looked at by player.
 	/*if (Controller && Controller->IsLocalController())
 	{
-		AUsableActor* usable = GetUsableInView();
+		AUsableObject* usable = GetUsableInView();
 
 		// End Focus
-		if (FocusedUsableActor != usable)
+		if (FocusedUsableObject != usable)
 		{
-			if (FocusedUsableActor)
+			if (FocusedUsableObject)
 			{
-				FocusedUsableActor->EndFocusItem();
+				FocusedUsableObject->EndFocusItem();
 			}
 
 			bHasNewFocus = true;
 		}
 
 		// Assign new Focus
-		FocusedUsableActor = usable;
+		FocusedUsableObject = usable;
 
 		// Start Focus.
 		if (usable)
@@ -349,9 +349,9 @@ void ASpaceExplorerPawn::MoveRightInput(float Val)
 }
 
 /*
-Performs raytrace to find closest looked-at UsableActor.
+Performs raytrace to find closest looked-at UsableObject.
 */
-AUsableActor* ASpaceExplorerPawn::GetUsableInView()
+AUsableObject* ASpaceExplorerPawn::GetUsableInView()
 {
 	
 	FVector camLoc;
@@ -373,15 +373,15 @@ AUsableActor* ASpaceExplorerPawn::GetUsableInView()
 	FHitResult Hit(ForceInit);
 	GetWorld()->LineTraceSingle(Hit, start_trace, end_trace, COLLISION_PROJECTILE, TraceParams);
 
-	return Cast<AUsableActor>(Hit.GetActor());
+	return Cast<AUsableObject>(Hit.GetActor());
 }
 
 /*
-Runs on Server. Perform "OnUsed" on currently viewed UsableActor if implemented.
+Runs on Server. Perform "OnUsed" on currently viewed UsableObject if implemented.
 */
 void ASpaceExplorerPawn::Use_Implementation()
 {
-	AUsableActor* usable = GetUsableInView();
+	AUsableObject* usable = GetUsableInView();
 	if (usable)
 	{
 		usable->OnUsed(this);

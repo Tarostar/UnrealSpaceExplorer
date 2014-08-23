@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "Engine/StaticMeshActor.h"
-#include "UsableActor.generated.h"
+#include "GameFramework/Actor.h"
+#include "UsableObject.generated.h"
 
 /**
- * Base class for all actors that can be used or activated
+ * 
  */
 UCLASS()
-class SPACEEXPLORER_API AUsableActor : public AStaticMeshActor
+class SPACEEXPLORER_API AUsableObject : public AActor
 {
 	GENERATED_UCLASS_BODY()
 

@@ -1,7 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
 
-#include "UsableActor.h"
+#include "UsableObject.h"
 #include "SpaceExplorerPawn.generated.h"
 
 UCLASS(config = Game)
@@ -10,7 +10,7 @@ class ASpaceExplorerPawn : public APawn
 public:
 	GENERATED_UCLASS_BODY()
 
-	/** Use the actor currently in view (if derived from UsableActor) */
+	/** Use the actor currently in view (if derived from UsableObject) */
 	UFUNCTION(BlueprintCallable, WithValidation, Server, Reliable, Category = PlayerAbility)
 	virtual void Use();
 
@@ -90,9 +90,9 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
 	// End APawn overrides
 
-	/** Get actor derived from UsableActor currently looked at by the player */
-	class AUsableActor* GetUsableInView();
-	void HandleUsableActor();
+	/** Get actor derived from UsableObject currently looked at by the player */
+	class AUsableObject* GetUsableInView();
+	void HandleUsableObject();
 
 	/** Bound to the vertical axis */
 	void ThrustInput(float Val);
@@ -130,6 +130,6 @@ private:
 	/* True only in first frame when focused on new usable actor. */
 	bool bHasNewFocus;
 
-	/* Actor derived from UsableActor currently in center-view. */
-	AUsableActor* FocusedUsableActor;
+	/* Actor derived from UsableObject currently in center-view. */
+	AUsableObject* FocusedUsableObject;
 };
