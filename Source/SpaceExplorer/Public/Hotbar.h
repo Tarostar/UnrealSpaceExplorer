@@ -15,11 +15,26 @@ class SPACEEXPLORER_API AHotbar : public AActor
 	GENERATED_UCLASS_BODY()
 
 public:
+	// colour of hotbar text
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Hotbar)
+	FLinearColor m_textColour;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Hotbar)
+	FLinearColor m_textColourSelected;
+
+	// texture background for hotbar
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Hotbar)
+	UTexture *m_texture;
+
+	// texture background for hotbar when selected
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Hotbar)
+	UTexture *m_textureSelected;
+
 	/* Access to m_bShowHotbar */
 	bool IsHotbarVisible();
 
 	/* Setup Hotbar for use */
-	void Init(ACustomHUD * pHUD, const FLinearColor& textColour, float fTextScale, float fSlotSize);
+	void Init(ACustomHUD * pHUD, float fTextScale, float fSlotSize);
 
 	/* Draw Hotbar when visible */
 	void DrawHotbar();
@@ -32,6 +47,9 @@ public:
 
 	/* Get upper, left position of Hotbar (used to position other HUD elements relative to Hotbar) */
 	FVector2D GetStartPos();
+
+	bool ItemDrag(bool bPickup);
+	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
 private:
 	// number of hotbar slots
@@ -54,18 +72,6 @@ private:
 	UPROPERTY()
 	TArray<FVector2D> m_vaHotbarHitBoxPositions;
 
-	// texture background for hotbar
-	UPROPERTY()
-	UTexture *m_texture;
-
-	// texture background for hotbar when selected
-	UPROPERTY()
-	UTexture *m_textureSelected;
-
-	// colour of hotbar text
-	UPROPERTY()
-	FLinearColor m_textColour;
-
 	// font of hotbar text
 	UPROPERTY()
 	UFont *m_font;
@@ -75,7 +81,15 @@ private:
 	float m_fTextScale;
 
 	// pointer to main HUD for access to AHUD methods, nCurrentRatio, etc.
+	UPROPERTY()
 	ACustomHUD * m_pHUD;
+
+	UPROPERTY()
+	int32 m_nHotbarHoverIndex;
+
+	// hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index
+	UPROPERTY()
+	FName m_cursorOverHitBoxName;
 
 	/* Called by UpdatePositions */
 	void SetStartPosition();

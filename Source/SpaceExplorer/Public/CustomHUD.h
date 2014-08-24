@@ -25,14 +25,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
 	bool m_bMenuOpen;
 
-	// cursor over hitbox
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-	bool bCursorOverHitBox;
-
-	// hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-	FName CursorOverHitBoxName;
-
 	/* update the screen dimensions if changed and then update HUD and inventory*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
 	void UpdateScreenDimensions(int32 SizeX, int32 SizeY);

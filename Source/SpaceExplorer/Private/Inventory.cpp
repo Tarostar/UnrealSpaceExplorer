@@ -20,6 +20,8 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	m_vInvStartpos = FVector2D(0.f, 0.f);
 
 	m_vaInvHitBoxPositions.SetNum(m_nWidthCount * m_nHeightCount);
+
+	m_bCursorOverHitBox = false;
 }
 
 void AInventory::Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize, float fInventoryBorder)
@@ -120,8 +122,25 @@ void AInventory::SetHitBoxPositionArray()
 	}
 }
 
-void AInventory::ItemDrag(bool bPickup)
+bool AInventory::ItemDrag(bool bPickup)
 {
+	// TODO: implement
 
+	return false;
+}
+
+bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
+{
+	// TODO: implement
+	if (bBegin)
+	{
+		m_cursorOverHitBoxName = BoxName;
+		m_bCursorOverHitBox = true;
+		return false;
+	}
+
+	m_bCursorOverHitBox = false;
+
+	return false;
 }
 

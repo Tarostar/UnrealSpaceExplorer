@@ -52,9 +52,8 @@ void ACustomHUD::BeginPlay()
 		/* Hotbar */
 		m_hotbar = World->SpawnActor<AHotbar>(SpawnParams);
 		if (m_hotbar)
-		{
-			// default HUD green			
-			m_hotbar->Init(this, FLinearColor(0.391f, 0.735f, 0.213f), 0.3f, 128.f);
+		{	
+			m_hotbar->Init(this, 0.3f, 128.f);
 		}
 
 		/* Inventory */
@@ -179,7 +178,19 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 	if (m_inventory && m_inventory->IsInvOpen())
 	{
 		// in item mode, check for item pickup
-		m_inventory->ItemDrag(true);
+		if (m_inventory->ItemDrag(true))
+		{
+			return;
+		}
+	}
+
+	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	{
+		// in item mode, check for item pickup
+		if (m_hotbar->ItemDrag(true))
+		{
+			return;
+		}
 	}
 }
 
@@ -193,7 +204,19 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 	if (m_inventory && m_inventory->IsInvOpen())
 	{
 		// in item mode, check for item pickup
-		m_inventory->ItemDrag(false);
+		if (m_inventory->ItemDrag(false))
+		{
+			return;
+		}
+	}
+
+	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	{
+		// in item mode, check for item pickup
+		if (m_hotbar->ItemDrag(true))
+		{
+			return;
+		}
 	}
 }
 
@@ -201,12 +224,21 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxBeginCursorOver(BoxName);
-
+	
 	if (m_inventory && m_inventory->IsInvOpen())
 	{
-		CursorOverHitBoxName = BoxName;
-		bCursorOverHitBox = true;
-		return;
+		if (m_inventory->CheckMouseOver(BoxName, true))
+		{
+			return;
+		}
+	}
+
+	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	{
+		if (m_hotbar->CheckMouseOver(BoxName, true))
+		{
+			return;
+		}
 	}
 
 	m_menu.UpdateButtonState(BoxName, EButtonState::ButtonHover);
@@ -218,8 +250,18 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 
 	if (m_inventory && m_inventory->IsInvOpen())
 	{
-		bCursorOverHitBox = false;
-		return;
+		if (m_inventory->CheckMouseOver(BoxName, false))
+		{
+			return;
+		}
+	}
+
+	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	{
+		if (m_hotbar->CheckMouseOver(BoxName, false))
+		{
+			return;
+		}
 	}
 
 	m_menu.UpdateButtonState(BoxName, EButtonState::ButtonNormal);
