@@ -15,22 +15,22 @@ AHotbar::AHotbar(const class FPostConstructInitializeProperties& PCIP)
 
 	m_vaHotbarHitBoxPositions.SetNum(m_nSlotCount);
 
-	// TODO: review
 	m_textColour = FColor::White;
 
-	m_fTextScale = 0.3f;
+	m_fTextScale = 1.f;
 
-	m_font = NULL;
-	m_texture = NULL;
+	static ConstructorHelpers::FObjectFinder<UTexture> HUDHotbarTextureOb(TEXT("/Game/HUD/Textures/HotBarButton128"));
+	m_texture = HUDHotbarTextureOb.Object;
+
+	static ConstructorHelpers::FObjectFinder<UFont> HUDHotbarFontOb(TEXT("/Game/Fonts/FadeToGrey"));
+	m_font = HUDHotbarFontOb.Object;
 }
 
-void AHotbar::Init(ACustomHUD * pHUD, UTexture *texture, const FLinearColor& textColour, UFont* font, float fTextScale, float fSlotSize)
+void AHotbar::Init(ACustomHUD * pHUD, const FLinearColor& textColour, float fTextScale, float fSlotSize)
 {
 	m_pHUD = pHUD;
-	m_texture = texture;
 	m_fHotbarSlotSize = fSlotSize;
 	m_textColour = textColour;
-	m_font = font;
 	m_fTextScale = fTextScale;
 }
 
@@ -49,9 +49,15 @@ void AHotbar::DrawHotbar()
 	int i;
 	for (i = 0; i < m_nSlotCount; i++)
 	{
-		m_pHUD->DrawTextureSimple(m_texture, m_vaHotbarHitBoxPositions[i].X, m_vaHotbarHitBoxPositions[i].Y, m_pHUD->GetCurrentRatio());
+		if (m_texture)
+		{
+			m_pHUD->DrawTextureSimple(m_texture, m_vaHotbarHitBoxPositions[i].X, m_vaHotbarHitBoxPositions[i].Y, m_pHUD->GetCurrentRatio());
+		}
 
-		m_pHUD->DrawText(FString::FromInt(i), m_textColour, m_vaHotbarHitBoxPositions[i].X + 5.0f, m_vaHotbarHitBoxPositions[i].Y, m_font, m_fTextScale);
+		if (m_font)
+		{
+			m_pHUD->DrawText(FString::FromInt(i), m_textColour, m_vaHotbarHitBoxPositions[i].X + 5.0f, m_vaHotbarHitBoxPositions[i].Y, m_font, m_fTextScale);
+		}
 	}
 }
 
@@ -79,8 +85,8 @@ void AHotbar::SetStartPosition()
 	// size of entire AHotbar
 	float fHotbarSize = m_fHotbarSlotSize * m_pHUD->GetCurrentRatio() * m_nSlotCount;
 
-	// start (upper, left corner) of vertical hotbar
-	m_vHotbarStartPos = FVector2D(m_pHUD->VScreenDimensions.X / 2.0f - fHotbarSize / 2, m_pHUD->VScreenDimensions.Y - m_fHotbarSlotSize * m_pHUD->GetCurrentRatio());
+	// start (upper, left corner) of vertical hotbar (multiply by 1.5 to get a bit of margin)
+	m_vHotbarStartPos = FVector2D(m_pHUD->VScreenDimensions.X / 2.35f - fHotbarSize / 2, m_pHUD->VScreenDimensions.Y - m_fHotbarSlotSize * 1.5f * m_pHUD->GetCurrentRatio());
 }
 
 void AHotbar::SetHitBoxPositionArray()

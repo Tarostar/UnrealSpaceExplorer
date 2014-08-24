@@ -21,6 +21,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
 	FVector2D VScreenDimensions;
 
+	/* flag whether menu is open */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
+	bool m_bMenuOpen;
+
 	// cursor over hitbox
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
 	bool bCursorOverHitBox;
@@ -45,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
 	void OnReceiveDrawHUD(int32 SizeX, int32 SizeY);
 
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+	void AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size);
+
 	/* CustomHUD Events*/
 
 	// BlueprintImplementableEvent allows these to be declared in the blueprint
@@ -60,6 +67,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = HUD_Menu)
 	void ReceiveHitBoxReleaseCompleted(const FName BoxName);
 
+
 private:
 	// menu class responsible for drawing menu
 	Menu m_menu;
@@ -73,7 +81,6 @@ private:
 	AHotbar * m_hotbar;
 
 	// ratio used to scale everything on the HUD for screen size
-	UPROPERTY()
 	float m_fCurrentRatio;
 
 	/* signal to draw the HUD or menu */
@@ -90,4 +97,6 @@ private:
 
 	/** after all game elements are created */
 	virtual void PostInitializeComponents() override;
+
+	virtual void BeginPlay() override;
 };

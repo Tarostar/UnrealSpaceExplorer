@@ -19,7 +19,7 @@ public:
 	bool IsHotbarVisible();
 
 	/* Setup Hotbar for use */
-	void Init(ACustomHUD * pHUD, UTexture* texture, const FLinearColor& textColour, UFont* font, float fTextScale, float fSlotSize);
+	void Init(ACustomHUD * pHUD, const FLinearColor& textColour, float fTextScale, float fSlotSize);
 
 	/* Draw Hotbar when visible */
 	void DrawHotbar();
@@ -75,7 +75,6 @@ private:
 	float m_fTextScale;
 
 	// pointer to main HUD for access to AHUD methods, nCurrentRatio, etc.
-	UPROPERTY()
 	ACustomHUD * m_pHUD;
 
 	/* Called by UpdatePositions */

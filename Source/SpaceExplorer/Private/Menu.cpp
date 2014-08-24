@@ -6,7 +6,6 @@
 
 Menu::Menu()
 {
-	m_bMenuOpen = false;
 	m_pHUD = NULL;
 }
 
@@ -17,11 +16,6 @@ Menu::~Menu()
 void Menu::Init(ACustomHUD * pHUD)
 {
 	m_pHUD = pHUD;
-}
-
-bool Menu::IsMenuOpen()
-{
-	return m_bMenuOpen;
 }
 
 /* Draw main menu */
@@ -197,7 +191,7 @@ void Menu::Resume()
 	}
 
 	// execute resume
-	m_bMenuOpen = false;
+	m_pHUD->m_bMenuOpen = false;
 
 	AGameMode* const GameMode = m_pHUD->GetWorld()->GetAuthGameMode();
 	GameMode->ClearPause();

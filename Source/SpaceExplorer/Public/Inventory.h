@@ -33,7 +33,6 @@ private:
 	UPROPERTY()
 	bool m_bInvOpen;
 
-	UPROPERTY()
 	ACustomHUD * m_pHUD;
 
 	// pointer to hotbar for relative positioning when hotbar is visible

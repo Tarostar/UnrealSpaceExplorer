@@ -11,33 +11,60 @@ const float DEFAULT_SCREEN_HEIGHT = 1440.0f;
 ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
+	m_bMenuOpen = false;
+
 	m_fCurrentRatio = 1.0f;
 	VScreenDimensions.Set(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
+
+	m_hotbar = NULL;
+	m_inventory = NULL;
 }
 
 void ACustomHUD::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
-	UWorld* const World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
-	/* Hotbar */
-	static ConstructorHelpers::FObjectFinder<UFont> HUDHotbarFontOb(TEXT("/Engine/Fonts/LED36"));
-	static ConstructorHelpers::FObjectFinder<UTexture> HUDHotbarTextureOb(TEXT("/Engine/HUD/Textures/HotBarButton128"));
-
-	m_hotbar = World->SpawnActor<AHotbar>(AHotbar::StaticClass());
-	m_hotbar->Init(this, HUDHotbarTextureOb.Object, FColor::White, HUDHotbarFontOb.Object, 1.f, 128.f);
-
+	
 	/* Menu */
 	m_menu.Init(this);
+}
 
-	/* Inventory */
-	m_inventory = World->SpawnActor<AInventory>(AInventory::StaticClass());
-	m_inventory->Init(this, m_hotbar);
+void ACustomHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	/*if (GetWorld())
+	{
+		FActorSpawnParameters SpawnParams;
+            SpawnParams.Owner = this;
+            SpawnParams.Instigator = Instigator;
+            SpawnParams.bNoCollisionFail = true;
+            AActor* const SpawningObject = World->SpawnActor<AActor>(WhatToSpawn, SpawnLocation, SpawnRotation, SpawnParams);
+	}*/
+
+	UWorld* const World = GetWorld();
+	if (World)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("BeginPlay"));
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = Instigator;
+
+		/* Hotbar */
+		m_hotbar = World->SpawnActor<AHotbar>(SpawnParams);
+		if (m_hotbar)
+		{
+			// default HUD green			
+			m_hotbar->Init(this, FLinearColor(0.391f, 0.735f, 0.213f), 0.3f, 128.f);
+		}
+
+		/* Inventory */
+		m_inventory = World->SpawnActor<AInventory>(SpawnParams);
+		if (m_inventory)
+		{
+			m_inventory->Init(this, m_hotbar);
+		}
+	}
+
 }
 
 /* HUD and Menu Draw */
@@ -57,7 +84,7 @@ void ACustomHUD::OnReceiveDrawHUD(int32 SizeX, int32 SizeY)
 		UpdateScreenDimensions(SizeX, SizeY);
 	}
 	
-	if (m_menu.IsMenuOpen())
+	if (m_bMenuOpen)
 	{
 		// menu open - draw main menu
 		m_menu.DrawMainMenu();
@@ -85,9 +112,15 @@ void ACustomHUD::UpdateScreenDimensions(int32 SizeX, int32 SizeY)
 	m_fCurrentRatio = ScaleToScreensize();
 
 	// update inventory hitboxes, etc.
-	m_hotbar->UpdatePositions();
+	if (m_hotbar)
+	{
+		m_hotbar->UpdatePositions();
+	}
 
-	m_inventory->UpdatePositions();
+	if (m_inventory)
+	{
+		m_inventory->UpdatePositions();
+	}
 }
 
 void ACustomHUD::DrawHUDComponents()
@@ -96,9 +129,15 @@ void ACustomHUD::DrawHUDComponents()
 
 	//DrawHUDBars();
 
-	m_hotbar->DrawHotbar();
+	if (m_hotbar)
+	{
+		m_hotbar->DrawHotbar();
+	}
 
-	m_inventory->DrawInventory();
+	if (m_inventory)
+	{
+		m_inventory->DrawInventory();
+	}
 }
 
 /* Helpers */
@@ -137,7 +176,7 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, true))
 		return;
 
-	if (m_inventory->IsInvOpen())
+	if (m_inventory && m_inventory->IsInvOpen())
 	{
 		// in item mode, check for item pickup
 		m_inventory->ItemDrag(true);
@@ -151,7 +190,7 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, false))
 		return;
 
-	if (m_inventory->IsInvOpen())
+	if (m_inventory && m_inventory->IsInvOpen())
 	{
 		// in item mode, check for item pickup
 		m_inventory->ItemDrag(false);
@@ -163,7 +202,7 @@ void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxBeginCursorOver(BoxName);
 
-	if (m_inventory->IsInvOpen())
+	if (m_inventory && m_inventory->IsInvOpen())
 	{
 		CursorOverHitBoxName = BoxName;
 		bCursorOverHitBox = true;
@@ -177,7 +216,7 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxEndCursorOver(BoxName);
 
-	if (m_inventory->IsInvOpen())
+	if (m_inventory && m_inventory->IsInvOpen())
 	{
 		bCursorOverHitBox = false;
 		return;
@@ -191,3 +230,7 @@ float ACustomHUD::GetCurrentRatio()
 	return m_fCurrentRatio;
 }
 
+void ACustomHUD::AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size)
+{
+	m_menu.AutoGenerateMainMenu(location, textureNormal, textureHover, texturePressed, font, size);
+}
