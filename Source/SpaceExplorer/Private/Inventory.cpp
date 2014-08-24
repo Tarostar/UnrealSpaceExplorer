@@ -4,7 +4,8 @@
 #include "CustomHUD.h"
 #include "Inventory.h"
 
-Inventory::Inventory()
+AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
+	: Super(PCIP)
 {
 	m_bInvOpen = false;
 	m_pHotbar = NULL;
@@ -21,11 +22,7 @@ Inventory::Inventory()
 	m_vaInvHitBoxPositions.SetNum(m_nWidthCount * m_nHeightCount);
 }
 
-Inventory::~Inventory()
-{
-}
-
-void Inventory::Init(ACustomHUD * pHUD, Hotbar * pHotbar, float fSlotSize, float fInventoryBorder)
+void AInventory::Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize, float fInventoryBorder)
 {
 	m_pHUD = pHUD;
 	m_pHotbar = pHotbar;
@@ -33,12 +30,12 @@ void Inventory::Init(ACustomHUD * pHUD, Hotbar * pHotbar, float fSlotSize, float
 	m_fInventoryBorder = fInventoryBorder;
 }
 
-bool Inventory::IsInvOpen()
+bool AInventory::IsInvOpen()
 {
 	return m_bInvOpen;
 }
 
-void Inventory::ToggleInventory(int32 nWidthCount, int32 nHeightCount)
+void AInventory::ToggleInventory(int32 nWidthCount, int32 nHeightCount)
 {
 	if (m_bInvOpen)
 	{
@@ -49,7 +46,7 @@ void Inventory::ToggleInventory(int32 nWidthCount, int32 nHeightCount)
 	OpenInventory(nWidthCount, nHeightCount);
 }
 
-void Inventory::OpenInventory(int32 nWidthCount, int32 nHeightCount)
+void AInventory::OpenInventory(int32 nWidthCount, int32 nHeightCount)
 {
 	if (nWidthCount != m_nWidthCount || nHeightCount != m_nHeightCount)
 	{
@@ -64,7 +61,7 @@ void Inventory::OpenInventory(int32 nWidthCount, int32 nHeightCount)
 	m_bInvOpen = true;
 }
 
-void Inventory::DrawInventory()
+void AInventory::DrawInventory()
 {
 	if (!m_bInvOpen)
 	{
@@ -72,14 +69,14 @@ void Inventory::DrawInventory()
 	}
 }
 
-void Inventory::UpdatePositions()
+void AInventory::UpdatePositions()
 {
 	SetStartPosition();
 	SetHitBoxPositionArray();
 }
 
 
-void Inventory::SetStartPosition()
+void AInventory::SetStartPosition()
 {
 	if (m_pHUD == NULL)
 	{
@@ -87,28 +84,28 @@ void Inventory::SetStartPosition()
 	}
 
 	// inventory width
-	float fInvWidth = m_fSlotSize * m_pHUD->CurrentRatio * m_nWidthCount;
+	float fInvWidth = m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nWidthCount;
 
 	// inventory positioned to the right (minus its width and margin)
 	float fMargin = m_fSlotSize;
 	float x = m_pHUD->VScreenDimensions.X - fInvWidth - fMargin;
 
 	float y;
-	if (m_pHotbar)
+	if (m_pHotbar && m_pHotbar->IsHotbarVisible())
 	{
 		// inventory position above hotbar
-		y = m_pHotbar->GetStartPos().Y - m_fSlotSize * m_pHUD->CurrentRatio * m_nHeightCount;
+		y = m_pHotbar->GetStartPos().Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
 	}
 	else
 	{
 		// inventory position above bottom of screen
-		y = m_pHUD->VScreenDimensions.Y - m_fSlotSize * m_pHUD->CurrentRatio * m_nHeightCount;
+		y = m_pHUD->VScreenDimensions.Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
 	}
 
 	m_vInvStartpos = FVector2D(x, y);
 }
 
-void Inventory::SetHitBoxPositionArray()
+void AInventory::SetHitBoxPositionArray()
 {
 	int i;
 	for (i = 0; i < m_vaInvHitBoxPositions.Num(); i++)
@@ -116,14 +113,14 @@ void Inventory::SetHitBoxPositionArray()
 		int32 nColumn = i / m_nHeightCount;
 		int32 nRow = i - nColumn * m_nWidthCount;
 
-		float X = nRow * m_fSlotSize * m_pHUD->CurrentRatio + m_vInvStartpos.X + m_fInventoryBorder * m_pHUD->CurrentRatio;
-		float Y = nColumn * m_fSlotSize * m_pHUD->CurrentRatio + m_vInvStartpos.Y + m_fInventoryBorder * m_pHUD->CurrentRatio;
+		float X = nRow * m_fSlotSize * m_pHUD->GetCurrentRatio() + m_vInvStartpos.X + m_fInventoryBorder * m_pHUD->GetCurrentRatio();
+		float Y = nColumn * m_fSlotSize * m_pHUD->GetCurrentRatio() + m_vInvStartpos.Y + m_fInventoryBorder * m_pHUD->GetCurrentRatio();
 
 		m_vaInvHitBoxPositions[i] = FVector2D(X, Y);
 	}
 }
 
-void Inventory::ItemDrag(bool bPickup)
+void AInventory::ItemDrag(bool bPickup)
 {
 
 }

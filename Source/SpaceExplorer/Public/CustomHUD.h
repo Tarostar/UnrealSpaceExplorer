@@ -17,25 +17,24 @@ class SPACEEXPLORER_API ACustomHUD : public AHUD
 	GENERATED_UCLASS_BODY()
 	
 public:
-	/* screen dimensions for HUD and menu */
+	// screen dimensions for HUD and menu
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
 	FVector2D VScreenDimensions;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Screen)
-	float CurrentRatio;
-
-	/* cursor over hitbox */
+	// cursor over hitbox
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
 	bool bCursorOverHitBox;
 
-	/* hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index */
+	// hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
 	FName CursorOverHitBoxName;
 
-public:
 	/* update the screen dimensions if changed and then update HUD and inventory*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
 	void UpdateScreenDimensions(int32 SizeX, int32 SizeY);
+
+	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
+	float GetCurrentRatio();
 
 	/* draw the HUD*/
 	UFUNCTION(BlueprintCallable, Category = HUD)
@@ -66,12 +65,17 @@ private:
 	Menu m_menu;
 
 	// inventory class responsible for drawing inventory
-	Inventory m_inventory;
+	UPROPERTY()
+	AInventory * m_inventory;
 
 	// hotbar class responsible for drawing hotbar
-	Hotbar m_hotbar;
+	UPROPERTY()
+	AHotbar * m_hotbar;
 
-private:
+	// ratio used to scale everything on the HUD for screen size
+	UPROPERTY()
+	float m_fCurrentRatio;
+
 	/* signal to draw the HUD or menu */
 	virtual void ReceiveDrawHUD(int32 SizeX, int32 SizeY) override;
 	/* signal for menu item interaction*/

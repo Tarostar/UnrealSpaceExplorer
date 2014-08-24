@@ -11,7 +11,7 @@ const float DEFAULT_SCREEN_HEIGHT = 1440.0f;
 ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	CurrentRatio = 1.0f;
+	m_fCurrentRatio = 1.0f;
 	VScreenDimensions.Set(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 }
 
@@ -19,9 +19,25 @@ void ACustomHUD::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	UWorld* const World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	/* Hotbar */
+	static ConstructorHelpers::FObjectFinder<UFont> HUDHotbarFontOb(TEXT("/Engine/Fonts/LED36"));
+	static ConstructorHelpers::FObjectFinder<UTexture> HUDHotbarTextureOb(TEXT("/Engine/HUD/Textures/HotBarButton128"));
+
+	m_hotbar = World->SpawnActor<AHotbar>(AHotbar::StaticClass());
+	m_hotbar->Init(this, HUDHotbarTextureOb.Object, FColor::White, HUDHotbarFontOb.Object, 1.f, 128.f);
+
+	/* Menu */
 	m_menu.Init(this);
-	m_hotbar.Init(this);
-	m_inventory.Init(this, &m_hotbar);
+
+	/* Inventory */
+	m_inventory = World->SpawnActor<AInventory>(AInventory::StaticClass());
+	m_inventory->Init(this, m_hotbar);
 }
 
 /* HUD and Menu Draw */
@@ -66,12 +82,12 @@ void ACustomHUD::UpdateScreenDimensions(int32 SizeX, int32 SizeY)
 	VScreenDimensions.Set(SizeX, SizeY);
 
 	// set class float with CurrentRatio use to scale HUD and menu
-	CurrentRatio = ScaleToScreensize();
+	m_fCurrentRatio = ScaleToScreensize();
 
 	// update inventory hitboxes, etc.
-	m_hotbar.UpdatePositions();
+	m_hotbar->UpdatePositions();
 
-	m_inventory.UpdatePositions();
+	m_inventory->UpdatePositions();
 }
 
 void ACustomHUD::DrawHUDComponents()
@@ -80,9 +96,9 @@ void ACustomHUD::DrawHUDComponents()
 
 	//DrawHUDBars();
 
-	m_hotbar.DrawHotbar();
+	m_hotbar->DrawHotbar();
 
-	m_inventory.DrawInventory();
+	m_inventory->DrawInventory();
 }
 
 /* Helpers */
@@ -121,10 +137,10 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, true))
 		return;
 
-	if (m_inventory.IsInvOpen())
+	if (m_inventory->IsInvOpen())
 	{
 		// in item mode, check for item pickup
-		m_inventory.ItemDrag(true);
+		m_inventory->ItemDrag(true);
 	}
 }
 
@@ -135,10 +151,10 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, false))
 		return;
 
-	if (m_inventory.IsInvOpen())
+	if (m_inventory->IsInvOpen())
 	{
 		// in item mode, check for item pickup
-		m_inventory.ItemDrag(false);
+		m_inventory->ItemDrag(false);
 	}
 }
 
@@ -147,7 +163,7 @@ void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxBeginCursorOver(BoxName);
 
-	if (m_inventory.IsInvOpen())
+	if (m_inventory->IsInvOpen())
 	{
 		CursorOverHitBoxName = BoxName;
 		bCursorOverHitBox = true;
@@ -161,7 +177,7 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxEndCursorOver(BoxName);
 
-	if (m_inventory.IsInvOpen())
+	if (m_inventory->IsInvOpen())
 	{
 		bCursorOverHitBox = false;
 		return;
@@ -169,3 +185,9 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 
 	m_menu.UpdateButtonState(BoxName, EButtonState::ButtonNormal);
 }
+
+float ACustomHUD::GetCurrentRatio()
+{
+	return m_fCurrentRatio;
+}
+

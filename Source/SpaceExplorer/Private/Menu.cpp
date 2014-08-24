@@ -45,10 +45,10 @@ void Menu::DrawButton(const FButtonData& button)
 	// Find middle of screen and subtract vertical offset
 	// FVector2D menuStartLoc = VScreenDimensions / 2 - button.m_size.Y;
 
-	FVector2D loc = button.m_location * m_pHUD->CurrentRatio;
+	FVector2D loc = button.m_location * m_pHUD->GetCurrentRatio();
 	// TODO: use DrawTexture and also scale button size to ratio
 	// -> need to figure this out: Texture-space width of the quad (in normalized UV distance).
-	// FVector2D size = button.m_size * CurrentRatio;
+	// FVector2D size = button.m_size * GetCurrentRatio();
 
 	// set correct texture
 	UTexture* texture;
