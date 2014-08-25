@@ -2,7 +2,8 @@
 
 #include "SpaceExplorer.h"
 #include "MainHUD.h"
-#include "MyUIWidget.h"
+#include "MainMenu.h"
+//#include "MyUIWidget.h"
 
 
 AMainHUD::AMainHUD(const class FPostConstructInitializeProperties& PCIP)
@@ -11,7 +12,21 @@ AMainHUD::AMainHUD(const class FPostConstructInitializeProperties& PCIP)
 
 }
 
-void AMainHUD::BeginPlay()
+void AMainHUD::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (GEngine && GEngine->GameViewport)
+	{
+		UGameViewportClient* Viewport = GEngine->GameViewport;
+
+		SAssignNew(MainMenu, SMainMenu).MainHUD(TWeakObjectPtr<AMainHUD>(this));
+
+		Viewport->AddViewportWidgetContent(SNew(SWeakWidget).PossiblyNullContent(MainMenu.ToSharedRef()));
+	}
+}
+
+/*void AMainHUD::BeginPlay()
 {
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////So far only TSharedPtr<SMyUIWidget> has been created, now create the actual object.
@@ -24,7 +39,7 @@ void AMainHUD::BeginPlay()
 	if (GEngine->IsValidLowLevel())
 	{
 		GEngine->GameViewport->
-			/*Viewport's weak ptr will not give Viewport ownership of Widget*/
+			//Viewport's weak ptr will not give Viewport ownership of Widget
 			AddViewportWidgetContent(SNew(SWeakWidget).PossiblyNullContent(MyUIWidget.ToSharedRef()));
 	}
 
@@ -34,4 +49,4 @@ void AMainHUD::BeginPlay()
 		/////Set widget's properties as visible (sets child widget's properties recursively)
 		MyUIWidget->SetVisibility(EVisibility::Visible);
 	}
-}
+}*/
