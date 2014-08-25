@@ -19,8 +19,8 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 	}
 
 	// HUD
-	static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/HUD/BP_CustomHUD.BP_CustomHUD'"));
-	//static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/ExampleContent/HUD/Blueprints/BP_HUD_Example.BP_HUD_Example'"));
+	// static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/HUD/BP_CustomHUD.BP_CustomHUD'"));
+	static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/HUD/BP_MainHUD.BP_MainHUD'"));
 	if (TheHUDOb.Object != NULL)
 	{
 		HUDClass = (UClass*)TheHUDOb.Object->GeneratedClass;
