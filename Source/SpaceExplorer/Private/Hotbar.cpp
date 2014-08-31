@@ -49,7 +49,7 @@ bool AHotbar::IsHotbarVisible()
 
 void AHotbar::DrawHotbar()
 {
-	if (m_vaHotbarHitBoxPositions.Num() != m_nSlotCount)
+	if (!m_bShowHotbar || m_vaHotbarHitBoxPositions.Num() != m_nSlotCount)
 	{
 		return;
 	}
@@ -137,6 +137,11 @@ FVector2D AHotbar::GetStartPos()
 
 bool AHotbar::ItemDrag(bool bPickup)
 {
+	if (!m_bShowHotbar)
+	{
+		return false;
+	}
+
 	// TODO: implement
 
 	return false;
@@ -144,6 +149,11 @@ bool AHotbar::ItemDrag(bool bPickup)
 
 bool AHotbar::CheckMouseOver(const FName BoxName, bool bBegin)
 {
+	if (!m_bShowHotbar)
+	{
+		return false;
+	}
+
 	// TODO: implement
 	if (bBegin)
 	{

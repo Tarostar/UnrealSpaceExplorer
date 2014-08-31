@@ -105,9 +105,6 @@ public:
 	/* Draw the main menu */
 	void DrawMainMenu();
 
-	bool IsMenuOpen();
-	void ToggleMenuOpen();
-
 	/* Add custom buttons - should be accesible through the HUD from blueprints */
 	// void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size, Func& f);
 

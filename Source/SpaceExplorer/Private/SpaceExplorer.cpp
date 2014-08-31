@@ -3,7 +3,7 @@
 #include "SpaceExplorer.h"
 
 #include "Slate.h"
-#include "MenuStyles.h"
+#include "Menus/MenuStyles.h"
 
 /**
 * Custom implementation of the Default Game Module.

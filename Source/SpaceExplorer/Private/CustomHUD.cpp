@@ -175,7 +175,7 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, true))
 		return;
 
-	if (m_inventory && m_inventory->IsInvOpen())
+	if (m_inventory)
 	{
 		// in item mode, check for item pickup
 		if (m_inventory->ItemDrag(true))
@@ -184,7 +184,7 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 		}
 	}
 
-	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	if (m_hotbar)
 	{
 		// in item mode, check for item pickup
 		if (m_hotbar->ItemDrag(true))
@@ -201,7 +201,7 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, false))
 		return;
 
-	if (m_inventory && m_inventory->IsInvOpen())
+	if (m_inventory)
 	{
 		// in item mode, check for item pickup
 		if (m_inventory->ItemDrag(false))
@@ -210,7 +210,7 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 		}
 	}
 
-	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	if (m_hotbar)
 	{
 		// in item mode, check for item pickup
 		if (m_hotbar->ItemDrag(true))
@@ -223,9 +223,10 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 
 void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 {
+
 	Super::ReceiveHitBoxBeginCursorOver(BoxName);
 	
-	if (m_inventory && m_inventory->IsInvOpen())
+	if (m_inventory)
 	{
 		if (m_inventory->CheckMouseOver(BoxName, true))
 		{
@@ -233,7 +234,7 @@ void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 		}
 	}
 
-	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	if (m_hotbar)
 	{
 		if (m_hotbar->CheckMouseOver(BoxName, true))
 		{
@@ -248,7 +249,7 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxEndCursorOver(BoxName);
 
-	if (m_inventory && m_inventory->IsInvOpen())
+	if (m_inventory)
 	{
 		if (m_inventory->CheckMouseOver(BoxName, false))
 		{
@@ -256,7 +257,7 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 		}
 	}
 
-	if (m_hotbar && m_hotbar->IsHotbarVisible())
+	if (m_hotbar)
 	{
 		if (m_hotbar->CheckMouseOver(BoxName, false))
 		{

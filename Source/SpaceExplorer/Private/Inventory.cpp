@@ -21,7 +21,13 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 
 	m_vaInvHitBoxPositions.SetNum(m_nWidthCount * m_nHeightCount);
 
-	m_bCursorOverHitBox = false;
+	static ConstructorHelpers::FObjectFinder<UTexture> HUDTextureOb(TEXT("/Game/HUD/Textures/InvDarkTransparent64"));
+	m_texture = HUDTextureOb.Object;
+
+	static ConstructorHelpers::FObjectFinder<UTexture> HUDTextureSelOb(TEXT("/Game/HUD/Textures/InvSel64"));
+	m_textureSelected = HUDTextureSelOb.Object;
+
+	m_nHoverIndex = -1;
 }
 
 void AInventory::Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize, float fInventoryBorder)
@@ -65,9 +71,31 @@ void AInventory::OpenInventory(int32 nWidthCount, int32 nHeightCount)
 
 void AInventory::DrawInventory()
 {
-	if (!m_bInvOpen)
+	if (!m_bInvOpen || m_vaInvHitBoxPositions.Num() != m_nWidthCount * m_nHeightCount)
 	{
 		return;
+	}
+
+	int i;
+	for (i = 0; i < m_vaInvHitBoxPositions.Num(); i++)
+	{
+		// hitbox
+		FString name = FString::FromInt(i);
+		m_pHUD->AddHitBox(m_vaInvHitBoxPositions[i], FVector2D(m_fSlotSize, m_fSlotSize) * m_pHUD->GetCurrentRatio(), FName(*name), false);
+
+		UTexture *texture = m_texture;
+		if (m_nHoverIndex == i)
+		{
+			// selected
+			texture = m_textureSelected;
+		}
+
+		// texture
+		if (texture)
+		{
+			m_pHUD->DrawTextureSimple(texture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, m_pHUD->GetCurrentRatio());
+		}
+
 	}
 }
 
@@ -112,7 +140,7 @@ void AInventory::SetHitBoxPositionArray()
 	int i;
 	for (i = 0; i < m_vaInvHitBoxPositions.Num(); i++)
 	{
-		int32 nColumn = i / m_nHeightCount;
+		int32 nColumn = i / m_nWidthCount;
 		int32 nRow = i - nColumn * m_nWidthCount;
 
 		float X = nRow * m_fSlotSize * m_pHUD->GetCurrentRatio() + m_vInvStartpos.X + m_fInventoryBorder * m_pHUD->GetCurrentRatio();
@@ -124,6 +152,11 @@ void AInventory::SetHitBoxPositionArray()
 
 bool AInventory::ItemDrag(bool bPickup)
 {
+	if (!m_bInvOpen)
+	{
+		return false;
+	}
+
 	// TODO: implement
 
 	return false;
@@ -131,15 +164,35 @@ bool AInventory::ItemDrag(bool bPickup)
 
 bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 {
-	// TODO: implement
-	if (bBegin)
+	// TODO: this is a bit quick and dirty, needs to actually check if hits an inventory box and return false only if that is not the case
+
+	if (!m_bInvOpen)
 	{
-		m_cursorOverHitBoxName = BoxName;
-		m_bCursorOverHitBox = true;
 		return false;
 	}
 
-	m_bCursorOverHitBox = false;
+	FString strHitboxName = BoxName.ToString();
+	if (!strHitboxName.IsNumeric())
+	{
+		return false;
+	}
+
+	int nIndex = FCString::Atoi(*strHitboxName);
+	
+	if (bBegin)
+	{
+		m_nHoverIndex = nIndex;
+		return true;
+	}
+
+	if (m_nHoverIndex == nIndex)
+	{
+		// turn of current hover index
+		m_nHoverIndex = -1;
+		return true;
+	}
+
+	// not current hover index - ignore
 
 	return false;
 }

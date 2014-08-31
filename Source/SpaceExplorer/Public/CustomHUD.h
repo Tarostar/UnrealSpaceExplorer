@@ -24,6 +24,10 @@ public:
 	/* flag whether menu is open */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
 	bool m_bMenuOpen;
+	
+	// inventory class responsible for drawing inventory
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	AInventory * m_inventory;
 
 	/* update the screen dimensions if changed and then update HUD and inventory*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
@@ -63,10 +67,6 @@ public:
 private:
 	// menu class responsible for drawing menu
 	Menu m_menu;
-
-	// inventory class responsible for drawing inventory
-	UPROPERTY()
-	AInventory * m_inventory;
 
 	// hotbar class responsible for drawing hotbar
 	UPROPERTY()

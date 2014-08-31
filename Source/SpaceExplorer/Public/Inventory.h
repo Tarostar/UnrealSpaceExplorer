@@ -15,6 +15,18 @@ class SPACEEXPLORER_API AInventory : public AActor
 	GENERATED_UCLASS_BODY()
 
 public:	
+	// texture background
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	UTexture *m_texture;
+
+	// texture background when selected
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	UTexture *m_textureSelected;
+
+	/* flag whether inventory is open */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	bool m_bInvOpen;
+
 	void Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize = 64.f, float fInventoryBorder = 0.f);
 
 	bool IsInvOpen();
@@ -30,10 +42,6 @@ public:
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
 private:
-	/* flag whether inventory is open */
-	UPROPERTY()
-	bool m_bInvOpen;
-
 	UPROPERTY()
 	ACustomHUD * m_pHUD;
 
@@ -60,11 +68,7 @@ private:
 	TArray<FVector2D> m_vaInvHitBoxPositions;
 
 	UPROPERTY()
-	bool m_bCursorOverHitBox;
-
-	// hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index
-	UPROPERTY()
-	FName m_cursorOverHitBoxName;
+	int32 m_nHoverIndex;
 
 private:
 	void SetStartPosition();
