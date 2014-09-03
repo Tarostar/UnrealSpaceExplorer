@@ -31,20 +31,10 @@ void ACustomHUD::PostInitializeComponents()
 void ACustomHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	/*if (GetWorld())
-	{
-		FActorSpawnParameters SpawnParams;
-            SpawnParams.Owner = this;
-            SpawnParams.Instigator = Instigator;
-            SpawnParams.bNoCollisionFail = true;
-            AActor* const SpawningObject = World->SpawnActor<AActor>(WhatToSpawn, SpawnLocation, SpawnRotation, SpawnParams);
-	}*/
-
+	
 	UWorld* const World = GetWorld();
 	if (World)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("BeginPlay"));
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;

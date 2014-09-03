@@ -2,6 +2,7 @@
 #pragma once
 
 #include "UsableObject.h"
+#include "InventoryObject.h"
 #include "SpaceExplorerPawn.generated.h"
 
 UCLASS(config = Game)
@@ -85,9 +86,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		float MaxUseDistance;
 
-protected:
+private:
 	// Begin APawn overrides
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
+	virtual void BeginPlay() override;
 	// End APawn overrides
 
 	/** Get actor derived from UsableObject currently looked at by the player */
@@ -132,4 +134,6 @@ private:
 
 	/* Actor derived from UsableObject currently in center-view. */
 	AUsableObject* FocusedUsableObject;
+
+	TArray<AInventoryObject> m_inventoryObjects;
 };

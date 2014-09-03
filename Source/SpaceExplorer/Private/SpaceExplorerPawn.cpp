@@ -1,6 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 
 #include "SpaceExplorer.h"
+#include "InventoryObject.h"
 #include "SpaceExplorerPawn.h"
 
 ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializeProperties& PCIP)
@@ -57,7 +58,31 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 
 	MaxUseDistance = 800;
 	bHasNewFocus = true;
+
 }
+
+void ASpaceExplorerPawn::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	UWorld* const World = GetWorld();
+	if (World)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Space Pawn BeginPlay"));
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = Instigator;
+
+		/* Hotbar */
+		AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(SpawnParams);
+		if (invObject)
+		{
+			m_inventoryObjects.Add(*invObject);
+		}
+	}
+
+}
+
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
 {
