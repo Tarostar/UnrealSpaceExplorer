@@ -4,6 +4,7 @@
 
 class ACustomHUD;
 class AHotbar;
+class AInventoryObject;
 #include "Inventory.generated.h"
 
 /**
@@ -35,8 +36,9 @@ public:
 
 	void UpdatePositions();
 
-	void ToggleInventory(int32 nWidthCount, int32 nHeightCount);
-	void OpenInventory(int32 nWidthCount, int32 nHeightCount);
+	void ToggleInventory(AInventoryObject* pInventory, float top = -1.0f, float bottom = -1.0f, float right = -1.0f);
+	void CloseInventory();
+	void OpenInventory(AInventoryObject* pInventory);
 
 	bool ItemDrag(bool bPickup);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
@@ -69,6 +71,9 @@ private:
 
 	UPROPERTY()
 	int32 m_nHoverIndex;
+
+	UPROPERTY()
+	AInventoryObject* m_pInventory;
 
 private:
 	void SetStartPosition();

@@ -1,7 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
 
-#include "UsableObject.h"
+class AUsableObject;
 #include "InventoryObject.h"
 #include "SpaceExplorerPawn.generated.h"
 
@@ -135,5 +135,12 @@ private:
 	/* Actor derived from UsableObject currently in center-view. */
 	AUsableObject* FocusedUsableObject;
 
-	TArray<AInventoryObject> m_inventoryObjects;
+	/* open/close all inventory containers */
+	void ToggleAllInventory();
+	/* open / close first inventory object */
+	void ToggleInventory1();
+
+	/* array of all inventory containers */
+	UPROPERTY()
+	TArray<AInventoryObject*> m_inventoryObjects;
 };

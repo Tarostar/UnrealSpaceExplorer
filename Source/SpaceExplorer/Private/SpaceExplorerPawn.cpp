@@ -1,6 +1,8 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 
 #include "SpaceExplorer.h"
+#include "UsableObject.h"
+#include "CustomHUD.h"
 #include "InventoryObject.h"
 #include "SpaceExplorerPawn.h"
 
@@ -73,11 +75,15 @@ void ASpaceExplorerPawn::BeginPlay()
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
 
-		/* Hotbar */
-		AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(SpawnParams);
+		//AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(SpawnParams);
+		AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
+		
 		if (invObject)
 		{
-			m_inventoryObjects.Add(*invObject);
+			invObject->m_nInvHeightCount = 5;
+			invObject->m_nInvWidthCount = 5;
+			invObject->m_inventorySlots.SetNum(invObject->m_nInvHeightCount * invObject->m_nInvWidthCount);
+			m_inventoryObjects.Add(invObject);
 		}
 	}
 
@@ -227,6 +233,10 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAction("ZoomIn", IE_Pressed, this, &ASpaceExplorerPawn::ZoomIn);
 	InputComponent->BindAction("ZoomOut", IE_Pressed, this, &ASpaceExplorerPawn::ZoomOut);
 	InputComponent->BindAction("ToggleFirstPerson", IE_Pressed, this, &ASpaceExplorerPawn::ToggleFirstPerson);
+
+	InputComponent->BindAction("ToggleAllInventory", IE_Pressed, this, &ASpaceExplorerPawn::ToggleAllInventory);
+	InputComponent->BindAction("ToggleInventory1", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventory1);
+	//InputComponent->BindAction("ToggleInventory2", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventory2);
 }
 
 void ASpaceExplorerPawn::ZoomIn()
@@ -417,4 +427,42 @@ bool ASpaceExplorerPawn::Use_Validate()
 {
 	// No special server-side validation performed.
 	return true;
+}
+
+void ASpaceExplorerPawn::ToggleAllInventory()
+{
+	if (!Controller)
+	{
+		return;
+	}
+
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (!pc)
+	{
+		return;
+	}
+
+	ACustomHUD * pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	
+	for (int i = 0; i < m_inventoryObjects.Num(); i++)
+	{
+		pHUD->ToggleInventory(m_inventoryObjects[i]);
+	}
+}
+
+void ASpaceExplorerPawn::ToggleInventory1()
+{
+	if (!Controller || !m_inventoryObjects.IsValidIndex(0))
+	{
+		return;
+	}
+
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (!pc)
+	{
+		return;
+	}
+
+	ACustomHUD * pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	pHUD->ToggleInventory(m_inventoryObjects[0]);
 }

@@ -1,6 +1,7 @@
 
 
 #include "SpaceExplorer.h"
+#include "InventoryObject.h"
 #include "CustomHUD.h"
 
 const float DEFAULT_SCREEN_WIDTH = 2560.0f;
@@ -266,4 +267,29 @@ float ACustomHUD::GetCurrentRatio()
 void ACustomHUD::AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size)
 {
 	m_menu.AutoGenerateMainMenu(location, textureNormal, textureHover, texturePressed, font, size);
+}
+
+void ACustomHUD::ToggleInventory(AInventoryObject* pInventory)
+{
+	if (m_inventory == NULL)
+	{
+		return;
+	}
+
+	// position of previous inventory
+	float top = 0.f;
+	float bottom = 0.f;
+	float right = 0.f;
+	m_inventory->ToggleInventory(pInventory, top, bottom, right);
+
+	// need to set start positions based on index, so decide on placement order
+	// then need to handle UpdatePositions in the inventory
+	// SetStartPosition
+
+	// IDEA: pass in index, width, heigt, along with top, bottom and right of previous drawn inventory
+	// then simple check to see if width fits starting at top of previous, otherwise start at bottom with horizontal left value of zero
+
+	// issues: tracking open/closed individual inventories, allow positioning?
+
+	// note top, bottom, right passed in as reference so that updated by each call!
 }

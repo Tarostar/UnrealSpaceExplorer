@@ -1,6 +1,7 @@
 
 
 #include "SpaceExplorer.h"
+#include "InventoryObject.h"
 #include "CustomHUD.h"
 #include "Inventory.h"
 
@@ -28,6 +29,8 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	m_textureSelected = HUDTextureSelOb.Object;
 
 	m_nHoverIndex = -1;
+
+	m_pInventory = NULL;
 }
 
 void AInventory::Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize, float fInventoryBorder)
@@ -43,7 +46,7 @@ bool AInventory::IsInvOpen()
 	return m_bInvOpen;
 }
 
-void AInventory::ToggleInventory(int32 nWidthCount, int32 nHeightCount)
+void AInventory::ToggleInventory(AInventoryObject* pInventory, float top, float bottom, float right)
 {
 	if (m_bInvOpen)
 	{
@@ -51,16 +54,28 @@ void AInventory::ToggleInventory(int32 nWidthCount, int32 nHeightCount)
 		return;
 	}
 
-	OpenInventory(nWidthCount, nHeightCount);
+	OpenInventory(pInventory);
 }
 
-void AInventory::OpenInventory(int32 nWidthCount, int32 nHeightCount)
+void AInventory::CloseInventory()
 {
-	if (nWidthCount != m_nWidthCount || nHeightCount != m_nHeightCount)
+	m_bInvOpen = false;
+}
+
+void AInventory::OpenInventory(AInventoryObject* pInventory)
+{
+	if (pInventory == NULL)
+	{
+		return;
+	}
+		
+	m_pInventory = pInventory;
+
+	if (pInventory->m_nInvWidthCount != m_nWidthCount || pInventory->m_nInvHeightCount != m_nHeightCount)
 	{
 		// inventory width or height has changed
-		m_nWidthCount = nWidthCount;
-		m_nHeightCount = nHeightCount;
+		m_nWidthCount = pInventory->m_nInvWidthCount;
+		m_nHeightCount = pInventory->m_nInvHeightCount;
 
 		m_vaInvHitBoxPositions.SetNum(m_nWidthCount * m_nHeightCount);
 		UpdatePositions();

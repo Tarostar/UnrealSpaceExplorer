@@ -5,6 +5,7 @@
 #include "Hotbar.h"
 #include "Menu.h"
 #include "Inventory.h"
+#include "InventoryObject.h"
 #include "GameFramework/HUD.h"
 #include "CustomHUD.generated.h"
 
@@ -35,6 +36,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
 	float GetCurrentRatio();
+
+	/* toggle inventory on/off */
+	/*  top, bottom, right parameters are position of previous inventory, -1 if drawing only single inventory */
+	UFUNCTION(BlueprintCallable, Category = HUD_Inventory)
+	void ToggleInventory(AInventoryObject* pInventory);
 
 	/* draw the HUD*/
 	UFUNCTION(BlueprintCallable, Category = HUD)
