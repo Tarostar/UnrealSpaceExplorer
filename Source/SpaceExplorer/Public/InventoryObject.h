@@ -39,6 +39,9 @@ public:
 	AUsableObject * ReplaceItem(int32 nIndex, AUsableObject* pItem);
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool HasItem(int32 nIndex);
+	
+	UFUNCTION(BlueprintCallable, Category = Inventory)
 	AUsableObject * RetrieveItem(int32 nIndex);
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)

@@ -1,6 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 
 #include "SpaceExplorer.h"
+#include "Net/UnrealNetwork.h"
 #include "UsableObject.h"
 #include "CustomHUD.h"
 #include "InventoryObject.h"
@@ -63,6 +64,15 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 
 }
 
+void ASpaceExplorerPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate to everyone
+	DOREPLIFETIME(ASpaceExplorerPawn, m_inventoryObjects);
+}
+
+
 void ASpaceExplorerPawn::BeginPlay()
 {
 	Super::BeginPlay();
@@ -70,7 +80,6 @@ void ASpaceExplorerPawn::BeginPlay()
 	UWorld* const World = GetWorld();
 	if (World)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Space Pawn BeginPlay"));
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
@@ -235,7 +244,7 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAction("ToggleFirstPerson", IE_Pressed, this, &ASpaceExplorerPawn::ToggleFirstPerson);
 
 	InputComponent->BindAction("ToggleAllInventory", IE_Pressed, this, &ASpaceExplorerPawn::ToggleAllInventory);
-	InputComponent->BindAction("ToggleInventory1", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventory1);
+	InputComponent->BindAction("ToggleInventoryOne", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventoryOne);
 	//InputComponent->BindAction("ToggleInventory2", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventory2);
 }
 
@@ -446,14 +455,24 @@ void ASpaceExplorerPawn::ToggleAllInventory()
 	
 	for (int i = 0; i < m_inventoryObjects.Num(); i++)
 	{
-		pHUD->ToggleInventory(m_inventoryObjects[i]);
+		if (i == 0)
+		{
+			pHUD->ToggleInventory(m_inventoryObjects[i], true);
+		}
+		else
+		{
+			pHUD->ToggleInventory(m_inventoryObjects[i], true);
+		}
 	}
 }
 
-void ASpaceExplorerPawn::ToggleInventory1()
+void ASpaceExplorerPawn::ToggleInventoryOne()
 {
+	//UE_LOG(Pawn, Error, TEXT("test test test yep test"));
+
 	if (!Controller || !m_inventoryObjects.IsValidIndex(0))
 	{
+		//UE_LOG(Pawn, Error, TEXT("ToggleInventoryOne Failed because missing controller or index is invalid"));
 		return;
 	}
 
@@ -464,5 +483,20 @@ void ASpaceExplorerPawn::ToggleInventory1()
 	}
 
 	ACustomHUD * pHUD = Cast<ACustomHUD>(pc->GetHUD());
-	pHUD->ToggleInventory(m_inventoryObjects[0]);
+	pHUD->ToggleInventory(m_inventoryObjects[0], false);
+}
+
+bool ASpaceExplorerPawn::AddItem(AUsableObject * pItem)
+{
+	for (int i = 0; i < m_inventoryObjects.Num(); i++)
+	{
+		if (m_inventoryObjects[i]->AddItemFirstAvailableSlot(pItem))
+		{
+			// successfully added item
+			return true;
+		}
+	}
+
+	// did not find any suitable inventory space
+	return false;
 }

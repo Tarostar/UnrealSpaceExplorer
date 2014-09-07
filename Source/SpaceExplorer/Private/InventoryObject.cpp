@@ -73,6 +73,22 @@ AUsableObject * AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem
 	return pTargetItem; // may be NULL	
 }
 
+bool AInventoryObject::HasItem(int32 nIndex)
+{
+	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	{
+		// invalid index
+		return false;
+	}
+
+	if (m_inventorySlots[nIndex] == NULL)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 AUsableObject * AInventoryObject::RetrieveItem(int32 nIndex)
 {
 	int32 nUpperLeft;
@@ -108,9 +124,14 @@ AUsableObject * AInventoryObject::RetrieveItem(int32 nIndex)
 
 AUsableObject * AInventoryObject::CloneItem(int32 nIndex)
 {
+	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	{
+		// invalid index
+		return false;
+	}
+
 	// create a copy and return it
-	AUsableObject * pNewObject = new AUsableObject(*m_inventorySlots[nIndex]);
-	return pNewObject;
+	return new AUsableObject(*m_inventorySlots[nIndex]);
 
 }
 
@@ -284,3 +305,4 @@ bool AInventoryObject::InsertItem(int32 nIndex, AUsableObject* pItem)
 
 	return true;
 }
+

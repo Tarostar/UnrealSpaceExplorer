@@ -76,15 +76,24 @@ public:
 		bool bFirstPersonView;
 
 	// DAMAGE
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
-		float CurrentDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
-		float MaxDamage;
+	float CurrentDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
+	float MaxDamage;
+
+	// ITEMS
 
 	/* Max distance to use/focus on actors. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-		float MaxUseDistance;
+	float MaxUseDistance;
+
+	// INVENTORY
+
+	/* Add an item to the inventory */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	bool AddItem(AUsableObject * pItem);
 
 private:
 	// Begin APawn overrides
@@ -138,9 +147,9 @@ private:
 	/* open/close all inventory containers */
 	void ToggleAllInventory();
 	/* open / close first inventory object */
-	void ToggleInventory1();
+	void ToggleInventoryOne();
 
 	/* array of all inventory containers */
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<AInventoryObject*> m_inventoryObjects;
 };

@@ -26,6 +26,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Menu)
 	bool m_bMenuOpen;
 	
+	// TODO: this will eventually need to be an array (one for each object in the pawn)...
+
 	// inventory class responsible for drawing inventory
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
 	AInventory * m_inventory;
@@ -40,7 +42,7 @@ public:
 	/* toggle inventory on/off */
 	/*  top, bottom, right parameters are position of previous inventory, -1 if drawing only single inventory */
 	UFUNCTION(BlueprintCallable, Category = HUD_Inventory)
-	void ToggleInventory(AInventoryObject* pInventory);
+	void ToggleInventory(AInventoryObject* pInventory, bool bInGroup);
 
 	/* draw the HUD*/
 	UFUNCTION(BlueprintCallable, Category = HUD)

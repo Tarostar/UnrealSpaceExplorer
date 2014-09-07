@@ -31,6 +31,11 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	m_nHoverIndex = -1;
 
 	m_pInventory = NULL;
+	m_pPreviousInventory = NULL;
+
+	m_bInGroup = false;
+
+	m_nDraggingItemIndex = -1;
 }
 
 void AInventory::Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize, float fInventoryBorder)
@@ -46,7 +51,7 @@ bool AInventory::IsInvOpen()
 	return m_bInvOpen;
 }
 
-void AInventory::ToggleInventory(AInventoryObject* pInventory, float top, float bottom, float right)
+void AInventory::ToggleInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory)
 {
 	if (m_bInvOpen)
 	{
@@ -54,7 +59,9 @@ void AInventory::ToggleInventory(AInventoryObject* pInventory, float top, float 
 		return;
 	}
 
-	OpenInventory(pInventory);
+	m_pPreviousInventory = pPreviousInventory;
+
+	OpenInventory(pInventory, bInGroup);
 }
 
 void AInventory::CloseInventory()
@@ -62,7 +69,7 @@ void AInventory::CloseInventory()
 	m_bInvOpen = false;
 }
 
-void AInventory::OpenInventory(AInventoryObject* pInventory)
+void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup)
 {
 	if (pInventory == NULL)
 	{
@@ -71,11 +78,12 @@ void AInventory::OpenInventory(AInventoryObject* pInventory)
 		
 	m_pInventory = pInventory;
 
-	if (pInventory->m_nInvWidthCount != m_nWidthCount || pInventory->m_nInvHeightCount != m_nHeightCount)
+	if (m_bInGroup != bInGroup || pInventory->m_nInvWidthCount != m_nWidthCount || pInventory->m_nInvHeightCount != m_nHeightCount)
 	{
-		// inventory width or height has changed
+		// inventory group, width or height has changed
 		m_nWidthCount = pInventory->m_nInvWidthCount;
 		m_nHeightCount = pInventory->m_nInvHeightCount;
+		m_bInGroup = bInGroup;
 
 		m_vaInvHitBoxPositions.SetNum(m_nWidthCount * m_nHeightCount);
 		UpdatePositions();
@@ -111,7 +119,33 @@ void AInventory::DrawInventory()
 			m_pHUD->DrawTextureSimple(texture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, m_pHUD->GetCurrentRatio());
 		}
 
+		// draw item texture (if item exists and is not being dragged)
+		if (m_nDraggingItemIndex != i && m_pInventory->HasItem(i))
+		{
+			// TODO: review and scale of item texture should match without the 0.3 scaling....
+			m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.3f * m_pHUD->GetCurrentRatio());
+		}
 	}
+
+	if (m_nDraggingItemIndex >= 0)
+	{
+		// draw texture of item being dragged under mouse cursor
+		DrawDraggedItem();
+	}
+}
+
+void AInventory::DrawDraggedItem()
+{
+	APlayerController* const controller = Cast<APlayerController>(m_pHUD->GetInstigatorController());
+	if (controller == NULL)
+	{
+		return;
+	}
+
+	float x, y;
+	controller->GetMousePosition(x, y);
+
+	m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[m_nDraggingItemIndex]->m_inventoryTexture, x, y, m_pHUD->GetCurrentRatio());
 }
 
 void AInventory::UpdatePositions()
@@ -129,24 +163,47 @@ void AInventory::SetStartPosition()
 	}
 
 	// inventory width
-	float fInvWidth = m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nWidthCount;
-
-	// inventory positioned to the right (minus its width and margin)
 	float fMargin = m_fSlotSize;
-	float x = m_pHUD->VScreenDimensions.X - fInvWidth - fMargin;
+	float fInvWidth = m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nWidthCount;
+	
+	// default to first inventory drawing in top-right corner
+	float x = 0;
+	float y = 0;
 
-	float y;
-	if (m_pHotbar && m_pHotbar->IsHotbarVisible())
+	if (!m_bInGroup)
 	{
-		// inventory position above hotbar
-		y = m_pHotbar->GetStartPos().Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
+		// single inventory opened - draw it above hotbar on right side (minus its width and margin)
+
+		x = m_pHUD->VScreenDimensions.X - fInvWidth - fMargin;
+
+		if (m_pHotbar && m_pHotbar->IsHotbarVisible())
+		{
+			// inventory position above hotbar
+			y = m_pHotbar->GetStartPos().Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
+		}
+		else
+		{
+			// inventory position above bottom of screen
+			y = m_pHUD->VScreenDimensions.Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
+		}
 	}
-	else
+	else if (m_pPreviousInventory)
 	{
-		// inventory position above bottom of screen
-		y = m_pHUD->VScreenDimensions.Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
+		// position after previous inventory if space, otherwise below
+
+		// where previous inventory ends (+ margin)
+		x = m_pPreviousInventory->m_vInvStartpos.X + m_pPreviousInventory->m_fSlotSize * m_pPreviousInventory->m_nWidthCount * m_pHUD->GetCurrentRatio() + fMargin;
+		y = m_pPreviousInventory->m_vInvStartpos.Y;
+
+		if (x + fInvWidth > m_pHUD->VScreenDimensions.X)
+		{
+			// does not fit, move down (at the moment we don't bother to check if fits on screen)
+			x = 0;
+			y = m_pPreviousInventory->m_vInvStartpos.Y + m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount + fMargin;
+		}
 	}
 
+	// store the start position for this inventory
 	m_vInvStartpos = FVector2D(x, y);
 }
 
@@ -167,48 +224,77 @@ void AInventory::SetHitBoxPositionArray()
 
 bool AInventory::ItemDrag(bool bPickup)
 {
-	if (!m_bInvOpen)
+	if (!bPickup)
+	{
+		if (m_nDraggingItemIndex < 0)
+		{
+			// just "drop" item being dragged"
+			m_nDraggingItemIndex = -1;
+			return true;
+		}
+		
+		// not us...
+		return false;
+	}
+
+	if (!m_bInvOpen || m_nHoverIndex < 0)
 	{
 		return false;
 	}
 
-	// TODO: implement
+	// we have a hover index, so now we just need to check if slot has an item
+	if (!m_pInventory->HasItem(m_nHoverIndex))
+	{
+		// no item (or potentially out-of-bounds)
+		return false;
+	}
 
-	return false;
+	// start "dragging" item - which simply means tracking which item we were hovering over when drag started
+	m_nDraggingItemIndex = m_nHoverIndex;
+
+	return true;
 }
 
 bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 {
-	// TODO: this is a bit quick and dirty, needs to actually check if hits an inventory box and return false only if that is not the case
+	// TODO: note - each inventory (there will eventually be multiple) must have its own unique BoxName
+	// TODO: easiest achieved by having the first part of BoxName indicate inventory
+	// i.e. "I0", "I1", etc. - see Hotbar for how to implemnet
 
 	if (!m_bInvOpen)
 	{
+		// inventory is not open so we know it can't be a hitbox in this inventory
 		return false;
 	}
+
+	// TODO: with support for multiple inventories this needs to get smarter and check we are in right inventory first
 
 	FString strHitboxName = BoxName.ToString();
 	if (!strHitboxName.IsNumeric())
 	{
+		// all inventory slots are named to their index so this cannot be an inventory slot
 		return false;
 	}
 
+	// get inventory slot index number
 	int nIndex = FCString::Atoi(*strHitboxName);
 	
 	if (bBegin)
 	{
+		// yes - this inventory
 		m_nHoverIndex = nIndex;
 		return true;
 	}
 
+	// we check hover index to avoid slots flickering on/off when placed pixel-to-pixel (i.e. if BEGIN already called for another slot then ignore the "END" for all other slots.)
 	if (m_nHoverIndex == nIndex)
 	{
-		// turn of current hover index
+		// turn off current hover index
 		m_nHoverIndex = -1;
 		return true;
 	}
 
-	// not current hover index - ignore
-
-	return false;
+	// not current hover index - ignore, but return true as we have handled it (if BoxName didn't belong to this inventory we would never have got here)
+	return true;
 }
 

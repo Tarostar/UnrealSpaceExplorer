@@ -269,18 +269,16 @@ void ACustomHUD::AutoGenerateMainMenu(FVector2D location, UTexture * textureNorm
 	m_menu.AutoGenerateMainMenu(location, textureNormal, textureHover, texturePressed, font, size);
 }
 
-void ACustomHUD::ToggleInventory(AInventoryObject* pInventory)
+void ACustomHUD::ToggleInventory(AInventoryObject* pInventory, bool bInGroup)
 {
 	if (m_inventory == NULL)
 	{
 		return;
 	}
 
-	// position of previous inventory
-	float top = 0.f;
-	float bottom = 0.f;
-	float right = 0.f;
-	m_inventory->ToggleInventory(pInventory, top, bottom, right);
+	// TODO: must trackk all inventories... (group class?)
+
+	m_inventory->ToggleInventory(pInventory, bInGroup, NULL);
 
 	// need to set start positions based on index, so decide on placement order
 	// then need to handle UpdatePositions in the inventory

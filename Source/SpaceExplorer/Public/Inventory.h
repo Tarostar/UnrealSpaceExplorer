@@ -36,9 +36,9 @@ public:
 
 	void UpdatePositions();
 
-	void ToggleInventory(AInventoryObject* pInventory, float top = -1.0f, float bottom = -1.0f, float right = -1.0f);
+	void ToggleInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory);
 	void CloseInventory();
-	void OpenInventory(AInventoryObject* pInventory);
+	void OpenInventory(AInventoryObject* pInventory, bool bInGroup);
 
 	bool ItemDrag(bool bPickup);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
@@ -69,13 +69,26 @@ private:
 	UPROPERTY()
 	TArray<FVector2D> m_vaInvHitBoxPositions;
 
+	// slot mouse cursor is hovering over
 	UPROPERTY()
 	int32 m_nHoverIndex;
+
+	// index of item being dragged (we don't remove from inventory, but stop drawing it until reset, moved or dropped into world)
+	UPROPERTY()
+	int32 m_nDraggingItemIndex;
+
+	// true if several inventories drawn after each other
+	bool m_bInGroup;
 
 	UPROPERTY()
 	AInventoryObject* m_pInventory;
 
+	// optional pointer to previously drawn inventory for calculating position
+	UPROPERTY()
+	AInventory* m_pPreviousInventory;
+
 private:
 	void SetStartPosition();
 	void SetHitBoxPositionArray();
+	void DrawDraggedItem();
 };
