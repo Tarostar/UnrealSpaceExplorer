@@ -19,6 +19,8 @@ ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 
 	m_hotbar = NULL;
 	m_inventory = NULL;
+
+	
 }
 
 void ACustomHUD::PostInitializeComponents()

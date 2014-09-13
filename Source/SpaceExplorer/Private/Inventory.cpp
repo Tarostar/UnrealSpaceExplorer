@@ -122,8 +122,8 @@ void AInventory::DrawInventory()
 		// draw item texture (if item exists and is not being dragged)
 		if (m_nDraggingItemIndex != i && m_pInventory->HasItem(i))
 		{
-			// TODO: review and scale of item texture should match without the 0.3 scaling....
-			m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.3f * m_pHUD->GetCurrentRatio());
+			// TODO: review and scale of item texture should match without the hardcoded scaling....
+			m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
 		}
 	}
 
@@ -136,7 +136,7 @@ void AInventory::DrawInventory()
 
 void AInventory::DrawDraggedItem()
 {
-	APlayerController* const controller = Cast<APlayerController>(m_pHUD->GetInstigatorController());
+	APlayerController* const controller = Cast<APlayerController>(m_pHUD->PlayerOwner);
 	if (controller == NULL)
 	{
 		return;
