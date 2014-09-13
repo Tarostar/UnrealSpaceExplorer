@@ -226,9 +226,24 @@ bool AInventory::ItemDrag(bool bPickup)
 {
 	if (!bPickup)
 	{
-		if (m_nDraggingItemIndex < 0)
-		{
-			// just "drop" item being dragged"
+		// TODO: this needs to be changed to store it in CustomHUD and so check across all inventories and hotbar, but for now...
+		if (m_nDraggingItemIndex >= 0)
+		{			
+			if (m_pInventory == NULL || m_nHoverIndex < 0 || m_nDraggingItemIndex == m_nHoverIndex)
+			{
+				// it was us... but do nothing except drop item being dragged
+				m_nDraggingItemIndex = -1;
+				return true;
+			}
+
+			// move to new index
+
+			// TODO: this needs to replicate to/from server...
+			// also the move will get trickier when not same inventory/hotbar, probably retrieve and then add
+			m_pInventory->MoveItem(m_nDraggingItemIndex, m_nHoverIndex, true);
+			
+
+			// drop item being dragged
 			m_nDraggingItemIndex = -1;
 			return true;
 		}
@@ -268,6 +283,7 @@ bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 	}
 
 	// TODO: with support for multiple inventories this needs to get smarter and check we are in right inventory first
+	// it also needs to store one reference to the current hitbox for all inventories + hotbar in the CustomHUD
 
 	FString strHitboxName = BoxName.ToString();
 	if (!strHitboxName.IsNumeric())
