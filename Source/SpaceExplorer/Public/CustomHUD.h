@@ -5,6 +5,7 @@
 class AActionBar;
 class AInventory;
 class AInventoryObject;
+class ASpaceExplorerPawn;
 
 #include "DragObject.h"
 #include "Menu.h"
@@ -32,7 +33,7 @@ public:
 
 	// inventory class responsible for drawing inventory
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-	AInventory * m_inventory;
+	TArray<AInventory*> m_inventories;
 
 	// responsible for drawing action bar
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
@@ -48,7 +49,8 @@ public:
 	/* toggle inventory on/off */
 	/*  top, bottom, right parameters are position of previous inventory, -1 if drawing only single inventory */
 	UFUNCTION(BlueprintCallable, Category = HUD_Inventory)
-	void ToggleInventory(AInventoryObject* pInventory, bool bInGroup);
+	void ToggleInventory(int32 nID);
+	void ToggleAllInventory();
 
 	/* draw the HUD*/
 	UFUNCTION(BlueprintCallable, Category = HUD)
@@ -114,4 +116,5 @@ private:
 	virtual void BeginPlay() override;
 
 	void DrawDraggedItem();
+	ASpaceExplorerPawn* GetSpaceExplorerPawn();
 };

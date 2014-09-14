@@ -39,7 +39,9 @@ public:
 
 	void ToggleInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory);
 	void CloseInventory();
-	void OpenInventory(AInventoryObject* pInventory, bool bInGroup);
+	void OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory);
+	
+	int32 GetID();
 
 	bool ItemDrag(bool bPickup, class DragObject& item);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);

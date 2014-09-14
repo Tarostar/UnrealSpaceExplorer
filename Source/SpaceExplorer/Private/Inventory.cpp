@@ -58,22 +58,24 @@ void AInventory::ToggleInventory(AInventoryObject* pInventory, bool bInGroup, AI
 		return;
 	}
 
-	m_pPreviousInventory = pPreviousInventory;
-
-	OpenInventory(pInventory, bInGroup);
+	OpenInventory(pInventory, bInGroup, pPreviousInventory);
 }
 
 void AInventory::CloseInventory()
 {
+	// TODO: any cleanup?
+
 	m_bInvOpen = false;
 }
 
-void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup)
+void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory)
 {
 	if (pInventory == NULL)
 	{
 		return;
 	}
+
+	m_pPreviousInventory = pPreviousInventory;
 		
 	m_pInventory = pInventory;
 
@@ -93,7 +95,7 @@ void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup)
 
 void AInventory::DrawInventory()
 {
-	if (!m_bInvOpen || m_vaInvHitBoxPositions.Num() != m_nWidthCount * m_nHeightCount)
+	if (m_pInventory == NULL || !m_bInvOpen || m_vaInvHitBoxPositions.Num() != m_nWidthCount * m_nHeightCount)
 	{
 		return;
 	}
@@ -102,7 +104,7 @@ void AInventory::DrawInventory()
 	for (i = 0; i < m_vaInvHitBoxPositions.Num(); i++)
 	{
 		// hitbox
-		FString name = FString::FromInt(i);
+		FString name = FString::FromInt(m_pInventory->GetID()) + TEXT("_") + FString::FromInt(i);
 		m_pHUD->AddHitBox(m_vaInvHitBoxPositions[i], FVector2D(m_fSlotSize, m_fSlotSize) * m_pHUD->GetCurrentRatio(), FName(*name), false);
 
 		UTexture *texture = m_texture;
@@ -187,7 +189,7 @@ void AInventory::SetStartPosition()
 			y = m_pPreviousInventory->m_vInvStartpos.Y + m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount + fMargin;
 		}
 	}
-
+	
 	// store the start position for this inventory
 	m_vInvStartpos = FVector2D(x, y);
 }
@@ -304,7 +306,7 @@ bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 	// TODO: easiest achieved by having the first part of BoxName indicate inventory
 	// i.e. "I0", "I1", etc. - see action bar for how to implemnet
 
-	if (!m_bInvOpen)
+	if (!m_bInvOpen || m_pInventory == NULL)
 	{
 		// inventory is not open so we know it can't be a hitbox in this inventory
 		return false;
@@ -314,14 +316,29 @@ bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 	// it also needs to store one reference to the current hitbox for all inventories in the CustomHUD
 
 	FString strHitboxName = BoxName.ToString();
-	if (!strHitboxName.IsNumeric())
+	int32 n = strHitboxName.Find(TEXT("_"));
+	if (n <= 0)
 	{
-		// all inventory slots are named to their index so this cannot be an inventory slot
+		// not formatted as an inventory hitbox name, e.g. <InventoryID>_<SlotIndex>
+		return false;
+	}
+	
+	if (strHitboxName.Len() <= n + 1 || !strHitboxName.Left(n).IsNumeric() || !strHitboxName.Mid(n + 1).IsNumeric())
+	{
+		// not formatted as an inventory hitbox name, e.g. <InventoryID>_<SlotIndex>
+		return false;
+	}
+
+	// get inventory ID
+	int nID = FCString::Atoi(*strHitboxName.Left(n));
+	if (nID != m_pInventory->GetID())
+	{
+		// not this inventory
 		return false;
 	}
 
 	// get inventory slot index number
-	int nIndex = FCString::Atoi(*strHitboxName);
+	int nIndex = FCString::Atoi(*strHitboxName.Mid(n + 1));
 	
 	if (bBegin)
 	{
@@ -342,3 +359,12 @@ bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 	return true;
 }
 
+int32 AInventory::GetID()
+{
+	if (m_pInventory)
+	{
+		return m_pInventory->GetID();
+	}
+	
+	return -1;
+}

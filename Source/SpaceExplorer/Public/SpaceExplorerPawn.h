@@ -95,7 +95,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItem(AUsableObject * pItem);
 
+	AInventoryObject* GetInventoryObjectFromIndex(int32 index);
 	AInventoryObject* GetInventoryObjectFromID(int32 nID);
+
+	int32 GetInventoryObjectCount();
 
 private:
 	// Begin APawn overrides

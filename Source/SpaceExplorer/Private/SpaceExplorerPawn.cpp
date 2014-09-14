@@ -94,6 +94,17 @@ void ASpaceExplorerPawn::BeginPlay()
 			m_inventoryObjects.Add(invObject);
 		}
 
+		AInventoryObject * invObject2 = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
+
+		if (invObject2)
+		{
+			invObject2->Init(AssignUniqueInventoryID(), 10, 2);
+			invObject2->m_inventorySlots.SetNum(invObject2->m_nInvHeightCount * invObject2->m_nInvWidthCount);
+			m_inventoryObjects.Add(invObject2);
+		}
+
+
+
 		/*m_hotbarObjects = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
 
 		if (m_hotbarObjects)
@@ -458,18 +469,10 @@ void ASpaceExplorerPawn::ToggleAllInventory()
 		return;
 	}
 
-	ACustomHUD * pHUD = Cast<ACustomHUD>(pc->GetHUD());
-	
-	for (int i = 0; i < m_inventoryObjects.Num(); i++)
+	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	if (pHUD)
 	{
-		if (i == 0)
-		{
-			pHUD->ToggleInventory(m_inventoryObjects[i], true);
-		}
-		else
-		{
-			pHUD->ToggleInventory(m_inventoryObjects[i], true);
-		}
+		pHUD->ToggleAllInventory();
 	}
 }
 
@@ -489,8 +492,11 @@ void ASpaceExplorerPawn::ToggleInventoryOne()
 		return;
 	}
 
-	ACustomHUD * pHUD = Cast<ACustomHUD>(pc->GetHUD());
-	pHUD->ToggleInventory(m_inventoryObjects[0], false);
+	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	if (pHUD)
+	{
+		pHUD->ToggleInventory(m_inventoryObjects[0]->GetID());
+	}
 }
 
 bool ASpaceExplorerPawn::AddItem(AUsableObject * pItem)
@@ -549,6 +555,16 @@ int32 ASpaceExplorerPawn::GetInventoryIndexFromID(int32 nID)
 	return -1;
 }
 
+AInventoryObject* ASpaceExplorerPawn::GetInventoryObjectFromIndex(int32 nIndex)
+{
+	if (m_inventoryObjects.IsValidIndex(nIndex))
+	{
+		return m_inventoryObjects[nIndex];
+	}
+
+	return NULL;
+}
+
 AInventoryObject* ASpaceExplorerPawn::GetInventoryObjectFromID(int32 nID)
 {
 	for (int i = 0; i < m_inventoryObjects.Num(); i++)
@@ -562,4 +578,9 @@ AInventoryObject* ASpaceExplorerPawn::GetInventoryObjectFromID(int32 nID)
 
 	// does not exist
 	return NULL;
+}
+
+int32 ASpaceExplorerPawn::GetInventoryObjectCount()
+{
+	return m_inventoryObjects.Num();
 }

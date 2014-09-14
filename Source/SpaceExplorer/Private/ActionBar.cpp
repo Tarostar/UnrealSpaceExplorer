@@ -179,7 +179,7 @@ bool AActionBar::DragDrop(bool bPickup, const class DragObject& item)
 	// start "dragging" item - which simply means tracking which item we were hovering over when drag started
 	m_nDraggingItemIndex = m_nHoverIndex;*/
 
-	return true;
+	return false;
 }
 
 bool AActionBar::CheckMouseOver(const FName BoxName, bool bBegin)

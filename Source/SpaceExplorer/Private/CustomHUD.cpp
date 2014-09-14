@@ -21,7 +21,6 @@ ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 	VScreenDimensions.Set(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 
 	m_actionBar = NULL;
-	m_inventory = NULL;
 
 	
 }
@@ -64,16 +63,6 @@ void ACustomHUD::BeginPlay()
 
 			m_actionBar->Init(this, 0.3f, 128.f);
 		}
-
-		/* Inventory */
-		m_inventory = World->SpawnActor<AInventory>(SpawnParams);
-		if (m_inventory)
-		{
-			m_inventory->Init(this, m_actionBar);
-		}
-
-		
-
 	}
 
 }
@@ -128,9 +117,12 @@ void ACustomHUD::UpdateScreenDimensions(int32 SizeX, int32 SizeY)
 		m_actionBar->UpdatePositions();
 	}
 
-	if (m_inventory)
+	for (int i = 0; i < m_inventories.Num(); i++)
 	{
-		m_inventory->UpdatePositions();
+		if (m_inventories[i])
+		{
+			m_inventories[i]->UpdatePositions();
+		}
 	}
 }
 
@@ -145,9 +137,12 @@ void ACustomHUD::DrawHUDComponents()
 		m_actionBar->Draw();
 	}
 
-	if (m_inventory)
+	for (int i = 0; i < m_inventories.Num(); i++)
 	{
-		m_inventory->DrawInventory();
+		if (m_inventories[i])
+		{
+			m_inventories[i]->DrawInventory();
+		}
 	}
 
 	DrawDraggedItem();
@@ -189,19 +184,22 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 	if (m_menu.ReceiveHitBox(BoxName, true))
 		return;
 
-	if (m_inventory)
-	{
-		if (m_inventory->ItemDrag(true, m_draggedItem))
-		{
-			return;
-		}
-	}
-
 	if (m_actionBar)
 	{
 		if (m_actionBar->DragDrop(true, m_draggedItem))
 		{
 			return;
+		}
+	}
+
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i])
+		{
+			if (m_inventories[i]->ItemDrag(true, m_draggedItem))
+			{
+				return;
+			}
 		}
 	}
 }
@@ -212,20 +210,23 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 
 	if (m_menu.ReceiveHitBox(BoxName, false))
 		return;
-
-	if (m_inventory)
-	{
-		if (m_inventory->ItemDrag(false, m_draggedItem))
-		{
-			return;
-		}
-	}
-
+	
 	if (m_actionBar)
 	{
 		if (m_actionBar->DragDrop(false, m_draggedItem))
 		{
 			return;
+		}
+	}
+
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i])
+		{
+			if (m_inventories[i]->ItemDrag(false, m_draggedItem))
+			{
+				return;
+			}
 		}
 	}
 
@@ -240,19 +241,22 @@ void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 
 	Super::ReceiveHitBoxBeginCursorOver(BoxName);
 	
-	if (m_inventory)
-	{
-		if (m_inventory->CheckMouseOver(BoxName, true))
-		{
-			return;
-		}
-	}
-
 	if (m_actionBar)
 	{
 		if (m_actionBar->CheckMouseOver(BoxName, true))
 		{
 			return;
+		}
+	}
+
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i])
+		{
+			if (m_inventories[i]->CheckMouseOver(BoxName, true))
+			{
+				return;
+			}
 		}
 	}
 
@@ -262,20 +266,23 @@ void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 {
 	Super::ReceiveHitBoxEndCursorOver(BoxName);
-
-	if (m_inventory)
-	{
-		if (m_inventory->CheckMouseOver(BoxName, false))
-		{
-			return;
-		}
-	}
-
+	
 	if (m_actionBar)
 	{
 		if (m_actionBar->CheckMouseOver(BoxName, false))
 		{
 			return;
+		}
+	}
+
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i])
+		{
+			if (m_inventories[i]->CheckMouseOver(BoxName, false))
+			{
+				return;
+			}
 		}
 	}
 
@@ -292,27 +299,103 @@ void ACustomHUD::AutoGenerateMainMenu(FVector2D location, UTexture * textureNorm
 	m_menu.AutoGenerateMainMenu(location, textureNormal, textureHover, texturePressed, font, size);
 }
 
-void ACustomHUD::ToggleInventory(AInventoryObject* pInventory, bool bInGroup)
+void ACustomHUD::ToggleAllInventory()
 {
-	if (m_inventory == NULL)
+	// open or close all inventories
+
+	if (m_inventories.Num() > 0)
+	{
+		// close all open inventories
+
+		for (int i = 0; i < m_inventories.Num(); i++)
+		{
+			// TODO: this is a bit manual and clunky
+			m_inventories[i]->CloseInventory();
+			delete m_inventories[i];
+		}
+
+		m_inventories.Empty();
+
+		// all closed
+		return;
+	}
+
+	// none open, so open all
+
+	UWorld* const World = GetWorld();
+	if (World == NULL)
 	{
 		return;
 	}
 
-	// TODO: must trackk all inventories... (group class?)
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = Instigator;
+	
+	ASpaceExplorerPawn* pPawn = GetSpaceExplorerPawn();
+	if (pPawn)
+	{
+		m_inventories.SetNum(pPawn->GetInventoryObjectCount());
 
-	m_inventory->ToggleInventory(pInventory, bInGroup, NULL);
+		for (int i = 0; i < m_inventories.Num(); i++)
+		{
+			m_inventories[i] = World->SpawnActor<AInventory>(SpawnParams);
+			if (m_inventories[i])
+			{
+				m_inventories[i]->Init(this, m_actionBar);
+				m_inventories[i]->OpenInventory(pPawn->GetInventoryObjectFromIndex(i), m_inventories.Num() > 1, i == 0 ? NULL : m_inventories[i - 1]);
+			}
+		}
+	}
+}
 
-	// need to set start positions based on index, so decide on placement order
-	// then need to handle UpdatePositions in the inventory
-	// SetStartPosition
+void ACustomHUD::ToggleInventory(int32 nID)
+{
+	// open or close indicated inventory
 
-	// IDEA: pass in index, width, heigt, along with top, bottom and right of previous drawn inventory
-	// then simple check to see if width fits starting at top of previous, otherwise start at bottom with horizontal left value of zero
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i]->GetID() == nID)
+		{
+			// found - close
+			m_inventories[i]->CloseInventory();
+			delete m_inventories[i];
+			m_inventories.RemoveAt(i);
+			return;
+		}
+	}
 
-	// issues: tracking open/closed individual inventories, allow positioning?
+	// did not find - open
 
-	// note top, bottom, right passed in as reference so that updated by each call!
+	UWorld* const World = GetWorld();
+	if (World == NULL)
+	{
+		return;
+	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = Instigator;
+
+	ASpaceExplorerPawn* pPawn = GetSpaceExplorerPawn();
+	if (pPawn)
+	{
+		AInventory* newInventory = World->SpawnActor<AInventory>(SpawnParams);
+		if (newInventory == NULL)
+		{
+			// failed...
+			return;
+		}
+		
+		newInventory->Init(this, m_actionBar);
+
+		// handle positioning if other inventories already open
+		bool bExisting = m_inventories.Num() > 0;
+		newInventory->OpenInventory(pPawn->GetInventoryObjectFromID(nID), bExisting, bExisting ? m_inventories[m_inventories.Num() - 1] : NULL);
+
+		// add to array of open inventories
+		m_inventories.Add(newInventory);
+	}
 }
 
 void ACustomHUD::DrawDraggedItem()
@@ -370,18 +453,22 @@ int32 ACustomHUD::GetInventoryID()
 
 AInventoryObject* ACustomHUD::GetSourceInventoryObjectFromID(int32 nID)
 {
+	ASpaceExplorerPawn* const pPawn = GetSpaceExplorerPawn();
+	if (pPawn)
+	{
+		return pPawn->GetInventoryObjectFromID(m_draggedItem.GetInventoryID());
+	}
+
+	return NULL;
+}
+
+ASpaceExplorerPawn* ACustomHUD::GetSpaceExplorerPawn()
+{
 	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
 	if (controller == NULL)
 	{
 		return NULL;
 	}
 
-	ASpaceExplorerPawn* const pPawn = Cast<ASpaceExplorerPawn>(controller->GetPawn());
-	if (pPawn == NULL)
-	{
-		return NULL;
-	}
-
-	return pPawn->GetInventoryObjectFromID(m_draggedItem.GetInventoryID());
+	return Cast<ASpaceExplorerPawn>(controller->GetPawn());
 }
-
