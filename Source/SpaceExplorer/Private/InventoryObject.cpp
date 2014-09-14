@@ -9,10 +9,12 @@ AInventoryObject::AInventoryObject(const class FPostConstructInitializePropertie
 {
 	m_nInvWidthCount = 10;
 	m_nInvHeightCount = 5;
+	m_ID = -1;
 }
 
-void AInventoryObject::Init(int32 nWidth, int32 nHeight)
+void AInventoryObject::Init(int32 id, int32 nWidth, int32 nHeight)
 {
+	m_ID = id;
 	m_nInvWidthCount = nWidth;
 	m_nInvHeightCount = nHeight;
 
@@ -306,3 +308,7 @@ bool AInventoryObject::InsertItem(int32 nIndex, AUsableObject* pItem)
 	return true;
 }
 
+int32 AInventoryObject::GetID()
+{
+	return m_ID;
+}

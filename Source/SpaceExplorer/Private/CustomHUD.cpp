@@ -4,6 +4,8 @@
 #include "InventoryObject.h"
 #include "CustomHUD.h"
 #include "SpaceExplorerPawn.h"
+#include "ActionBar.h"
+#include "Inventory.h"
 
 const float DEFAULT_SCREEN_WIDTH = 2560.0f;
 const float DEFAULT_SCREEN_HEIGHT = 1440.0f;
@@ -18,7 +20,7 @@ ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 	m_fCurrentRatio = 1.0f;
 	VScreenDimensions.Set(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 
-	m_hotbar = NULL;
+	m_actionBar = NULL;
 	m_inventory = NULL;
 
 	
@@ -45,11 +47,11 @@ void ACustomHUD::BeginPlay()
 
 		
 
-		/* Hotbar */
-		m_hotbar = World->SpawnActor<AHotbar>(SpawnParams);
-		if (m_hotbar)
+		/* ActionBar */
+		m_actionBar = World->SpawnActor<AActionBar>(SpawnParams);
+		if (m_actionBar)
 		{	
-			AInventoryObject* pHotbarObjects = NULL;
+			/*AInventoryObject* pHotbarObjects = NULL;
 			APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
 			if (controller)
 			{
@@ -58,16 +60,16 @@ void ACustomHUD::BeginPlay()
 				{
 					pHotbarObjects = pawn->GetHotbarObjects();
 				}
-			}
+			}*/
 
-			m_hotbar->Init(this, 0.3f, 128.f, pHotbarObjects);
+			m_actionBar->Init(this, 0.3f, 128.f);
 		}
 
 		/* Inventory */
 		m_inventory = World->SpawnActor<AInventory>(SpawnParams);
 		if (m_inventory)
 		{
-			m_inventory->Init(this, m_hotbar);
+			m_inventory->Init(this, m_actionBar);
 		}
 
 		
@@ -121,9 +123,9 @@ void ACustomHUD::UpdateScreenDimensions(int32 SizeX, int32 SizeY)
 	m_fCurrentRatio = ScaleToScreensize();
 
 	// update inventory hitboxes, etc.
-	if (m_hotbar)
+	if (m_actionBar)
 	{
-		m_hotbar->UpdatePositions();
+		m_actionBar->UpdatePositions();
 	}
 
 	if (m_inventory)
@@ -138,15 +140,17 @@ void ACustomHUD::DrawHUDComponents()
 
 	//DrawHUDBars();
 
-	if (m_hotbar)
+	if (m_actionBar)
 	{
-		m_hotbar->DrawHotbar();
+		m_actionBar->Draw();
 	}
 
 	if (m_inventory)
 	{
 		m_inventory->DrawInventory();
 	}
+
+	DrawDraggedItem();
 }
 
 /* Helpers */
@@ -187,17 +191,15 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 
 	if (m_inventory)
 	{
-		// in item mode, check for item pickup
-		if (m_inventory->ItemDrag(true))
+		if (m_inventory->ItemDrag(true, m_draggedItem))
 		{
 			return;
 		}
 	}
 
-	if (m_hotbar)
+	if (m_actionBar)
 	{
-		// in item mode, check for item pickup
-		if (m_hotbar->ItemDrag(true))
+		if (m_actionBar->DragDrop(true, m_draggedItem))
 		{
 			return;
 		}
@@ -213,21 +215,23 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 
 	if (m_inventory)
 	{
-		// in item mode, check for item pickup
-		if (m_inventory->ItemDrag(false))
+		if (m_inventory->ItemDrag(false, m_draggedItem))
 		{
 			return;
 		}
 	}
 
-	if (m_hotbar)
+	if (m_actionBar)
 	{
-		// in item mode, check for item pickup
-		if (m_hotbar->ItemDrag(true))
+		if (m_actionBar->DragDrop(false, m_draggedItem))
 		{
 			return;
 		}
 	}
+
+	// release back into world
+	// TODO: instatiate - or actually make component visible again
+	m_draggedItem.Drop();
 }
 
 
@@ -244,9 +248,9 @@ void ACustomHUD::ReceiveHitBoxBeginCursorOver(const FName BoxName)
 		}
 	}
 
-	if (m_hotbar)
+	if (m_actionBar)
 	{
-		if (m_hotbar->CheckMouseOver(BoxName, true))
+		if (m_actionBar->CheckMouseOver(BoxName, true))
 		{
 			return;
 		}
@@ -267,9 +271,9 @@ void ACustomHUD::ReceiveHitBoxEndCursorOver(const FName BoxName)
 		}
 	}
 
-	if (m_hotbar)
+	if (m_actionBar)
 	{
-		if (m_hotbar->CheckMouseOver(BoxName, false))
+		if (m_actionBar->CheckMouseOver(BoxName, false))
 		{
 			return;
 		}
@@ -310,3 +314,74 @@ void ACustomHUD::ToggleInventory(AInventoryObject* pInventory, bool bInGroup)
 
 	// note top, bottom, right passed in as reference so that updated by each call!
 }
+
+void ACustomHUD::DrawDraggedItem()
+{
+	if (!m_draggedItem.IsDragging())
+	{
+		return;
+	}
+
+	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
+	if (controller == NULL)
+	{
+		return;
+	}
+
+	float x, y;
+	controller->GetMousePosition(x, y);
+
+	AInventoryObject* const pInventory = GetSourceInventoryObjectFromID(m_draggedItem.GetInventoryID());		
+	if (pInventory)
+	{
+		DrawTextureSimple(pInventory->m_inventorySlots[m_draggedItem.GetSlotIndex()]->m_inventoryTexture, x, y, GetCurrentRatio());
+	}
+}
+
+const class DragObject* ACustomHUD::GetDraggedItem()
+{
+	return &m_draggedItem;
+}
+
+bool ACustomHUD::IsDragging()
+{
+	return m_draggedItem.IsDragging();
+}
+
+FString ACustomHUD::GetLabel()
+{
+	return m_draggedItem.GetLabel();
+}
+
+EActionType::Type ACustomHUD::GetType()
+{
+	return m_draggedItem.GetType();
+}
+
+int32 ACustomHUD::GetSlotIndex()
+{
+	return m_draggedItem.GetSlotIndex();
+}
+
+int32 ACustomHUD::GetInventoryID()
+{
+	return m_draggedItem.GetInventoryID();
+}
+
+AInventoryObject* ACustomHUD::GetSourceInventoryObjectFromID(int32 nID)
+{
+	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
+	if (controller == NULL)
+	{
+		return NULL;
+	}
+
+	ASpaceExplorerPawn* const pPawn = Cast<ASpaceExplorerPawn>(controller->GetPawn());
+	if (pPawn == NULL)
+	{
+		return NULL;
+	}
+
+	return pPawn->GetInventoryObjectFromID(m_draggedItem.GetInventoryID());
+}
+

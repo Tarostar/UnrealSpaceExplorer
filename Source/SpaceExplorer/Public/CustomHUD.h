@@ -2,10 +2,12 @@
 
 #pragma once
 
-#include "Hotbar.h"
+class AActionBar;
+class AInventory;
+class AInventoryObject;
+
+#include "DragObject.h"
 #include "Menu.h"
-#include "Inventory.h"
-#include "InventoryObject.h"
 #include "GameFramework/HUD.h"
 #include "CustomHUD.generated.h"
 
@@ -31,6 +33,10 @@ public:
 	// inventory class responsible for drawing inventory
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
 	AInventory * m_inventory;
+
+	// responsible for drawing action bar
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	AActionBar * m_actionBar;
 
 	/* update the screen dimensions if changed and then update HUD and inventory*/
 	UFUNCTION(BlueprintCallable, Category = HUD_Screen)
@@ -71,17 +77,24 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = HUD_Menu)
 	void ReceiveHitBoxReleaseCompleted(const FName BoxName);
 
+	/* Drag and Drop */
+	AInventoryObject* GetSourceInventoryObjectFromID(int32 nID);
+	const class DragObject* GetDraggedItem();
+	bool IsDragging();
+	FString GetLabel();
+	EActionType::Type GetType();
+	int32 GetSlotIndex();
+	int32 GetInventoryID();
 
 private:
 	// menu class responsible for drawing menu
 	Menu m_menu;
-
-	// hotbar class responsible for drawing hotbar
-	UPROPERTY()
-	AHotbar * m_hotbar;
-
+	
 	// ratio used to scale everything on the HUD for screen size
 	float m_fCurrentRatio;
+
+	// item being dragged
+	class DragObject m_draggedItem;
 
 	/* signal to draw the HUD or menu */
 	virtual void ReceiveDrawHUD(int32 SizeX, int32 SizeY) override;
@@ -99,4 +112,6 @@ private:
 	virtual void PostInitializeComponents() override;
 
 	virtual void BeginPlay() override;
+
+	void DrawDraggedItem();
 };

@@ -27,7 +27,7 @@ public:
 	TArray<AUsableObject*> m_inventorySlots;
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void Init(int32 nWidth, int32 nHeight);
+	void Init(int32 id, int32 nWidth, int32 nHeight);
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItemFirstAvailableSlot(AUsableObject* pItem);
@@ -53,7 +53,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool DestroyItem(int32 nIndex);
 
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	int32 GetID();
+
 private:
+	// unique ID
+	int32 m_ID;
+
 	bool GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex);
 	bool CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth);
 	bool InsertItem(int32 nIndex, AUsableObject* pItem);

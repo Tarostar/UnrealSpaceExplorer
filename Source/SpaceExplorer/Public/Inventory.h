@@ -2,9 +2,10 @@
 
 #pragma once
 
-class ACustomHUD;
-class AHotbar;
 class AInventoryObject;
+class AActionBar;
+
+#include "CustomHUD.h"
 #include "Inventory.generated.h"
 
 /**
@@ -28,7 +29,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
 	bool m_bInvOpen;
 
-	void Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize = 64.f, float fInventoryBorder = 0.f);
+	void Init(ACustomHUD * pHUD, AActionBar * pActionBar, float fSlotSize = 64.f, float fInventoryBorder = 0.f);
 
 	bool IsInvOpen();
 
@@ -40,16 +41,17 @@ public:
 	void CloseInventory();
 	void OpenInventory(AInventoryObject* pInventory, bool bInGroup);
 
-	bool ItemDrag(bool bPickup);
+	bool ItemDrag(bool bPickup, class DragObject& item);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
 private:
 	UPROPERTY()
 	ACustomHUD * m_pHUD;
 
-	// pointer to hotbar for relative positioning when hotbar is visible
-	UPROPERTY()
-	AHotbar * m_pHotbar;
+	// pointer to action bar for relative positioning when action bar is visible
+	// TODO: adding UProperty here causes CustomHUD to fail compiling?!?!?...?
+	//UPROPERTY()
+	AActionBar * m_ActionBar;
 
 	UPROPERTY()
 	FVector2D m_vInvStartpos;
@@ -73,10 +75,6 @@ private:
 	UPROPERTY()
 	int32 m_nHoverIndex;
 
-	// index of item being dragged (we don't remove from inventory, but stop drawing it until reset, moved or dropped into world)
-	UPROPERTY()
-	int32 m_nDraggingItemIndex;
-
 	// true if several inventories drawn after each other
 	bool m_bInGroup;
 
@@ -90,5 +88,4 @@ private:
 private:
 	void SetStartPosition();
 	void SetHitBoxPositionArray();
-	void DrawDraggedItem();
 };

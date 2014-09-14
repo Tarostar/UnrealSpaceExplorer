@@ -95,8 +95,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItem(AUsableObject * pItem);
 
-	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AInventoryObject * GetHotbarObjects();
+	AInventoryObject* GetInventoryObjectFromID(int32 nID);
 
 private:
 	// Begin APawn overrides
@@ -139,6 +138,8 @@ private:
 
 	/** Helpers */
 	void SetMouseLook(bool bMouseLook);
+	int32 AssignUniqueInventoryID();
+	int32 GetInventoryIndexFromID(int32 nID);
 
 private:
 	/* True only in first frame when focused on new usable actor. */
@@ -155,7 +156,4 @@ private:
 	/* array of all inventory containers */
 	UPROPERTY(Replicated)
 	TArray<AInventoryObject*> m_inventoryObjects;
-
-	UPROPERTY(Replicated)
-	AInventoryObject* m_hotbarObjects;
 };

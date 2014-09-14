@@ -4,12 +4,13 @@
 #include "InventoryObject.h"
 #include "CustomHUD.h"
 #include "Inventory.h"
+#include "ActionBar.h"
 
 AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
 	m_bInvOpen = false;
-	m_pHotbar = NULL;
+	m_ActionBar = NULL;
 	m_pHUD = NULL;
 
 	m_nWidthCount = 10;
@@ -34,14 +35,12 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	m_pPreviousInventory = NULL;
 
 	m_bInGroup = false;
-
-	m_nDraggingItemIndex = -1;
 }
 
-void AInventory::Init(ACustomHUD * pHUD, AHotbar * pHotbar, float fSlotSize, float fInventoryBorder)
+void AInventory::Init(ACustomHUD * pHUD, AActionBar * pActionBar, float fSlotSize, float fInventoryBorder)
 {
 	m_pHUD = pHUD;
-	m_pHotbar = pHotbar;
+	m_ActionBar = pActionBar;
 	m_fSlotSize = fSlotSize;
 	m_fInventoryBorder = fInventoryBorder;
 }
@@ -120,32 +119,19 @@ void AInventory::DrawInventory()
 		}
 
 		// draw item texture (if item exists and is not being dragged)
-		if (m_nDraggingItemIndex != i && m_pInventory->HasItem(i))
+		
+		if (m_pInventory->HasItem(i))
 		{
+			if (m_pHUD->IsDragging() && m_pHUD->GetInventoryID() == m_pInventory->GetID() && m_pHUD->GetSlotIndex() == i)
+			{
+				// this item is currently being dragged so don't draw
+				continue;
+			}
+
 			// TODO: review and scale of item texture should match without the hardcoded scaling....
 			m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
 		}
 	}
-
-	if (m_nDraggingItemIndex >= 0)
-	{
-		// draw texture of item being dragged under mouse cursor
-		DrawDraggedItem();
-	}
-}
-
-void AInventory::DrawDraggedItem()
-{
-	APlayerController* const controller = Cast<APlayerController>(m_pHUD->PlayerOwner);
-	if (controller == NULL)
-	{
-		return;
-	}
-
-	float x, y;
-	controller->GetMousePosition(x, y);
-
-	m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[m_nDraggingItemIndex]->m_inventoryTexture, x, y, m_pHUD->GetCurrentRatio());
 }
 
 void AInventory::UpdatePositions()
@@ -153,7 +139,6 @@ void AInventory::UpdatePositions()
 	SetStartPosition();
 	SetHitBoxPositionArray();
 }
-
 
 void AInventory::SetStartPosition()
 {
@@ -172,14 +157,14 @@ void AInventory::SetStartPosition()
 
 	if (!m_bInGroup)
 	{
-		// single inventory opened - draw it above hotbar on right side (minus its width and margin)
+		// single inventory opened - draw it above action bar on right side (minus its width and margin)
 
 		x = m_pHUD->VScreenDimensions.X - fInvWidth - fMargin;
 
-		if (m_pHotbar && m_pHotbar->IsHotbarVisible())
+		if (m_ActionBar && m_ActionBar->IsVisible())
 		{
-			// inventory position above hotbar
-			y = m_pHotbar->GetStartPos().Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
+			// inventory position above action bar
+			y = m_ActionBar->GetStartPos().Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
 		}
 		else
 		{
@@ -222,30 +207,72 @@ void AInventory::SetHitBoxPositionArray()
 	}
 }
 
-bool AInventory::ItemDrag(bool bPickup)
+bool AInventory::ItemDrag(bool bPickup, class DragObject& item)
 {
+	if (m_pInventory == NULL)
+	{
+		// we have no inventory object associated - do nothing.
+		return false;
+	}
+
 	if (!bPickup)
 	{
-		// TODO: this needs to be changed to store it in CustomHUD and so check across all inventories and hotbar, but for now...
-		if (m_nDraggingItemIndex >= 0)
-		{			
-			if (m_pInventory == NULL || m_nHoverIndex < 0 || m_nDraggingItemIndex == m_nHoverIndex)
+		if (item.IsDragging())
+		{	
+			// item is being dragged
+
+			if (m_nHoverIndex < 0)
 			{
-				// it was us... but do nothing except drop item being dragged
-				m_nDraggingItemIndex = -1;
+				// item is not being dropped into this inventory - do nothing.
+				return false;
+			}
+
+			if (item.GetInventoryID() == m_pInventory->GetID())
+			{
+				// item being dragged FROM this inventory.
+
+				if (item.GetSlotIndex() != m_nHoverIndex)
+				{
+					// TODO: this needs to replicate to/from server...
+					// item is dropped into new slot in same inventory - move it.
+					m_pInventory->MoveItem(item.GetSlotIndex(), m_nHoverIndex, true);
+				}				
+				
+				// drop item being dragged
+				item.Drop();
 				return true;
 			}
 
-			// move to new index
+			// item being dragged from another inventory
 
 			// TODO: this needs to replicate to/from server...
-			// also the move will get trickier when not same inventory/hotbar, probably retrieve and then add
-			m_pInventory->MoveItem(m_nDraggingItemIndex, m_nHoverIndex, true);
 			
+			// first retrieve it
+			AInventoryObject* const pSourceInventory = m_pHUD->GetSourceInventoryObjectFromID(item.GetInventoryID());
+			if (pSourceInventory == NULL)
+			{
+				// can't get source inventory
+				item.Drop();
+				return true;
+			}
 
-			// drop item being dragged
-			m_nDraggingItemIndex = -1;
-			return true;
+			AUsableObject * pItem = pSourceInventory->RetrieveItem(item.GetSlotIndex());
+			if (pItem)
+			{
+				// we have an item to move - attempt to add it
+				if (!m_pInventory->AddItem(m_nHoverIndex, pItem))
+				{
+					// failed to add item - try to put it back (if this fails we have a problem...)
+					if (!pSourceInventory->AddItem(item.GetSlotIndex(), pItem))
+					{
+						// TODO: handle - we have an orphaned item... should not happen
+					}
+				}
+
+				// drop item being dragged
+				item.Drop();
+				return true;
+			}
 		}
 		
 		// not us...
@@ -254,6 +281,7 @@ bool AInventory::ItemDrag(bool bPickup)
 
 	if (!m_bInvOpen || m_nHoverIndex < 0)
 	{
+		// not this inventory
 		return false;
 	}
 
@@ -265,7 +293,7 @@ bool AInventory::ItemDrag(bool bPickup)
 	}
 
 	// start "dragging" item - which simply means tracking which item we were hovering over when drag started
-	m_nDraggingItemIndex = m_nHoverIndex;
+	item.Init("", EActionType::Use, m_pInventory->GetID(), m_nHoverIndex);
 
 	return true;
 }
@@ -274,7 +302,7 @@ bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 {
 	// TODO: note - each inventory (there will eventually be multiple) must have its own unique BoxName
 	// TODO: easiest achieved by having the first part of BoxName indicate inventory
-	// i.e. "I0", "I1", etc. - see Hotbar for how to implemnet
+	// i.e. "I0", "I1", etc. - see action bar for how to implemnet
 
 	if (!m_bInvOpen)
 	{
@@ -283,7 +311,7 @@ bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 	}
 
 	// TODO: with support for multiple inventories this needs to get smarter and check we are in right inventory first
-	// it also needs to store one reference to the current hitbox for all inventories + hotbar in the CustomHUD
+	// it also needs to store one reference to the current hitbox for all inventories in the CustomHUD
 
 	FString strHitboxName = BoxName.ToString();
 	if (!strHitboxName.IsNumeric())

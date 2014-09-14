@@ -70,8 +70,6 @@ void ASpaceExplorerPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > 
 
 	// Replicate to everyone
 	DOREPLIFETIME(ASpaceExplorerPawn, m_inventoryObjects);
-
-	DOREPLIFETIME(ASpaceExplorerPawn, m_hotbarObjects);
 }
 
 
@@ -91,24 +89,22 @@ void ASpaceExplorerPawn::BeginPlay()
 		
 		if (invObject)
 		{
-			invObject->m_nInvHeightCount = 5;
-			invObject->m_nInvWidthCount = 5;
+			invObject->Init(AssignUniqueInventoryID(), 5, 5);
 			invObject->m_inventorySlots.SetNum(invObject->m_nInvHeightCount * invObject->m_nInvWidthCount);
 			m_inventoryObjects.Add(invObject);
 		}
 
-		m_hotbarObjects = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
+		/*m_hotbarObjects = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
 
 		if (m_hotbarObjects)
 		{
 			m_hotbarObjects->m_nInvHeightCount = 1;
 			m_hotbarObjects->m_nInvWidthCount = 5;
 			m_hotbarObjects->m_inventorySlots.SetNum(m_hotbarObjects->m_nInvHeightCount * m_hotbarObjects->m_nInvWidthCount);
-		}		
+		}*/		
 	}
 
 }
-
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
 {
@@ -512,7 +508,58 @@ bool ASpaceExplorerPawn::AddItem(AUsableObject * pItem)
 	return false;
 }
 
-AInventoryObject * ASpaceExplorerPawn::GetHotbarObjects()
+int32 ASpaceExplorerPawn::AssignUniqueInventoryID()
 {
-	return m_hotbarObjects;
+	// assign unique ID
+	int32 nUniqueID = 0;
+	bool bExists = true;
+	while (bExists)
+	{
+		// start by assuming this unique ID does not exist
+		bExists = false;
+
+		// check if it does exists
+		for (int i = 0; i < m_inventoryObjects.Num(); i++)
+		{
+			if (m_inventoryObjects[i]->GetID() == nUniqueID)
+			{
+				// found ID in use - try next
+				bExists = true;
+				nUniqueID++;
+				break;
+			}
+		}
+	}
+
+	return nUniqueID;
+}
+
+int32 ASpaceExplorerPawn::GetInventoryIndexFromID(int32 nID)
+{
+	for (int i = 0; i < m_inventoryObjects.Num(); i++)
+	{
+		if (m_inventoryObjects[i]->GetID() == nID)
+		{
+			// found ID
+			return i;
+		}
+	}
+
+	// does not exist
+	return -1;
+}
+
+AInventoryObject* ASpaceExplorerPawn::GetInventoryObjectFromID(int32 nID)
+{
+	for (int i = 0; i < m_inventoryObjects.Num(); i++)
+	{
+		if (m_inventoryObjects[i]->GetID() == nID)
+		{
+			// found ID
+			return m_inventoryObjects[i];
+		}
+	}
+
+	// does not exist
+	return NULL;
 }
