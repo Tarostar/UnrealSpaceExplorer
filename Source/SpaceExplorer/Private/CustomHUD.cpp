@@ -3,6 +3,7 @@
 #include "SpaceExplorer.h"
 #include "InventoryObject.h"
 #include "CustomHUD.h"
+#include "SpaceExplorerPawn.h"
 
 const float DEFAULT_SCREEN_WIDTH = 2560.0f;
 const float DEFAULT_SCREEN_HEIGHT = 1440.0f;
@@ -42,11 +43,24 @@ void ACustomHUD::BeginPlay()
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
 
+		
+
 		/* Hotbar */
 		m_hotbar = World->SpawnActor<AHotbar>(SpawnParams);
 		if (m_hotbar)
 		{	
-			m_hotbar->Init(this, 0.3f, 128.f);
+			AInventoryObject* pHotbarObjects = NULL;
+			APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
+			if (controller)
+			{
+				ASpaceExplorerPawn* const pawn = Cast<ASpaceExplorerPawn>(controller->GetPawn());
+				if (pawn)
+				{
+					pHotbarObjects = pawn->GetHotbarObjects();
+				}
+			}
+
+			m_hotbar->Init(this, 0.3f, 128.f, pHotbarObjects);
 		}
 
 		/* Inventory */
@@ -55,6 +69,9 @@ void ACustomHUD::BeginPlay()
 		{
 			m_inventory->Init(this, m_hotbar);
 		}
+
+		
+
 	}
 
 }

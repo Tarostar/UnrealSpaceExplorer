@@ -3,6 +3,7 @@
 #pragma once
 
 class ACustomHUD;
+class AInventoryObject;
 
 #include "Hotbar.generated.h"
 
@@ -34,7 +35,7 @@ public:
 	bool IsHotbarVisible();
 
 	/* Setup Hotbar for use */
-	void Init(ACustomHUD * pHUD, float fTextScale, float fSlotSize);
+	void Init(ACustomHUD * pHUD, float fTextScale, float fSlotSize, AInventoryObject* pHotbarObjects);
 
 	/* Draw Hotbar when visible */
 	void DrawHotbar();
@@ -51,7 +52,12 @@ public:
 	bool ItemDrag(bool bPickup);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
+	void LinkHotbar(AInventoryObject* pHotbarObjects);
+
 private:
+	UPROPERTY()
+	AInventoryObject* m_pHotbarObjects;
+
 	// number of hotbar slots
 	UPROPERTY()
 	int32 m_nSlotCount;
@@ -90,6 +96,14 @@ private:
 	// hitbox name cursor is hovering over - for inventory will be a number indicating the inventory index
 	UPROPERTY()
 	FName m_cursorOverHitBoxName;
+
+	// slot mouse cursor is hovering over
+	UPROPERTY()
+	int32 m_nHoverIndex;
+
+	// index of item being dragged (we don't remove from inventory, but stop drawing it until reset, moved or dropped into world)
+	UPROPERTY()
+	int32 m_nDraggingItemIndex;
 
 	/* Called by UpdatePositions */
 	void SetStartPosition();

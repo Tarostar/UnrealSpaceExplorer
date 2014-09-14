@@ -70,6 +70,8 @@ void ASpaceExplorerPawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > 
 
 	// Replicate to everyone
 	DOREPLIFETIME(ASpaceExplorerPawn, m_inventoryObjects);
+
+	DOREPLIFETIME(ASpaceExplorerPawn, m_hotbarObjects);
 }
 
 
@@ -94,6 +96,15 @@ void ASpaceExplorerPawn::BeginPlay()
 			invObject->m_inventorySlots.SetNum(invObject->m_nInvHeightCount * invObject->m_nInvWidthCount);
 			m_inventoryObjects.Add(invObject);
 		}
+
+		m_hotbarObjects = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
+
+		if (m_hotbarObjects)
+		{
+			m_hotbarObjects->m_nInvHeightCount = 1;
+			m_hotbarObjects->m_nInvWidthCount = 5;
+			m_hotbarObjects->m_inventorySlots.SetNum(m_hotbarObjects->m_nInvHeightCount * m_hotbarObjects->m_nInvWidthCount);
+		}		
 	}
 
 }
@@ -499,4 +510,9 @@ bool ASpaceExplorerPawn::AddItem(AUsableObject * pItem)
 
 	// did not find any suitable inventory space
 	return false;
+}
+
+AInventoryObject * ASpaceExplorerPawn::GetHotbarObjects()
+{
+	return m_hotbarObjects;
 }

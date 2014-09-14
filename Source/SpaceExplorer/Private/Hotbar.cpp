@@ -2,6 +2,7 @@
 
 #include "SpaceExplorer.h"
 #include "CustomHUD.h"
+#include "InventoryObject.h"
 #include "Hotbar.h"
 
 AHotbar::AHotbar(const class FPostConstructInitializeProperties& PCIP)
@@ -33,13 +34,16 @@ AHotbar::AHotbar(const class FPostConstructInitializeProperties& PCIP)
 	m_font = HUDHotbarFontOb.Object;
 
 	m_nHotbarHoverIndex = -1;
+
+	m_pHotbarObjects = NULL;
 }
 
-void AHotbar::Init(ACustomHUD * pHUD, float fTextScale, float fSlotSize)
+void AHotbar::Init(ACustomHUD * pHUD, float fTextScale, float fSlotSize, AInventoryObject* pHotbarObjects)
 {
 	m_pHUD = pHUD;
 	m_fHotbarSlotSize = fSlotSize;
 	m_fTextScale = fTextScale;
+	m_pHotbarObjects = pHotbarObjects;
 }
 
 bool AHotbar::IsHotbarVisible()
@@ -137,14 +141,50 @@ FVector2D AHotbar::GetStartPos()
 
 bool AHotbar::ItemDrag(bool bPickup)
 {
-	if (!m_bShowHotbar)
+	if (!bPickup)
+	{
+		// TODO: this needs to be changed to store it in CustomHUD and so check across all inventories and hotbar, but for now...
+		if (m_nDraggingItemIndex >= 0)
+		{
+			if (m_pInventory == NULL || m_nHoverIndex < 0 || m_nDraggingItemIndex == m_nHoverIndex)
+			{
+				// it was us... but do nothing except drop item being dragged
+				m_nDraggingItemIndex = -1;
+				return true;
+			}
+
+			// move to new index
+
+			// TODO: this needs to replicate to/from server...
+			// also the move will get trickier when not same inventory/hotbar, probably retrieve and then add
+			m_pInventory->MoveItem(m_nDraggingItemIndex, m_nHoverIndex, true);
+
+
+			// drop item being dragged
+			m_nDraggingItemIndex = -1;
+			return true;
+		}
+
+		// not us...
+		return false;
+	}
+
+	if (!m_bShowHotbar || m_nHoverIndex < 0)
 	{
 		return false;
 	}
 
-	// TODO: implement
+	// we have a hover index, so now we just need to check if slot has an item
+	if (!m_pInventory->HasItem(m_nHoverIndex))
+	{
+		// no item (or potentially out-of-bounds)
+		return false;
+	}
 
-	return false;
+	// start "dragging" item - which simply means tracking which item we were hovering over when drag started
+	m_nDraggingItemIndex = m_nHoverIndex;
+
+	return true;
 }
 
 bool AHotbar::CheckMouseOver(const FName BoxName, bool bBegin)
@@ -178,4 +218,7 @@ bool AHotbar::CheckMouseOver(const FName BoxName, bool bBegin)
 	return false;
 }
 
-
+void AHotbar::LinkHotbar(AInventoryObject* pHotbarObjects)
+{
+	m_pHotbarObjects = pHotbarObjects;
+}

@@ -95,6 +95,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItem(AUsableObject * pItem);
 
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	AInventoryObject * GetHotbarObjects();
+
 private:
 	// Begin APawn overrides
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
@@ -152,4 +155,7 @@ private:
 	/* array of all inventory containers */
 	UPROPERTY(Replicated)
 	TArray<AInventoryObject*> m_inventoryObjects;
+
+	UPROPERTY(Replicated)
+	AInventoryObject* m_hotbarObjects;
 };
