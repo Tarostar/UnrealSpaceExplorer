@@ -311,7 +311,6 @@ void ACustomHUD::ToggleAllInventory()
 		{
 			// TODO: this is a bit manual and clunky
 			m_inventories[i]->CloseInventory();
-			delete m_inventories[i];
 		}
 
 		m_inventories.Empty();
@@ -359,7 +358,6 @@ void ACustomHUD::ToggleInventory(int32 nID)
 		{
 			// found - close
 			m_inventories[i]->CloseInventory();
-			delete m_inventories[i];
 			m_inventories.RemoveAt(i);
 			return;
 		}
