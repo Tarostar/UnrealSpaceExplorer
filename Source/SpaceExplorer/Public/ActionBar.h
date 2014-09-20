@@ -43,10 +43,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
 	UTexture *m_textureSelected;
 
-	bool SetSlotAction(int32 nIndex, const class DragObject& object);
+	bool SetSlotAction(int32 nIndex, class DragObject& object);
 
 	UFUNCTION(BlueprintCallable, Category = HUD_ActionBar)
 	void DisableSlot(int32 nIndex);
+
+	UFUNCTION(BlueprintCallable, Category = HUD_ActionBar)
+	bool InvokeAction();
 
 	/* Access to m_bShowActionBar */
 	bool IsVisible();
@@ -66,14 +69,10 @@ public:
 	/* Get upper, left position of action bar (used to position other HUD elements relative to action bar) */
 	FVector2D GetStartPos();
 
-	bool DragDrop(bool bPickup, const class DragObject& item);
+	bool DragDrop(bool bPickup, class DragObject& item);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
 private:
-	// number of action bar slots
-	UPROPERTY()
-	int32 m_nSlotCount;
-
 	// flag whether action bar is shown
 	UPROPERTY()
 	bool m_bShowActionBar;
@@ -87,7 +86,7 @@ private:
 	float m_fSlotSize;
 
 	// upper, left coordinate of each action bar hitbox (one for each action bar slot)
-	UPROPERTY()
+	//UPROPERTY()
 	TArray<FActionStruct> m_actionSlots;
 
 	// font of action bar text

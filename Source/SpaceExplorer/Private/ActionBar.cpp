@@ -3,17 +3,17 @@
 #include "ActionBar.h"
 #include "CustomHUD.h"
 #include "DragObject.h"
+#include "InventoryObject.h"
 
 AActionBar::AActionBar(const class FPostConstructInitializeProperties& PCIP)
 : Super(PCIP)
 {
 	m_bShowActionBar = true;
-	m_nSlotCount = 5;
 	m_pHUD = NULL;
 
 	m_fSlotSize = 128.f;
 
-	m_actionSlots.SetNum(m_nSlotCount);
+	m_actionSlots.SetNum(5);
 
 	// default HUD green
 	m_textColour = FLinearColor(0.391f, 0.735f, 0.213f);
@@ -49,13 +49,13 @@ bool AActionBar::IsVisible()
 
 void AActionBar::Draw()
 {
-	if (!m_bShowActionBar || m_actionSlots.Num() != m_nSlotCount)
+	if (!m_bShowActionBar)
 	{
 		return;
 	}
 
 	int i;
-	for (i = 0; i < m_nSlotCount; i++)
+	for (i = 0; i < m_actionSlots.Num(); i++)
 	{
 		// hitbox
 		FString name = TEXT("H") + FString::FromInt(i);
@@ -81,13 +81,28 @@ void AActionBar::Draw()
 		{
 			m_pHUD->DrawText(FString::FromInt(i + 1), *textColour, m_actionSlots[i].m_hitBoxPosition.X + 5.0f, m_actionSlots[i].m_hitBoxPosition.Y, m_font, m_fTextScale);
 		}
+
+		if (m_actionSlots[i].m_object.GetInventoryID() >= 0)
+		{
+			// first retrieve it
+			AInventoryObject* const pSourceInventory = m_pHUD->GetSourceInventoryObjectFromID(m_actionSlots[i].m_object.GetInventoryID());
+			if (pSourceInventory)
+			{
+
+				AUsableObject * pItem = pSourceInventory->GetItem(m_actionSlots[i].m_object.GetSlotIndex());
+				if (pItem)
+				{
+					m_pHUD->DrawTextureSimple(pItem->m_inventoryTexture, m_actionSlots[i].m_hitBoxPosition.X, m_actionSlots[i].m_hitBoxPosition.Y, m_pHUD->GetCurrentRatio());
+				}
+			}
+		}
+		
 	}
 }
 
 void AActionBar::SetSlotCount(int32 nCount)
 {
-	m_nSlotCount = nCount;
-	m_actionSlots.SetNum(m_nSlotCount);
+	m_actionSlots.SetNum(nCount);
 
 	UpdatePositions();
 }
@@ -106,7 +121,7 @@ void AActionBar::SetStartPosition()
 	}
 
 	// size of entire AActionBar
-	float fSize = m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nSlotCount;
+	float fSize = m_fSlotSize * m_pHUD->GetCurrentRatio() * m_actionSlots.Num();
 
 	// start (upper, left corner) of vertical action bar (multiply by 1.5 to get a bit of margin)
 	m_vStartPos = FVector2D(m_pHUD->VScreenDimensions.X / 2.3f - fSize / 2, m_pHUD->VScreenDimensions.Y - m_fSlotSize * 1.5f * m_pHUD->GetCurrentRatio());
@@ -135,51 +150,47 @@ FVector2D AActionBar::GetStartPos()
 	return m_vStartPos;
 }
 
-bool AActionBar::DragDrop(bool bPickup, const class DragObject& item)
+bool AActionBar::DragDrop(bool bPickup, class DragObject& item)
 {
-	/*if (!bPickup)
+	if (!bPickup)
 	{
-		if (m_nDraggingItemIndex >= 0)
-		{
-			if (m_pInventory == NULL || m_nHoverIndex < 0 || m_nDraggingItemIndex == m_nHoverIndex)
+		if (item.IsDragging())
+		{	
+			// item is being dragged
+
+			if (m_nHoverIndex < 0)
 			{
-				// it was us... but do nothing except drop item being dragged
-				m_nDraggingItemIndex = -1;
-				return true;
+				// item is not being dropped into this action bar
+				return false;
 			}
 
-			// move to new index
+			// item being dragged from an inventory
 
-			// TODO: this needs to replicate to/from server...
-			// also the move will get trickier when not same inventory, probably retrieve and then add
-			m_pInventory->MoveItem(m_nDraggingItemIndex, m_nHoverIndex, true);
+			// TODO: does this need to replicate to/from server...
 
-
-			// drop item being dragged
-			m_nDraggingItemIndex = -1;
+			// add to action bar
+			SetSlotAction(m_nHoverIndex, item);			
+			item.Drop();
 			return true;
 		}
-
-		// not us...
+		
+		// nothing to do...
 		return false;
 	}
 
 	if (!m_bShowActionBar || m_nHoverIndex < 0)
 	{
+		// not this action bar
 		return false;
 	}
 
-	// we have a hover index, so now we just need to check if slot has an item
-	if (!m_pInventory->HasItem(m_nHoverIndex))
-	{
-		// no item (or potentially out-of-bounds)
-		return false;
-	}
+	// set dragged item to this one
+	item = m_actionSlots[m_nHoverIndex].m_object;
 
-	// start "dragging" item - which simply means tracking which item we were hovering over when drag started
-	m_nDraggingItemIndex = m_nHoverIndex;*/
+	// remove action from slot
+	DisableSlot(m_nHoverIndex);
 
-	return false;
+	return true;
 }
 
 bool AActionBar::CheckMouseOver(const FName BoxName, bool bBegin)
@@ -212,7 +223,7 @@ bool AActionBar::CheckMouseOver(const FName BoxName, bool bBegin)
 	return false;
 }
 
-bool AActionBar::SetSlotAction(int32 nIndex, const class DragObject& object)
+bool AActionBar::SetSlotAction(int32 nIndex, class DragObject& object)
 {
 	if (nIndex < 0 || nIndex >= m_actionSlots.Num())
 	{
@@ -234,4 +245,18 @@ void AActionBar::DisableSlot(int32 nIndex)
 	}
 
 	m_actionSlots[nIndex].m_object.Drop();
+}
+
+bool AActionBar::InvokeAction()
+{
+	if (!m_bShowActionBar || m_nHoverIndex < 0)
+	{
+		// not this action bar
+		return false;
+	}
+
+	// set dragged item to this one
+	m_actionSlots[m_nHoverIndex].m_object.InvokeAction();
+
+	return true;
 }

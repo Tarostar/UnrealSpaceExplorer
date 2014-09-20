@@ -26,33 +26,47 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
 	TArray<AUsableObject*> m_inventorySlots;
 
+	/* Initialise inventory with ID and number of slots wide and high*/
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void Init(int32 id, int32 nWidth, int32 nHeight);
 
+	/* Add item to first available slot */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItemFirstAvailableSlot(AUsableObject* pItem);
 
+	/* Add item to specified index if fits - otherwise return false*/
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItem(int32 nIndex, AUsableObject* pItem);
 
+	/* insert item in target index if fits and return any item which was there - otherwise return false*/
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject * ReplaceItem(int32 nIndex, AUsableObject* pItem);
+	AUsableObject* ReplaceItem(int32 nIndex, AUsableObject* pItem);
 
+	/* check if slot has an item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool HasItem(int32 nIndex);
 	
+	/* remove and return item from inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject * RetrieveItem(int32 nIndex);
+	AUsableObject* RetrieveItem(int32 nIndex);
 
+	/* make a copy of item from inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject * CloneItem(int32 nIndex);
+	AUsableObject* CloneItem(int32 nIndex);
 
+	/* get a pointer to item in inventory */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	AUsableObject* GetItem(int32 nIndex);
+
+	/* move item from one slot position to another (if fits) - also move target item if swapping (and fits), if not swapping delete any item at target index */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool MoveItem(int32 nFrom, int32 nTo, bool bSwap = true);
 
+	/* remove item at target index */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool DestroyItem(int32 nIndex);
 
+	/* get unique ID for inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	int32 GetID();
 

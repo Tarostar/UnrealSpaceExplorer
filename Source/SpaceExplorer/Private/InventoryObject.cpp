@@ -53,7 +53,7 @@ bool AInventoryObject::AddItem(int32 nIndex, AUsableObject* pItem)
 	return false;
 }
 
-AUsableObject * AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem)
+AUsableObject* AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem)
 {
 	// retrieve any item in target slot which will set the slots to NULL
 	AUsableObject * pTargetItem = RetrieveItem(nIndex);
@@ -91,7 +91,7 @@ bool AInventoryObject::HasItem(int32 nIndex)
 	return true;
 }
 
-AUsableObject * AInventoryObject::RetrieveItem(int32 nIndex)
+AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex)
 {
 	int32 nUpperLeft;
 	if (!GetUpperLeft(nIndex, nUpperLeft))
@@ -124,7 +124,7 @@ AUsableObject * AInventoryObject::RetrieveItem(int32 nIndex)
 	return pItem;
 }
 
-AUsableObject * AInventoryObject::CloneItem(int32 nIndex)
+AUsableObject* AInventoryObject::CloneItem(int32 nIndex)
 {
 	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
 	{
@@ -134,6 +134,19 @@ AUsableObject * AInventoryObject::CloneItem(int32 nIndex)
 
 	// create a copy and return it
 	return new AUsableObject(*m_inventorySlots[nIndex]);
+
+}
+
+AUsableObject* AInventoryObject::GetItem(int32 nIndex)
+{
+	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	{
+		// invalid index
+		return false;
+	}
+
+	// return pointer
+	return m_inventorySlots[nIndex];
 
 }
 

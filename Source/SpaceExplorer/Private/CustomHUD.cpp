@@ -186,7 +186,13 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 
 	if (m_actionBar)
 	{
-		if (m_actionBar->DragDrop(true, m_draggedItem))
+		/*if (m_actionBar->DragDrop(true, m_draggedItem))
+		{
+			return;
+		}*/
+
+		// for action bar a click should invoke an action
+		if (m_actionBar->InvokeAction())
 		{
 			return;
 		}
@@ -454,7 +460,7 @@ AInventoryObject* ACustomHUD::GetSourceInventoryObjectFromID(int32 nID)
 	ASpaceExplorerPawn* const pPawn = GetSpaceExplorerPawn();
 	if (pPawn)
 	{
-		return pPawn->GetInventoryObjectFromID(m_draggedItem.GetInventoryID());
+		return pPawn->GetInventoryObjectFromID(nID);
 	}
 
 	return NULL;

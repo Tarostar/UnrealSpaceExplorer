@@ -14,8 +14,7 @@ public:
 	~DragObject();
 
 	// start dragging
-	void Init(const FString& label, const EActionType::Type& type, const int32& nInventoryID, const int32& nSlotIndex);
-
+	void Init(const FString& label, const EActionType::Type& type, const int32& nInventoryID, const int32& nSlotIndex, bool bDragging = true);
 	// stop dragging
 	void Drop();
 	
@@ -25,6 +24,8 @@ public:
 	EActionType::Type GetType();
 	int32 GetSlotIndex();
 	int32 GetInventoryID();
+
+	bool InvokeAction();
 
 private:
 	bool m_bDragging;
