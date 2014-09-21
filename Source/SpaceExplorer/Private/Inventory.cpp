@@ -100,8 +100,9 @@ void AInventory::DrawInventory()
 		return;
 	}
 
+	// loop backwards so "slot-boxes" are drawn behind large items spanning several slots
 	int i;
-	for (i = 0; i < m_vaInvHitBoxPositions.Num(); i++)
+	for (i = m_vaInvHitBoxPositions.Num() - 1; i >= 0; i--)
 	{
 		// hitbox
 		FString name = FString::FromInt(m_pInventory->GetID()) + TEXT("_") + FString::FromInt(i);
