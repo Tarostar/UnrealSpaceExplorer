@@ -519,26 +519,21 @@ bool ACustomHUD::Interact()
 	return false;
 }
 
-bool ACustomHUD::LMBRelease()
+bool ACustomHUD::LMBPressed()
 {
-	if (m_actionBar)
+	if (IsHoveringOverHitbox())
 	{
-		// for action bar a click should invoke an action
-		if (m_actionBar->LMBRelease())
-		{
-			return true;
-		}
+		return true;
 	}
 
-	for (int i = 0; i < m_inventories.Num(); i++)
+	return false;
+}
+
+bool ACustomHUD::LMBRelease()
+{
+	if (IsHoveringOverHitbox())
 	{
-		if (m_inventories[i])
-		{
-			if (m_inventories[i]->LMBRelease())
-			{
-				return true;
-			}
-		}
+		return true;
 	}
 
 	// button released outside hitboxes - drop any dragged item
@@ -557,6 +552,31 @@ bool ACustomHUD::LMBRelease()
 
 		// stop dragging item
 		m_draggedItem.Drop();
+	}
+
+	return false;
+}
+
+bool ACustomHUD::IsHoveringOverHitbox()
+{
+	if (m_actionBar)
+	{
+		// for action bar a click should invoke an action
+		if (m_actionBar->ActiveHitbox())
+		{
+			return true;
+		}
+	}
+
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i])
+		{
+			if (m_inventories[i]->ActiveHitbox())
+			{
+				return true;
+			}
+		}
 	}
 
 	return false;

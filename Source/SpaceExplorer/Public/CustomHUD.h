@@ -96,6 +96,7 @@ public:
 
 	/* right mouse button released */
 	bool LMBRelease();
+	bool LMBPressed();
 
 	/* pass right click event to HUD so that for example things can be removed from action bar */
 	void Delete();
@@ -129,4 +130,6 @@ private:
 
 	void DrawDraggedItem();
 	ASpaceExplorerPawn* GetSpaceExplorerPawn();
+
+	bool IsHoveringOverHitbox();
 };

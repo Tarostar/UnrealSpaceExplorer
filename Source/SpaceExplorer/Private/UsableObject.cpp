@@ -55,6 +55,7 @@ void AUsableObject::Collect(AActor * pNewOwner)
 	{
 		// https://docs.unrealengine.com/latest/INT/Programming/UnrealArchitecture/Actors/Components/index.html
 
+		// TODO: seems this returns nullptr... so it has no world owner? Need to learn more about owner
 		m_worldOwner = GetOwner();
 		SetOwner(pNewOwner);
 		m_mesh->UnregisterComponent(); // this should hide mesh - otherwise might try DestroyComponent
@@ -65,25 +66,31 @@ void AUsableObject::Drop()
 {
 	// put item back into world (register component and set location in world)
 
-	// TODO: transform?
-
 	if (m_mesh)
 	{
 		// https://docs.unrealengine.com/latest/INT/Programming/UnrealArchitecture/Actors/Components/index.html
 
-		m_mesh->RegisterComponent();
+		// get item owner (should be player)
+		AActor* owner = GetOwner();
+
+		if (owner)
+		{
+			// TODO: this is just a quick and dirty method to set a transform/location - needs work
+			FTransform transform = owner->GetTransform();
+			FVector vector = transform.GetTranslation();
+			vector.Z += 10.f;
+			transform.SetTranslation(vector);
+			SetActorTransform(transform);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("no world owner."));
+		}
 
 		// TODO: this variable is just temporary until I can figure out how to set it back to correct "world owner"
 		SetOwner(m_worldOwner);
 
-		// TODO: this causes crashing so need to rework...
-
-		// TODO: this is just a quick and dirty method to set a transform/location - needs work
-		/*FTransform transform = m_worldOwner->GetTransform();
-		FVector vector = transform.GetTranslation();
-		vector.Z += 10.f;
-		transform.SetTranslation(vector);
-		SetActorTransform(transform);*/
+		m_mesh->RegisterComponent();
 	}
 }
 
@@ -97,6 +104,7 @@ bool AUsableObject::InvokeAction()
 {
 	// this should most likely be just a baseclass placeholder and then children of usable object implement the actual action invoked
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Action invoked on usable object."));
+
 	return true;
 }
 

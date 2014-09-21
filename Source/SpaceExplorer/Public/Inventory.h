@@ -47,7 +47,7 @@ public:
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
 	bool InvokeAction();
-	bool LMBRelease();
+	bool ActiveHitbox();
 
 private:
 	UPROPERTY()

@@ -419,7 +419,7 @@ void ASpaceExplorerPawn::MoveRightInput(float Val)
 /*
 Performs raytrace to find closest looked-at UsableObject.
 */
-AUsableObject* ASpaceExplorerPawn::GetUsableInView()
+/*AUsableObject* ASpaceExplorerPawn::GetUsableInView()
 {
 	
 	FVector camLoc;
@@ -444,11 +444,10 @@ AUsableObject* ASpaceExplorerPawn::GetUsableInView()
 	return Cast<AUsableObject>(Hit.GetActor());
 }
 
-/*
-Runs on Server. Perform "OnUsed" on currently viewed UsableObject if implemented.
-*/
 void ASpaceExplorerPawn::Use_Implementation()
 {
+	// enable “replicates” property in your Blueprint.
+
 	AUsableObject* usable = GetUsableInView();
 	if (usable)
 	{
@@ -460,7 +459,7 @@ bool ASpaceExplorerPawn::Use_Validate()
 {
 	// No special server-side validation performed.
 	return true;
-}
+}*/
 
 void ASpaceExplorerPawn::ToggleAllInventory()
 {
@@ -634,30 +633,40 @@ void ASpaceExplorerPawn::InvokeAction(class DragObject& item)
 {
 	switch (item.GetType())
 	{
-		case EActionType::Use: UseItem(item);
+		case EActionType::Use: UseItem(item.GetInventoryID(), item.GetSlotIndex());
 			return;
 		case EActionType::Attack: Fire();
 			return;
 	}
 }
 
-void ASpaceExplorerPawn::UseItem(class DragObject& item)
+void ASpaceExplorerPawn::UseItem_Implementation(int32 nInventoryID, int32 nSlotIndex)
 {
-	// TODO: because of server replication implementation should use virtual void Use() function
+	// TODO: does this work in multiplayer
 
-	AInventoryObject* pInventoryObject = GetInventoryObjectFromID(item.GetInventoryID());
+	// enable “replicates” property in blueprints.
+
+	AInventoryObject* pInventoryObject = GetInventoryObjectFromID(nInventoryID);
 	if (pInventoryObject == nullptr)
 	{
 		return;
 	}
 
-	AUsableObject* pObject = pInventoryObject->GetItem(item.GetSlotIndex());
+	AUsableObject* pObject = pInventoryObject->GetItem(nSlotIndex);
 	if (pObject == nullptr)
 	{
 		return;
 	}
 
 	pObject->InvokeAction();
+
+	pObject->OnUsed(this);
+}
+
+bool ASpaceExplorerPawn::UseItem_Validate(int32 nInventoryID, int32 nSlotIndex)
+{
+	// No special server-side validation performed.
+	return true;
 }
 
 void ASpaceExplorerPawn::Interact()
@@ -686,26 +695,40 @@ void ASpaceExplorerPawn::Interact()
 
 void ASpaceExplorerPawn::LMBPressed()
 {
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (pc)
+	{
+		ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+		if (pHUD)
+		{
+			if (pHUD->LMBPressed())
+			{
+				// interacted with HUD item
+				return;
+			}
+		}
+	}
+
+	// interact with world
+
 	Fire();
 }
 
 void ASpaceExplorerPawn::LMBRelease()
 {
 	APlayerController* pc = Cast<APlayerController>(Controller);
-	if (pc == nullptr)
+	if (pc)
 	{
-		return;
-	}
-
-	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
-	if (pHUD)
-	{
-		if (pHUD->LMBRelease())
+		ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+		if (pHUD)
 		{
-			// interacted with HUD item
-			return;
+			if (pHUD->LMBRelease())
+			{
+				// interacted with HUD item
+				return;
+			}
 		}
 	}
 
-	// interact with world?
+	// interact with world
 }

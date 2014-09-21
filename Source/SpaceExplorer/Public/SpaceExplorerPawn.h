@@ -11,9 +11,8 @@ class ASpaceExplorerPawn : public APawn
 public:
 	GENERATED_UCLASS_BODY()
 
-	/** Use the actor currently in view (if derived from UsableObject) */
-	UFUNCTION(BlueprintCallable, WithValidation, Server, Reliable, Category = PlayerAbility)
-	virtual void Use();
+	//UFUNCTION(BlueprintCallable, WithValidation, Server, Reliable, Category = PlayerAbility)
+	//virtual void Use();
 
 public:
 	/** StaticMesh component that will be the visuals for our flying pawn */
@@ -103,6 +102,10 @@ public:
 	/* invoke an action */
 	void InvokeAction(class DragObject& item);
 
+	/* Runs on Server. Perform "OnUsed" on currently viewed UsableObject if implemented. */
+	UFUNCTION(BlueprintCallable, WithValidation, Server, Reliable, Category = Inventory)
+	virtual void UseItem(int32 nInventoryID, int32 nSlotIndex);
+
 private:
 	// Begin APawn overrides
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
@@ -140,7 +143,6 @@ private:
 	void ZoomIn();
 	void ZoomOut();
 	void ToggleFirstPerson();
-	void UseItem(class DragObject& item);
 
 	void Fire();
 	void LMBPressed();

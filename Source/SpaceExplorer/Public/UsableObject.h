@@ -77,7 +77,7 @@ public:
 
 private:
 	// TODO: this is just temporary until I figure out how to set a world owner when item dropped
-	AActor * m_worldOwner;
+	AActor* m_worldOwner;
 
 	// TODO: do we want to use a unique identifier for items or can we rely on pointer address to uniquely identify (i.e. separate) item instances... needs research
 	// int32 m_ID;

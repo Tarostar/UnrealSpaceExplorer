@@ -51,7 +51,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = HUD_ActionBar)
 	bool InvokeAction();
 
-	bool LMBRelease();
+	bool ActiveHitbox();
 
 	/* Access to m_bShowActionBar */
 	bool IsVisible();

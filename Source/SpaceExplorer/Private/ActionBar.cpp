@@ -260,14 +260,14 @@ bool AActionBar::InvokeAction()
 	return true;
 }
 
-bool AActionBar::LMBRelease()
+bool AActionBar::ActiveHitbox()
 {
-	if (!m_bShowActionBar || m_nHoverIndex < 0 || !m_pHUD)
+	if (!m_bShowActionBar || !m_pHUD)
 	{
 		// not this action bar - or HUD not set (HUD should always be set)
 		return false;
 	}
 
 	// do nothing, but confirm within hitbox
-	return true;
+	return m_nHoverIndex >= 0;
 }

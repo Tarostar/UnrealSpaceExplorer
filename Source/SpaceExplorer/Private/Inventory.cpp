@@ -408,14 +408,14 @@ bool AInventory::InvokeAction()
 	return true;
 }
 
-bool AInventory::LMBRelease()
+bool AInventory::ActiveHitbox()
 {
-	if (!m_bInvOpen || m_nHoverIndex < 0 || !m_pHUD || !m_pInventory)
+	if (!m_bInvOpen || !m_pHUD || !m_pInventory)
 	{
 		// not me (or invalid pointer)
 		return false;
 	}
 
 	// do nothing, but confirm within hitbox
-	return true;
+	return m_nHoverIndex >= 0;
 }
