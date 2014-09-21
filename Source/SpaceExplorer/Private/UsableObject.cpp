@@ -12,6 +12,9 @@ AUsableObject::AUsableObject(const class FPostConstructInitializeProperties& PCI
 	m_nInvHeight = 1;
 	m_bIsStackable = false;
 	m_nCount = 1;
+
+	// ideally this should generate a unique identifier
+	// m_ID = -1;
 	
 	// TODO: proper default texture
 	static ConstructorHelpers::FObjectFinder<UTexture2D> ItemTextureSelOb(TEXT("/Game/Textures/redThing_128_transparent"));
@@ -94,3 +97,12 @@ bool AUsableObject::InvokeAction()
 	return true;
 }
 
+int32 AUsableObject::GetItemWidth()
+{
+	return m_nInvWidth;
+}
+
+int32 AUsableObject::GetItemHeight()
+{
+	return m_nInvHeight;
+}

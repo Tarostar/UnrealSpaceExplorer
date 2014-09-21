@@ -56,7 +56,8 @@ bool AInventoryObject::AddItem(int32 nIndex, AUsableObject* pItem)
 AUsableObject* AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem)
 {
 	// retrieve any item in target slot which will set the slots to nullptr
-	AUsableObject * pTargetItem = RetrieveItem(nIndex);
+	int32 nUpperLeft;
+	AUsableObject * pTargetItem = RetrieveItem(nIndex, nUpperLeft);
 	
 	// insert new item
 	if (!AddItem(nIndex, pItem))
@@ -65,7 +66,7 @@ AUsableObject* AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem)
 		if (pTargetItem != nullptr)
 		{
 			// we have target item - return to original position
-			AddItem(nIndex, pTargetItem);
+			AddItem(nUpperLeft, pTargetItem);
 		}
 
 		return nullptr;
@@ -94,11 +95,18 @@ bool AInventoryObject::HasItem(int32 nIndex)
 AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex)
 {
 	int32 nUpperLeft;
+	return RetrieveItem(nIndex, nUpperLeft);
+}
+
+AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex, int32& nUpperLeft)
+{
 	if (!GetUpperLeft(nIndex, nUpperLeft))
 	{
 		// no item selected (or invalid index)
 		return nullptr;
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, TEXT("RetrieveItem - Upper Left: ") + FString::FromInt(nUpperLeft));
 
 	AUsableObject * pItem = m_inventorySlots[nUpperLeft];
 	for (int nRow = 0; nRow < pItem->m_nInvHeight; nRow++)
@@ -152,52 +160,78 @@ AUsableObject* AInventoryObject::GetItem(int32 nIndex)
 
 bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("MoveItem; From: ") + FString::FromInt(nFrom) + TEXT(" To: ") + FString::FromInt(nTo));
+
 	// retrieve item which will set the slots to nullptr
-	AUsableObject * pSourceItem = RetrieveItem(nFrom);
+	int32 nFromUpperLeft;
+	AUsableObject * pSourceItem = RetrieveItem(nFrom, nFromUpperLeft);
 	if (pSourceItem == nullptr)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("No source item found!"));
+
 		// no item found
 		return false;
 	}
 
 	// retrieve any item in target slot which will set the slots to nullptr
-	AUsableObject * pTargetItem = RetrieveItem(nTo);
+	int32 nToUpperLeft;
+	AUsableObject * pTargetItem = RetrieveItem(nTo, nToUpperLeft);
 	if (bSwap && pTargetItem != nullptr)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, TEXT("Swap"));
+
 		// put target item in source item position
-		if (!AddItem(nFrom, pTargetItem))
+		if (!AddItem(nFromUpperLeft, pTargetItem))
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Failed adding item to: ") + FString::FromInt(nFrom));
+
 			// failed, just put source and target items back
-			AddItem(nTo, pTargetItem);
-			AddItem(nFrom, pSourceItem);
+			if (!AddItem(nToUpperLeft, pTargetItem))
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Could not return target item: ") + FString::FromInt(nTo));
+
+			if (!AddItem(nFromUpperLeft, pSourceItem))
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Could not return target source item: ") + FString::FromInt(nFrom));
+
 			return false;
 		}
 	}
 
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("Move source item to: ") + FString::FromInt(nTo));
+
 	// now move source item
 	if (!AddItem(nTo, pSourceItem))
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("failed to put source item into target position!"));
+
 		// failed to put source item into target position
 		if (pTargetItem != nullptr)
 		{
 			// we have target item
 			if (bSwap)
 			{
-				// abort move
-				RetrieveItem(nFrom);
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, TEXT("Swap, so abort target item move!"));
+
+				// retrieve target item (we already have a pointer to it)
+				RetrieveItem(nFromUpperLeft);
 			}
+
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, TEXT("Return target item to its original position"));
+
 			// return target item to original position
-			AddItem(nTo, pTargetItem);
+			AddItem(nToUpperLeft, pTargetItem);
 		}
 		
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, TEXT("Return source item to its original position"));
+
 		// return source item to original position
-		AddItem(nFrom, pSourceItem);
+		AddItem(nFromUpperLeft, pSourceItem);
 		return false;
 	}
 
 	// successfully moved source item
 	if (!bSwap && pTargetItem != nullptr)
 	{
+		// TODO: do we actually delete it - or should we not just let the Unreal garbage collector deal with this?
 		// did not swap, so delete target item
 		delete pTargetItem;
 	}
@@ -216,6 +250,7 @@ bool AInventoryObject::DestroyItem(int32 nIndex)
 	}
 
 	// now delete the item
+	// TODO: do we actually delete it - or should we not just let the Unreal garbage collector deal with this?
 	delete pItem;
 	return true;
 }
@@ -251,14 +286,18 @@ bool AInventoryObject::GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex)
 	{
 		// go left
 		nUpperLeftIndex--;
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("Go left to: ") + FString::FromInt(nUpperLeftIndex));
 	}
 
 	// we know we are in leftmost column, so go up rows (if item spans several rows)
-	int nRow = nIndex / m_nInvWidthCount;
-	while (nUpperLeftIndex - m_nInvWidthCount > 0 && pItem->m_nInvHeight > 1 && m_inventorySlots[nUpperLeftIndex - m_nInvWidthCount] == pItem)
+	//int nRow = nIndex / m_nInvWidthCount;
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("m_nInvWidthCount: ") + FString::FromInt(m_nInvWidthCount));
+	
+	while (nUpperLeftIndex - m_nInvWidthCount >= 0 && pItem->m_nInvHeight > 1 && m_inventorySlots[nUpperLeftIndex - m_nInvWidthCount] == pItem)
 	{
 		// go up one row
 		nUpperLeftIndex -= m_nInvWidthCount;
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("Go up to: ") + FString::FromInt(nUpperLeftIndex));
 	}
 
 	return true;

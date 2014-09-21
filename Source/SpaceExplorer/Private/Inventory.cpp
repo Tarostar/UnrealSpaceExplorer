@@ -130,8 +130,23 @@ void AInventory::DrawInventory()
 				continue;
 			}
 
-			// TODO: review and scale of item texture should match without the hardcoded scaling....
-			m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
+			// check if item spans multiple slots and scale accordingly
+			if (m_pInventory->m_inventorySlots[i]->GetItemWidth() > 1 || m_pInventory->m_inventorySlots[i]->GetItemHeight() > 1)
+			{
+				// only draw for the upper, left index
+				int32 nUpperLeftIndex;
+				m_pInventory->GetUpperLeft(i, nUpperLeftIndex);
+				if (nUpperLeftIndex == i)
+				{
+					// TODO: this only handles square objects - but just temporary as this should be done with texture sizes instead
+					m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio() * m_pInventory->m_inventorySlots[i]->GetItemWidth());
+				}
+			}
+			else
+			{
+				// TODO: review and scale of item texture should match without the hardcoded scaling....
+				m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
+			}
 		}
 	}
 }

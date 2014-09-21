@@ -3,6 +3,8 @@
 #include "SpaceExplorer.h"
 #include "SpaceExplorerGameMode.h"
 #include "SpaceExplorerPawn.h"
+//#include "ItemFactory.h";
+// #include "UsableObject.h"
 #include "SpaceHUD.h"
 
 ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitializeProperties& PCIP)
@@ -25,6 +27,8 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 	{
 		HUDClass = (UClass*)TheHUDOb.Object->GeneratedClass;
 	}
+
+	// m_nNextObjectID = 0;
 }
 
 void ASpaceExplorerGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -36,5 +40,43 @@ void ASpaceExplorerGameMode::InitGame(const FString& MapName, const FString& Opt
 		// remove pause text
 		GEngine->GameViewport->SetSuppressTransitionMessage(true);
 	}
+
+	//m_itemFactory.Init();
 }
 
+// TODO: review
+/*
+AUsableObject* ASpaceExplorerGameMode::CreateItem()
+{
+	UWorld* const World = GetWorld();
+	if (World)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = Instigator;
+
+		AUsableObject * object = World->SpawnActor<AUsableObject>(AUsableObject::StaticClass());
+
+		if (object)
+		{
+			object->Init(AssignUniqueObjectID(), 5, 5);
+			invObject->m_inventorySlots.SetNum(invObject->m_nInvHeightCount * invObject->m_nInvWidthCount);
+			m_inventoryObjects.Add(invObject);
+		}
+
+		AInventoryObject * invObject2 = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
+
+		if (invObject2)
+		{
+			invObject2->Init(AssignUniqueInventoryID(), 10, 2);
+			invObject2->m_inventorySlots.SetNum(invObject2->m_nInvHeightCount * invObject2->m_nInvWidthCount);
+			m_inventoryObjects.Add(invObject2);
+		}
+	}
+}
+
+int32 ASpaceExplorerGameMode::AssignUniqueObjectID()
+{
+	// return next object ID and then increment it
+	return m_nNextObjectID++;
+}*/

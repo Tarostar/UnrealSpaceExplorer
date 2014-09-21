@@ -46,8 +46,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool HasItem(int32 nIndex);
 	
-	/* remove and return item from inventory */
+	/* remove and return item from inventory, and update index to point to upper, left corner of any object spanning multiple slots*/
 	UFUNCTION(BlueprintCallable, Category = Inventory)
+	AUsableObject* RetrieveItem(int32 nIndex, int32& nUpperLeft);
+
+	// UFUNCTION(BlueprintCallable, Category = Inventory)
 	AUsableObject* RetrieveItem(int32 nIndex);
 
 	/* make a copy of item from inventory */
@@ -70,11 +73,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	int32 GetID();
 
+	// start at index and find upper, left index
+	// if found return true and upperLeft index
+	bool GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex);
+
 private:
 	// unique ID
 	int32 m_ID;
 
-	bool GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex);
 	bool CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth);
 	bool InsertItem(int32 nIndex, AUsableObject* pItem);
 };
