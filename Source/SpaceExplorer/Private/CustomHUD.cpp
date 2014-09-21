@@ -542,7 +542,22 @@ bool ACustomHUD::LMBRelease()
 	}
 
 	// button released outside hitboxes - drop any dragged item
-	m_draggedItem.Drop();
+	if (m_draggedItem.IsDragging())
+	{
+		AInventoryObject* pInventory = GetSourceInventoryObjectFromID(m_draggedItem.GetInventoryID());
+		if (pInventory)
+		{
+			// drop back into world
+			pInventory->m_inventorySlots[m_draggedItem.GetSlotIndex()]->Drop();
+
+			// remove from inventory
+			// TODO: do nothing with returned pointer as it still exists in world and in any case the UProperty garbage collection should deal with it
+			pInventory->RetrieveItem(m_draggedItem.GetSlotIndex());
+		}
+
+		// stop dragging item
+		m_draggedItem.Drop();
+	}
 
 	return false;
 }

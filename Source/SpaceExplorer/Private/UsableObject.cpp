@@ -71,16 +71,19 @@ void AUsableObject::Drop()
 	{
 		// https://docs.unrealengine.com/latest/INT/Programming/UnrealArchitecture/Actors/Components/index.html
 
+		m_mesh->RegisterComponent();
+
 		// TODO: this variable is just temporary until I can figure out how to set it back to correct "world owner"
 		SetOwner(m_worldOwner);
 
+		// TODO: this causes crashing so need to rework...
+
 		// TODO: this is just a quick and dirty method to set a transform/location - needs work
-		FTransform transform = GetOwner()->GetTransform();
+		/*FTransform transform = m_worldOwner->GetTransform();
 		FVector vector = transform.GetTranslation();
 		vector.Z += 10.f;
 		transform.SetTranslation(vector);
-		SetActorTransform(transform);
-		m_mesh->RegisterComponent();
+		SetActorTransform(transform);*/
 	}
 }
 

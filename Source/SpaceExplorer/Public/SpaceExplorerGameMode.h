@@ -11,11 +11,13 @@ class ASpaceExplorerGameMode : public AGameMode
 	GENERATED_UCLASS_BODY()
 
 public:
+	// TODO: this should probably move to GameState
 	// TODO: review
 	/* temporary method to create a new item with an unique ID */
 	// AUsableObject* CreateItem();
 
 private:
+	// TODO: this should probably move to GameState
 	// TODO: thought to create an item factory that everything can use to spawn items, probably better than using game mode, but where should it live - in SpaceExplorer?
 	//ItemFactory m_itemFactory;
 	// this limits us to a lifetime of 2,147,483,647 objects to ever exist
