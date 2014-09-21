@@ -40,6 +40,7 @@ public:
 	void ToggleInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory);
 	void CloseInventory();
 	void OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory);
+	void Move(bool bInGroup, AInventory* pPreviousInventory);
 	
 	int32 GetID();
 

@@ -98,21 +98,19 @@ void ASpaceExplorerPawn::BeginPlay()
 
 		if (invObject2)
 		{
-			invObject2->Init(AssignUniqueInventoryID(), 10, 2);
+			invObject2->Init(AssignUniqueInventoryID(), 10, 10);
 			invObject2->m_inventorySlots.SetNum(invObject2->m_nInvHeightCount * invObject2->m_nInvWidthCount);
 			m_inventoryObjects.Add(invObject2);
 		}
 
+		AInventoryObject * invObject3 = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
 
-
-		/*m_hotbarObjects = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
-
-		if (m_hotbarObjects)
+		if (invObject3)
 		{
-			m_hotbarObjects->m_nInvHeightCount = 1;
-			m_hotbarObjects->m_nInvWidthCount = 5;
-			m_hotbarObjects->m_inventorySlots.SetNum(m_hotbarObjects->m_nInvHeightCount * m_hotbarObjects->m_nInvWidthCount);
-		}*/		
+			invObject3->Init(AssignUniqueInventoryID(), 10, 5);
+			invObject3->m_inventorySlots.SetNum(invObject3->m_nInvHeightCount * invObject3->m_nInvWidthCount);
+			m_inventoryObjects.Add(invObject3);
+		}	
 	}
 
 }
@@ -263,6 +261,7 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAction("ToggleAllInventory", IE_Pressed, this, &ASpaceExplorerPawn::ToggleAllInventory);
 	InputComponent->BindAction("ToggleInventoryOne", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventoryOne);
 	InputComponent->BindAction("ToggleInventoryTwo", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventoryTwo);
+	InputComponent->BindAction("ToggleInventoryThree", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventoryThree);
 
 	InputComponent->BindAction("Interact", IE_Pressed, this, &ASpaceExplorerPawn::Interact);
 	InputComponent->BindAction("Delete", IE_Pressed, this, &ASpaceExplorerPawn::Delete);
@@ -481,46 +480,43 @@ void ASpaceExplorerPawn::ToggleAllInventory()
 	}
 }
 
-void ASpaceExplorerPawn::ToggleInventoryOne()
+bool ASpaceExplorerPawn::ToggleInventory(int32 nIndex)
 {
-	if (!Controller || !m_inventoryObjects.IsValidIndex(0))
+	if (!Controller || !m_inventoryObjects.IsValidIndex(nIndex))
 	{
 		//UE_LOG(Pawn, Error, TEXT("ToggleInventoryOne Failed because missing controller or index is invalid"));
-		return;
+		return false;
 	}
 
 	APlayerController* pc = Cast<APlayerController>(Controller);
-	if (!pc)
+	if (pc == nullptr)
 	{
-		return;
+		return false;
 	}
 
 	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
-	if (pHUD)
+	if (pHUD == nullptr)
 	{
-		pHUD->ToggleInventory(m_inventoryObjects[0]->GetID());
+		return false;
 	}
+
+	pHUD->ToggleInventory(m_inventoryObjects[nIndex]->GetID());
+	return true;
+}
+
+void ASpaceExplorerPawn::ToggleInventoryOne()
+{
+	ToggleInventory(0);
 }
 
 void ASpaceExplorerPawn::ToggleInventoryTwo()
 {
-	if (!Controller || !m_inventoryObjects.IsValidIndex(1))
-	{
-		//UE_LOG(Pawn, Error, TEXT("ToggleInventoryTwo Failed because missing controller or index is invalid"));
-		return;
-	}
+	ToggleInventory(1);
+}
 
-	APlayerController* pc = Cast<APlayerController>(Controller);
-	if (!pc)
-	{
-		return;
-	}
-
-	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
-	if (pHUD)
-	{
-		pHUD->ToggleInventory(m_inventoryObjects[1]->GetID());
-	}
+void ASpaceExplorerPawn::ToggleInventoryThree()
+{
+	ToggleInventory(2);
 }
 
 bool ASpaceExplorerPawn::AddItem(AUsableObject * pItem)

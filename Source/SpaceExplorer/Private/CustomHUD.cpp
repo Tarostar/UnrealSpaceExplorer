@@ -362,6 +362,12 @@ void ACustomHUD::ToggleInventory(int32 nID)
 			// found - close
 			m_inventories[i]->CloseInventory();
 			m_inventories.RemoveAt(i);
+
+			// re-position any remaining inventories
+			for (int j = i; j < m_inventories.Num(); j++)
+			{
+				m_inventories[j]->Move(m_inventories.Num() > 1, j == 0 ? nullptr : m_inventories[j - 1]);
+			}
 			return;
 		}
 	}

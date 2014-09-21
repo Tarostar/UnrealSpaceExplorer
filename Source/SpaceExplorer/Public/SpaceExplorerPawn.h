@@ -163,6 +163,9 @@ private:
 	/* open / close individual inventory objects */
 	void ToggleInventoryOne();
 	void ToggleInventoryTwo();
+	void ToggleInventoryThree();
+
+	bool ToggleInventory(int32 nIndex);
 
 	// delete key pressed
 	void Delete();

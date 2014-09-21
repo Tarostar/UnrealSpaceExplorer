@@ -93,6 +93,13 @@ void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInv
 	m_bInvOpen = true;
 }
 
+void AInventory::Move(bool bInGroup, AInventory* pPreviousInventory)
+{
+	m_bInGroup = bInGroup;
+	m_pPreviousInventory = pPreviousInventory;
+	UpdatePositions();
+}
+
 void AInventory::DrawInventory()
 {
 	if (m_pInventory == nullptr || !m_bInvOpen || m_vaInvHitBoxPositions.Num() != m_nWidthCount * m_nHeightCount)
