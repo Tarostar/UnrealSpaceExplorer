@@ -88,6 +88,18 @@ public:
 	int32 GetSlotIndex();
 	int32 GetInventoryID();
 
+	/* Execute action from HUD */
+	void InvokeAction(class DragObject& item);
+
+	/* if in HUD inventory hitbox invoke action and return true - otherwise return false */
+	bool Interact();
+
+	/* right mouse button released */
+	bool LMBRelease();
+
+	/* pass right click event to HUD so that for example things can be removed from action bar */
+	void Delete();
+
 private:
 	// menu class responsible for drawing menu
 	Menu m_menu;

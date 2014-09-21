@@ -13,7 +13,7 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 
 	// Character Pawn
 	static ConstructorHelpers::FObjectFinder<UBlueprint> PlayerPawnObject(TEXT("Blueprint'/Game/Blueprints/BP_SpaceExplorer.BP_SpaceExplorer'"));
-	if (PlayerPawnObject.Object != NULL)
+	if (PlayerPawnObject.Object != nullptr)
 	{
 		DefaultPawnClass = (UClass*)PlayerPawnObject.Object->GeneratedClass;
 	}
@@ -21,7 +21,7 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 	// HUD
 	static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/HUD/BP_CustomHUD.BP_CustomHUD'"));
 	// static ConstructorHelpers::FObjectFinder<UBlueprint> TheHUDOb(TEXT("Blueprint'/Game/HUD/BP_MainHUD.BP_MainHUD'"));
-	if (TheHUDOb.Object != NULL)
+	if (TheHUDOb.Object != nullptr)
 	{
 		HUDClass = (UClass*)TheHUDOb.Object->GeneratedClass;
 	}

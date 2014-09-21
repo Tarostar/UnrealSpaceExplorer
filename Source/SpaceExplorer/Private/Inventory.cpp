@@ -10,8 +10,8 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
 	m_bInvOpen = false;
-	m_ActionBar = NULL;
-	m_pHUD = NULL;
+	m_ActionBar = nullptr;
+	m_pHUD = nullptr;
 
 	m_nWidthCount = 10;
 	m_nHeightCount = 5;
@@ -31,8 +31,8 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 
 	m_nHoverIndex = -1;
 
-	m_pInventory = NULL;
-	m_pPreviousInventory = NULL;
+	m_pInventory = nullptr;
+	m_pPreviousInventory = nullptr;
 
 	m_bInGroup = false;
 }
@@ -70,7 +70,7 @@ void AInventory::CloseInventory()
 
 void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory)
 {
-	if (pInventory == NULL)
+	if (pInventory == nullptr)
 	{
 		return;
 	}
@@ -95,7 +95,7 @@ void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInv
 
 void AInventory::DrawInventory()
 {
-	if (m_pInventory == NULL || !m_bInvOpen || m_vaInvHitBoxPositions.Num() != m_nWidthCount * m_nHeightCount)
+	if (m_pInventory == nullptr || !m_bInvOpen || m_vaInvHitBoxPositions.Num() != m_nWidthCount * m_nHeightCount)
 	{
 		return;
 	}
@@ -144,7 +144,7 @@ void AInventory::UpdatePositions()
 
 void AInventory::SetStartPosition()
 {
-	if (m_pHUD == NULL)
+	if (m_pHUD == nullptr)
 	{
 		return;
 	}
@@ -211,7 +211,7 @@ void AInventory::SetHitBoxPositionArray()
 
 bool AInventory::ItemDrag(bool bPickup, class DragObject& item)
 {
-	if (m_pInventory == NULL)
+	if (m_pInventory == nullptr)
 	{
 		// we have no inventory object associated - do nothing.
 		return false;
@@ -251,7 +251,7 @@ bool AInventory::ItemDrag(bool bPickup, class DragObject& item)
 			
 			// first retrieve it
 			AInventoryObject* const pSourceInventory = m_pHUD->GetSourceInventoryObjectFromID(item.GetInventoryID());
-			if (pSourceInventory == NULL)
+			if (pSourceInventory == nullptr)
 			{
 				// can't get source inventory
 				item.Drop();
@@ -306,7 +306,7 @@ bool AInventory::CheckMouseOver(const FName BoxName, bool bBegin)
 	// TODO: easiest achieved by having the first part of BoxName indicate inventory
 	// i.e. "I0", "I1", etc. - see action bar for how to implemnet
 
-	if (!m_bInvOpen || m_pInventory == NULL)
+	if (!m_bInvOpen || m_pInventory == nullptr)
 	{
 		// inventory is not open so we know it can't be a hitbox in this inventory
 		return false;
@@ -367,4 +367,39 @@ int32 AInventory::GetID()
 	}
 	
 	return -1;
+}
+
+bool AInventory::InvokeAction()
+{
+	if (!m_bInvOpen || m_nHoverIndex < 0 || !m_pHUD || !m_pInventory)
+	{
+		// not me (or invalid pointer)
+		return false;
+	}
+
+	// we have a hover index, so now we just need to check if slot has an item
+	if (!m_pInventory->HasItem(m_nHoverIndex))
+	{
+		// no item (or potentially out-of-bounds) - still this was us
+		return true;
+	}
+
+	class DragObject item;
+	item.Init("", EActionType::Use, m_pInventory->GetID(), m_nHoverIndex);
+
+	m_pHUD->InvokeAction(item);
+
+	return true;
+}
+
+bool AInventory::LMBRelease()
+{
+	if (!m_bInvOpen || m_nHoverIndex < 0 || !m_pHUD || !m_pInventory)
+	{
+		// not me (or invalid pointer)
+		return false;
+	}
+
+	// do nothing, but confirm within hitbox
+	return true;
 }

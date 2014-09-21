@@ -51,6 +51,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = HUD_ActionBar)
 	bool InvokeAction();
 
+	bool LMBRelease();
+
 	/* Access to m_bShowActionBar */
 	bool IsVisible();
 
@@ -69,7 +71,7 @@ public:
 	/* Get upper, left position of action bar (used to position other HUD elements relative to action bar) */
 	FVector2D GetStartPos();
 
-	bool DragDrop(bool bPickup, class DragObject& item);
+	bool DragDrop(bool bDelete, class DragObject& item);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
 private:

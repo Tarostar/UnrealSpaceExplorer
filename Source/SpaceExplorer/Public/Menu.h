@@ -82,11 +82,11 @@ private:
 			m_buttonState = EButtonState::ButtonNormal;
 			m_type = EButtonType::MainMenu;
 
-			m_textureNormal = NULL;
-			m_textureHover = NULL;
-			m_texturePressed = NULL;
+			m_textureNormal = nullptr;
+			m_textureHover = nullptr;
+			m_texturePressed = nullptr;
 
-			//ButtonFunc = NULL;
+			//ButtonFunc = nullptr;
 		}
 	};
 

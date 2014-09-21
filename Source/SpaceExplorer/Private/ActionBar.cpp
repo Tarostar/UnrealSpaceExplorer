@@ -9,7 +9,7 @@ AActionBar::AActionBar(const class FPostConstructInitializeProperties& PCIP)
 : Super(PCIP)
 {
 	m_bShowActionBar = true;
-	m_pHUD = NULL;
+	m_pHUD = nullptr;
 
 	m_fSlotSize = 128.f;
 
@@ -49,7 +49,7 @@ bool AActionBar::IsVisible()
 
 void AActionBar::Draw()
 {
-	if (!m_bShowActionBar)
+	if (!m_bShowActionBar || !m_pHUD)
 	{
 		return;
 	}
@@ -115,7 +115,7 @@ void AActionBar::UpdatePositions()
 
 void AActionBar::SetStartPosition()
 {
-	if (m_pHUD == NULL)
+	if (m_pHUD == nullptr)
 	{
 		return;
 	}
@@ -129,7 +129,7 @@ void AActionBar::SetStartPosition()
 
 void AActionBar::SetHitBoxPositionArray()
 {
-	if (m_pHUD == NULL)
+	if (m_pHUD == nullptr)
 	{
 		return;
 	}
@@ -150,9 +150,9 @@ FVector2D AActionBar::GetStartPos()
 	return m_vStartPos;
 }
 
-bool AActionBar::DragDrop(bool bPickup, class DragObject& item)
+bool AActionBar::DragDrop(bool bDelete, class DragObject& item)
 {
-	if (!bPickup)
+	if (!bDelete)
 	{
 		if (item.IsDragging())
 		{	
@@ -184,7 +184,7 @@ bool AActionBar::DragDrop(bool bPickup, class DragObject& item)
 		return false;
 	}
 
-	// set dragged item to this one
+	// set dragged item to this one (not really used for anything at the moment)
 	item = m_actionSlots[m_nHoverIndex].m_object;
 
 	// remove action from slot
@@ -249,14 +249,25 @@ void AActionBar::DisableSlot(int32 nIndex)
 
 bool AActionBar::InvokeAction()
 {
-	if (!m_bShowActionBar || m_nHoverIndex < 0)
+	if (!m_bShowActionBar || m_nHoverIndex < 0 || !m_pHUD)
 	{
-		// not this action bar
+		// not this action bar - or HUD not set (HUD should always be set)
 		return false;
 	}
 
-	// set dragged item to this one
-	m_actionSlots[m_nHoverIndex].m_object.InvokeAction();
+	m_pHUD->InvokeAction(m_actionSlots[m_nHoverIndex].m_object);
 
+	return true;
+}
+
+bool AActionBar::LMBRelease()
+{
+	if (!m_bShowActionBar || m_nHoverIndex < 0 || !m_pHUD)
+	{
+		// not this action bar - or HUD not set (HUD should always be set)
+		return false;
+	}
+
+	// do nothing, but confirm within hitbox
 	return true;
 }

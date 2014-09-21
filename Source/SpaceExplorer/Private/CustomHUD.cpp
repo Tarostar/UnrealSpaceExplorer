@@ -20,7 +20,7 @@ ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 	m_fCurrentRatio = 1.0f;
 	VScreenDimensions.Set(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 
-	m_actionBar = NULL;
+	m_actionBar = nullptr;
 
 	
 }
@@ -50,7 +50,7 @@ void ACustomHUD::BeginPlay()
 		m_actionBar = World->SpawnActor<AActionBar>(SpawnParams);
 		if (m_actionBar)
 		{	
-			/*AInventoryObject* pHotbarObjects = NULL;
+			/*AInventoryObject* pHotbarObjects = nullptr;
 			APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
 			if (controller)
 			{
@@ -182,15 +182,12 @@ void ACustomHUD::ReceiveHitBoxClick(const FName BoxName)
 	Super::ReceiveHitBoxClick(BoxName);
 
 	if (m_menu.ReceiveHitBox(BoxName, true))
+	{
 		return;
+	}
 
 	if (m_actionBar)
 	{
-		/*if (m_actionBar->DragDrop(true, m_draggedItem))
-		{
-			return;
-		}*/
-
 		// for action bar a click should invoke an action
 		if (m_actionBar->InvokeAction())
 		{
@@ -236,8 +233,8 @@ void ACustomHUD::ReceiveHitBoxRelease(const FName BoxName)
 		}
 	}
 
-	// release back into world
-	// TODO: instatiate - or actually make component visible again
+	// this can happen if we for example release an item over an action bar
+	// simple stop dragging
 	m_draggedItem.Drop();
 }
 
@@ -328,7 +325,7 @@ void ACustomHUD::ToggleAllInventory()
 	// none open, so open all
 
 	UWorld* const World = GetWorld();
-	if (World == NULL)
+	if (World == nullptr)
 	{
 		return;
 	}
@@ -348,7 +345,7 @@ void ACustomHUD::ToggleAllInventory()
 			if (m_inventories[i])
 			{
 				m_inventories[i]->Init(this, m_actionBar);
-				m_inventories[i]->OpenInventory(pPawn->GetInventoryObjectFromIndex(i), m_inventories.Num() > 1, i == 0 ? NULL : m_inventories[i - 1]);
+				m_inventories[i]->OpenInventory(pPawn->GetInventoryObjectFromIndex(i), m_inventories.Num() > 1, i == 0 ? nullptr : m_inventories[i - 1]);
 			}
 		}
 	}
@@ -372,7 +369,7 @@ void ACustomHUD::ToggleInventory(int32 nID)
 	// did not find - open
 
 	UWorld* const World = GetWorld();
-	if (World == NULL)
+	if (World == nullptr)
 	{
 		return;
 	}
@@ -385,7 +382,7 @@ void ACustomHUD::ToggleInventory(int32 nID)
 	if (pPawn)
 	{
 		AInventory* newInventory = World->SpawnActor<AInventory>(SpawnParams);
-		if (newInventory == NULL)
+		if (newInventory == nullptr)
 		{
 			// failed...
 			return;
@@ -395,7 +392,7 @@ void ACustomHUD::ToggleInventory(int32 nID)
 
 		// handle positioning if other inventories already open
 		bool bExisting = m_inventories.Num() > 0;
-		newInventory->OpenInventory(pPawn->GetInventoryObjectFromID(nID), bExisting, bExisting ? m_inventories[m_inventories.Num() - 1] : NULL);
+		newInventory->OpenInventory(pPawn->GetInventoryObjectFromID(nID), bExisting, bExisting ? m_inventories[m_inventories.Num() - 1] : nullptr);
 
 		// add to array of open inventories
 		m_inventories.Add(newInventory);
@@ -410,7 +407,7 @@ void ACustomHUD::DrawDraggedItem()
 	}
 
 	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
-	if (controller == NULL)
+	if (controller == nullptr)
 	{
 		return;
 	}
@@ -463,16 +460,89 @@ AInventoryObject* ACustomHUD::GetSourceInventoryObjectFromID(int32 nID)
 		return pPawn->GetInventoryObjectFromID(nID);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 ASpaceExplorerPawn* ACustomHUD::GetSpaceExplorerPawn()
 {
 	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
-	if (controller == NULL)
+	if (controller == nullptr)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return Cast<ASpaceExplorerPawn>(controller->GetPawn());
+}
+
+void ACustomHUD::Delete()
+{
+	if (m_actionBar)
+	{
+		// if active hit box, simply drop the item in the action bar hovering over
+		// dragged item is not currently used for anything
+		class DragObject draggedItem;
+		m_actionBar->DragDrop(true, draggedItem);
+	}
+}
+
+void ACustomHUD::InvokeAction(class DragObject& item)
+{
+	ASpaceExplorerPawn* const pPawn = GetSpaceExplorerPawn();
+	if (pPawn)
+	{
+		pPawn->InvokeAction(item);
+	}
+}
+
+bool ACustomHUD::Interact()
+{
+	if (m_actionBar)
+	{
+		// for action bar a click should invoke an action
+		if (m_actionBar->InvokeAction())
+		{
+			return true;
+		}
+	}
+
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i])
+		{
+			if (m_inventories[i]->InvokeAction())
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool ACustomHUD::LMBRelease()
+{
+	if (m_actionBar)
+	{
+		// for action bar a click should invoke an action
+		if (m_actionBar->LMBRelease())
+		{
+			return true;
+		}
+	}
+
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i])
+		{
+			if (m_inventories[i]->LMBRelease())
+			{
+				return true;
+			}
+		}
+	}
+
+	// button released outside hitboxes - drop any dragged item
+	m_draggedItem.Drop();
+
+	return false;
 }

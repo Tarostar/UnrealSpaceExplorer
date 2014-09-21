@@ -255,7 +255,6 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAction("ResetCamera", IE_Pressed, this, &ASpaceExplorerPawn::CamReset);
 	InputComponent->BindAction("MouseLook", IE_Pressed, this, &ASpaceExplorerPawn::StartMouseLook);
 	InputComponent->BindAction("MouseLook", IE_Released, this, &ASpaceExplorerPawn::StopMouseLook);
-	InputComponent->BindAction("Fire", IE_Pressed, this, &ASpaceExplorerPawn::Fire);
 	InputComponent->BindAction("CameraFollow", IE_Pressed, this, &ASpaceExplorerPawn::ToggleFreeMouseLook);
 	InputComponent->BindAction("ZoomIn", IE_Pressed, this, &ASpaceExplorerPawn::ZoomIn);
 	InputComponent->BindAction("ZoomOut", IE_Pressed, this, &ASpaceExplorerPawn::ZoomOut);
@@ -263,7 +262,14 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 
 	InputComponent->BindAction("ToggleAllInventory", IE_Pressed, this, &ASpaceExplorerPawn::ToggleAllInventory);
 	InputComponent->BindAction("ToggleInventoryOne", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventoryOne);
-	//InputComponent->BindAction("ToggleInventory2", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventory2);
+	InputComponent->BindAction("ToggleInventoryTwo", IE_Pressed, this, &ASpaceExplorerPawn::ToggleInventoryTwo);
+
+	InputComponent->BindAction("Interact", IE_Pressed, this, &ASpaceExplorerPawn::Interact);
+	InputComponent->BindAction("Delete", IE_Pressed, this, &ASpaceExplorerPawn::Delete);
+
+	// TODO: this should be interact, pick up or similar instead
+	InputComponent->BindAction("LMButton", IE_Pressed, this, &ASpaceExplorerPawn::LMBPressed);
+	InputComponent->BindAction("LMButton", IE_Released, this, &ASpaceExplorerPawn::LMBRelease);
 }
 
 void ASpaceExplorerPawn::ZoomIn()
@@ -419,8 +425,8 @@ AUsableObject* ASpaceExplorerPawn::GetUsableInView()
 	FVector camLoc;
 	FRotator camRot;
 
-	if (Controller == NULL)
-		return NULL;
+	if (Controller == nullptr)
+		return nullptr;
 
 	Controller->GetPlayerViewPoint(camLoc, camRot);
 	const FVector start_trace = camLoc;
@@ -478,8 +484,6 @@ void ASpaceExplorerPawn::ToggleAllInventory()
 
 void ASpaceExplorerPawn::ToggleInventoryOne()
 {
-	//UE_LOG(Pawn, Error, TEXT("test test test yep test"));
-
 	if (!Controller || !m_inventoryObjects.IsValidIndex(0))
 	{
 		//UE_LOG(Pawn, Error, TEXT("ToggleInventoryOne Failed because missing controller or index is invalid"));
@@ -496,6 +500,27 @@ void ASpaceExplorerPawn::ToggleInventoryOne()
 	if (pHUD)
 	{
 		pHUD->ToggleInventory(m_inventoryObjects[0]->GetID());
+	}
+}
+
+void ASpaceExplorerPawn::ToggleInventoryTwo()
+{
+	if (!Controller || !m_inventoryObjects.IsValidIndex(1))
+	{
+		//UE_LOG(Pawn, Error, TEXT("ToggleInventoryTwo Failed because missing controller or index is invalid"));
+		return;
+	}
+
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (!pc)
+	{
+		return;
+	}
+
+	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	if (pHUD)
+	{
+		pHUD->ToggleInventory(m_inventoryObjects[1]->GetID());
 	}
 }
 
@@ -562,7 +587,7 @@ AInventoryObject* ASpaceExplorerPawn::GetInventoryObjectFromIndex(int32 nIndex)
 		return m_inventoryObjects[nIndex];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 AInventoryObject* ASpaceExplorerPawn::GetInventoryObjectFromID(int32 nID)
@@ -577,10 +602,110 @@ AInventoryObject* ASpaceExplorerPawn::GetInventoryObjectFromID(int32 nID)
 	}
 
 	// does not exist
-	return NULL;
+	return nullptr;
 }
 
 int32 ASpaceExplorerPawn::GetInventoryObjectCount()
 {
 	return m_inventoryObjects.Num();
+}
+
+void ASpaceExplorerPawn::Delete()
+{
+	if (!Controller)
+	{
+		return;
+	}
+
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (!pc)
+	{
+		return;
+	}
+
+	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	if (pHUD)
+	{
+		pHUD->Delete();
+	}
+}
+
+void ASpaceExplorerPawn::InvokeAction(class DragObject& item)
+{
+	switch (item.GetType())
+	{
+		case EActionType::Use: UseItem(item);
+			return;
+		case EActionType::Attack: Fire();
+			return;
+	}
+}
+
+void ASpaceExplorerPawn::UseItem(class DragObject& item)
+{
+	// TODO: because of server replication implementation should use virtual void Use() function
+
+	AInventoryObject* pInventoryObject = GetInventoryObjectFromID(item.GetInventoryID());
+	if (pInventoryObject == nullptr)
+	{
+		return;
+	}
+
+	AUsableObject* pObject = pInventoryObject->GetItem(item.GetSlotIndex());
+	if (pObject == nullptr)
+	{
+		return;
+	}
+
+	pObject->InvokeAction();
+}
+
+void ASpaceExplorerPawn::Interact()
+{
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (pc == nullptr)
+	{
+		return;
+	}
+
+	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	if (pHUD)
+	{
+		if (pHUD->Interact())
+		{
+			// interacted with HUD item
+			return;
+		}
+	}
+
+	// interact with world
+
+	// TODO: implement
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Interacting with the world."));
+}
+
+void ASpaceExplorerPawn::LMBPressed()
+{
+	Fire();
+}
+
+void ASpaceExplorerPawn::LMBRelease()
+{
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (pc == nullptr)
+	{
+		return;
+	}
+
+	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
+	if (pHUD)
+	{
+		if (pHUD->LMBRelease())
+		{
+			// interacted with HUD item
+			return;
+		}
+	}
+
+	// interact with world?
 }

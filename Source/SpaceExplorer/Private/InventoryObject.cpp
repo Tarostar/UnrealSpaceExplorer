@@ -22,7 +22,7 @@ void AInventoryObject::Init(int32 id, int32 nWidth, int32 nHeight)
 	m_inventorySlots.Reset(nWidth * nHeight);
 	for (int i = 0; i < m_inventorySlots.Num(); i++)
 	{
-		m_inventorySlots[i] = NULL;
+		m_inventorySlots[i] = nullptr;
 	}
 }
 
@@ -55,24 +55,24 @@ bool AInventoryObject::AddItem(int32 nIndex, AUsableObject* pItem)
 
 AUsableObject* AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem)
 {
-	// retrieve any item in target slot which will set the slots to NULL
+	// retrieve any item in target slot which will set the slots to nullptr
 	AUsableObject * pTargetItem = RetrieveItem(nIndex);
 	
 	// insert new item
 	if (!AddItem(nIndex, pItem))
 	{
 		// failed to put item into target position
-		if (pTargetItem != NULL)
+		if (pTargetItem != nullptr)
 		{
 			// we have target item - return to original position
 			AddItem(nIndex, pTargetItem);
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	// success
-	return pTargetItem; // may be NULL	
+	return pTargetItem; // may be nullptr	
 }
 
 bool AInventoryObject::HasItem(int32 nIndex)
@@ -83,7 +83,7 @@ bool AInventoryObject::HasItem(int32 nIndex)
 		return false;
 	}
 
-	if (m_inventorySlots[nIndex] == NULL)
+	if (m_inventorySlots[nIndex] == nullptr)
 	{
 		return false;
 	}
@@ -97,7 +97,7 @@ AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex)
 	if (!GetUpperLeft(nIndex, nUpperLeft))
 	{
 		// no item selected (or invalid index)
-		return NULL;
+		return nullptr;
 	}
 
 	AUsableObject * pItem = m_inventorySlots[nUpperLeft];
@@ -116,7 +116,7 @@ AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex)
 			}
 
 			// set slot to empty
-			m_inventorySlots[nCurIndex] = NULL;
+			m_inventorySlots[nCurIndex] = nullptr;
 		}
 	}
 
@@ -152,17 +152,17 @@ AUsableObject* AInventoryObject::GetItem(int32 nIndex)
 
 bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 {
-	// retrieve item which will set the slots to NULL
+	// retrieve item which will set the slots to nullptr
 	AUsableObject * pSourceItem = RetrieveItem(nFrom);
-	if (pSourceItem == NULL)
+	if (pSourceItem == nullptr)
 	{
 		// no item found
 		return false;
 	}
 
-	// retrieve any item in target slot which will set the slots to NULL
+	// retrieve any item in target slot which will set the slots to nullptr
 	AUsableObject * pTargetItem = RetrieveItem(nTo);
-	if (bSwap && pTargetItem != NULL)
+	if (bSwap && pTargetItem != nullptr)
 	{
 		// put target item in source item position
 		if (!AddItem(nFrom, pTargetItem))
@@ -178,7 +178,7 @@ bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 	if (!AddItem(nTo, pSourceItem))
 	{
 		// failed to put source item into target position
-		if (pTargetItem != NULL)
+		if (pTargetItem != nullptr)
 		{
 			// we have target item
 			if (bSwap)
@@ -196,7 +196,7 @@ bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 	}
 
 	// successfully moved source item
-	if (!bSwap && pTargetItem != NULL)
+	if (!bSwap && pTargetItem != nullptr)
 	{
 		// did not swap, so delete target item
 		delete pTargetItem;
@@ -207,9 +207,9 @@ bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 
 bool AInventoryObject::DestroyItem(int32 nIndex)
 {
-	// retrieve item which will set the slots to NULL
+	// retrieve item which will set the slots to nullptr
 	AUsableObject * pItem = RetrieveItem(nIndex);
-	if (pItem == NULL)
+	if (pItem == nullptr)
 	{
 		// no item found
 		return false;
@@ -231,7 +231,7 @@ bool AInventoryObject::GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex)
 	// get item to check for when looking for upper left
 	AUsableObject * pItem = m_inventorySlots[nIndex];
 
-	if (pItem == NULL)
+	if (pItem == nullptr)
 	{
 		// no item selected
 		return false;
@@ -287,7 +287,7 @@ bool AInventoryObject::CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth)
 				return false;
 			}
 
-			if (m_inventorySlots[nCurIndex] != NULL)
+			if (m_inventorySlots[nCurIndex] != nullptr)
 			{
 				// not enough empty slots
 				return false;
@@ -325,3 +325,4 @@ int32 AInventoryObject::GetID()
 {
 	return m_ID;
 }
+

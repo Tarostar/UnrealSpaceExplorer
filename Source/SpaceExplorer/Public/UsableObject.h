@@ -55,6 +55,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Item)
 	bool IsVisibleInWorld();
 
+	UFUNCTION(BlueprintCallable, Category = Item)
+	bool InvokeAction();
+
 	// TODO: these are for highlighting collectable items...
 
 	UFUNCTION(BlueprintImplementableEvent)

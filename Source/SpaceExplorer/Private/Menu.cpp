@@ -6,7 +6,7 @@
 
 Menu::Menu()
 {
-	m_pHUD = NULL;
+	m_pHUD = nullptr;
 }
 
 Menu::~Menu()
@@ -31,7 +31,7 @@ void Menu::DrawMainMenu()
 
 void Menu::DrawButton(const FButtonData& button)
 {
-	if (m_pHUD == NULL)
+	if (m_pHUD == nullptr)
 	{
 		return;
 	}
@@ -185,7 +185,7 @@ bool Menu::ReceiveHitBox(const FName boxName, bool bClick)
 
 void Menu::Resume()
 {
-	if (m_pHUD == NULL)
+	if (m_pHUD == nullptr)
 	{
 		return;
 	}
@@ -199,7 +199,7 @@ void Menu::Resume()
 
 void Menu::Quit()
 {
-	if (m_pHUD == NULL)
+	if (m_pHUD == nullptr)
 	{
 		return;
 	}

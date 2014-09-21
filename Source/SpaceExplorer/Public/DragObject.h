@@ -25,8 +25,6 @@ public:
 	int32 GetSlotIndex();
 	int32 GetInventoryID();
 
-	bool InvokeAction();
-
 private:
 	bool m_bDragging;
 

@@ -18,62 +18,62 @@ public:
 public:
 	/** StaticMesh component that will be the visuals for our flying pawn */
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-		TSubobjectPtr<class UStaticMeshComponent> PlaneMesh;
+	TSubobjectPtr<class UStaticMeshComponent> PlaneMesh;
 
 	/** Spring arm that will offset the camera */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-		TSubobjectPtr<class USpringArmComponent> SpringArm;
+	TSubobjectPtr<class USpringArmComponent> SpringArm;
 
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-		TSubobjectPtr<class UCameraComponent> Camera;
+	TSubobjectPtr<class UCameraComponent> Camera;
 
 	// MOVEMENT
 
 	/** How quickly forward speed changes */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float Acceleration;
+	float Acceleration;
 
 	/** How quickly pawn can steer */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float TurnSpeed;
+	float TurnSpeed;
 
 	/** Max forward speed */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float MaxSpeed;
+	float MaxSpeed;
 
 	/** Min forward speed */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float MinSpeed;
+	float MinSpeed;
 
 	/** Current forward speed */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float CurrentForwardSpeed;
+	float CurrentForwardSpeed;
 
 	/** Current yaw speed */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float CurrentYawSpeed;
+	float CurrentYawSpeed;
 
 	/** Current pitch speed */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float CurrentPitchSpeed;
+	float CurrentPitchSpeed;
 
 	/** Current roll speed */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-		float CurrentRollSpeed;
+	float CurrentRollSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		float CurrentZoom;
+	float CurrentZoom;
 
 	// free look or follow pawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		bool bFreeMouseLook;
+	bool bFreeMouseLook;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		float MinimumArmTargetDistance;
+	float MinimumArmTargetDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		bool bFirstPersonView;
+	bool bFirstPersonView;
 
 	// DAMAGE
 
@@ -99,6 +99,9 @@ public:
 	AInventoryObject* GetInventoryObjectFromID(int32 nID);
 
 	int32 GetInventoryObjectCount();
+
+	/* invoke an action */
+	void InvokeAction(class DragObject& item);
 
 private:
 	// Begin APawn overrides
@@ -133,28 +136,40 @@ private:
 	void CamReset();
 	void StartMouseLook();
 	void StopMouseLook();
-	void Fire();
 	void ToggleFreeMouseLook();
 	void ZoomIn();
 	void ZoomOut();
 	void ToggleFirstPerson();
+	void UseItem(class DragObject& item);
+
+	void Fire();
+	void LMBPressed();
+	void LMBRelease();
+
+	/* check with HUD if interacting with an item - otherwise interact with world */
+	void Interact();
 
 	/** Helpers */
 	void SetMouseLook(bool bMouseLook);
 	int32 AssignUniqueInventoryID();
 	int32 GetInventoryIndexFromID(int32 nID);
 
-private:
+	/* Inventory Functions */
+
+	/* open/close all inventory containers */
+	void ToggleAllInventory();
+	/* open / close individual inventory objects */
+	void ToggleInventoryOne();
+	void ToggleInventoryTwo();
+
+	// delete key pressed
+	void Delete();
+
 	/* True only in first frame when focused on new usable actor. */
 	bool bHasNewFocus;
 
 	/* Actor derived from UsableObject currently in center-view. */
 	AUsableObject* FocusedUsableObject;
-
-	/* open/close all inventory containers */
-	void ToggleAllInventory();
-	/* open / close first inventory object */
-	void ToggleInventoryOne();
 
 	/* array of all inventory containers */
 	UPROPERTY(Replicated)

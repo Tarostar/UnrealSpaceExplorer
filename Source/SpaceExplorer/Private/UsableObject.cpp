@@ -21,7 +21,7 @@ AUsableObject::AUsableObject(const class FPostConstructInitializeProperties& PCI
 	m_mesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("Mesh"));
 	RootComponent = m_mesh;
 
-	m_worldOwner = NULL;
+	m_worldOwner = nullptr;
 }
 
 void AUsableObject::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -85,3 +85,12 @@ bool AUsableObject::IsVisibleInWorld()
 {
 	return m_mesh->IsRegistered();
 }
+
+
+bool AUsableObject::InvokeAction()
+{
+	// this should most likely be just a baseclass placeholder and then children of usable object implement the actual action invoked
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Action invoked on usable object."));
+	return true;
+}
+

@@ -46,6 +46,9 @@ public:
 	bool ItemDrag(bool bPickup, class DragObject& item);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
+	bool InvokeAction();
+	bool LMBRelease();
+
 private:
 	UPROPERTY()
 	ACustomHUD * m_pHUD;

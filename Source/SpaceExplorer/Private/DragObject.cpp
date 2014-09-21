@@ -62,20 +62,3 @@ int32 DragObject::GetInventoryID()
 {
 	return m_nInventoryID;
 }
-
-bool DragObject::InvokeAction()
-{
-	switch (m_nType)
-	{
-		case EActionType::Use :
-			if (m_nInventoryID >= 0 && m_nSlotIndex >= 0)
-			{
-				// TODO: interface perhaps to trigger a generic item action - need to think through the whole invoke actions structure
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("TODO: implement."));
-				return true;
-			}
-	}
-
-	// action type undefined
-	return false; 
-}
