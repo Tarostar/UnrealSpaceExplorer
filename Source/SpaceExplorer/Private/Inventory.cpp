@@ -13,8 +13,8 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	m_ActionBar = nullptr;
 	m_pHUD = nullptr;
 
-	m_nWidthCount = 10;
-	m_nHeightCount = 5;
+	m_nWidthCount = -1;
+	m_nHeightCount = -1;
 
 	m_fSlotSize = 64.f;
 	m_fInventoryBorder = 0.f;
@@ -146,13 +146,13 @@ void AInventory::DrawInventory()
 				m_pInventory->GetUpperLeft(i, nUpperLeftIndex);
 				if (nUpperLeftIndex == i)
 				{
-					// TODO: this only handles square objects - but just temporary as this should be done with texture sizes instead
-					m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio() * m_pInventory->m_inventorySlots[i]->GetItemWidth());
+					// texture must be correctly sized to cover the right number of slots (i.e. 128 pixels per slot)
+					m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
 				}
 			}
 			else
 			{
-				// TODO: review and scale of item texture should match without the hardcoded scaling....
+				// at the moment 128 pixels is the size of one slot for inventory items
 				m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
 			}
 		}
@@ -212,7 +212,7 @@ void AInventory::SetStartPosition()
 			y = m_pPreviousInventory->m_vInvStartpos.Y + m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount + fMargin;
 		}
 	}
-	
+
 	// store the start position for this inventory
 	m_vInvStartpos = FVector2D(x, y);
 }

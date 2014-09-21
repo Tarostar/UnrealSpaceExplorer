@@ -353,26 +353,21 @@ void ACustomHUD::ToggleAllInventory()
 
 void ACustomHUD::ToggleInventory(int32 nID)
 {
-	// open or close indicated inventory
+	// keep it simple, if any inventories open close them all - otherwise open requested inventory
 
-	for (int i = 0; i < m_inventories.Num(); i++)
+	if (m_inventories.Num() > 0)
 	{
-		if (m_inventories[i]->GetID() == nID)
+		// close all inventories
+		for (int i = m_inventories.Num() - 1; i >= 0; i--)
 		{
-			// found - close
 			m_inventories[i]->CloseInventory();
 			m_inventories.RemoveAt(i);
-
-			// re-position any remaining inventories
-			for (int j = i; j < m_inventories.Num(); j++)
-			{
-				m_inventories[j]->Move(m_inventories.Num() > 1, j == 0 ? nullptr : m_inventories[j - 1]);
-			}
-			return;
 		}
+
+		return;
 	}
 
-	// did not find - open
+	// no inventory open, so open this particular inventory
 
 	UWorld* const World = GetWorld();
 	if (World == nullptr)
