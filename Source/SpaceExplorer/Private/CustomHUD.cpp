@@ -22,7 +22,7 @@ ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 
 	m_actionBar = nullptr;
 
-	
+	m_pSpaceExplorerPawn = nullptr;
 }
 
 void ACustomHUD::PostInitializeComponents()
@@ -128,9 +128,7 @@ void ACustomHUD::UpdateScreenDimensions(int32 SizeX, int32 SizeY)
 
 void ACustomHUD::DrawHUDComponents()
 {
-	// TODO...
-
-	//DrawHUDBars();
+	DrawHUDBars();
 
 	if (m_actionBar)
 	{
@@ -466,13 +464,21 @@ AInventoryObject* ACustomHUD::GetSourceInventoryObjectFromID(int32 nID)
 
 ASpaceExplorerPawn* ACustomHUD::GetSpaceExplorerPawn()
 {
+	if (m_pSpaceExplorerPawn != nullptr)
+	{
+		// use existing pointer
+		return m_pSpaceExplorerPawn;
+	}
+
 	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
 	if (controller == nullptr)
 	{
 		return nullptr;
 	}
 
-	return Cast<ASpaceExplorerPawn>(controller->GetPawn());
+	// remember for next time
+	m_pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(controller->GetPawn());
+	return m_pSpaceExplorerPawn;
 }
 
 void ACustomHUD::Delete()
@@ -581,4 +587,31 @@ bool ACustomHUD::IsHoveringOverHitbox()
 	}
 
 	return false;
+}
+
+void ACustomHUD::DrawHUDBars()
+{
+	for (int i = 0; i < m_inventories.Num(); i++)
+	{
+		if (m_inventories[i]->IsInvOpen())
+		{
+			// inventory open, hide HUD
+			// TODO: this might be configurable, or only happen when all inventories are open
+			return;
+		}
+	}
+
+	ASpaceExplorerPawn* const pPawn = GetSpaceExplorerPawn();
+	if (pPawn == nullptr)
+	{
+		return;
+	}
+
+	// speed bar object... dynamic material instance
+	
+	/*FScalarParameterValue percentageSpeed = FScalarParameterValue
+		(pPawn->CurrentForwardSpeed / pPawn->MaxSpeed);*/
+
+	DoDrawHUD();
+
 }

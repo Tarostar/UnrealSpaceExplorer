@@ -66,6 +66,9 @@ public:
 
 	/* CustomHUD Events*/
 
+	UFUNCTION(BlueprintImplementableEvent, Category = HUD)
+	void DoDrawHUD();
+
 	// BlueprintImplementableEvent allows these to be declared in the blueprint
 	UFUNCTION(BlueprintImplementableEvent, Category = HUD_Menu)
 	void MenuDrawCompleted();
@@ -111,6 +114,9 @@ private:
 	// item being dragged
 	class DragObject m_draggedItem;
 
+	// remember the pawn for this HUD to avoid making repeated calls to retrieve it
+	ASpaceExplorerPawn* m_pSpaceExplorerPawn;
+
 	/* signal to draw the HUD or menu */
 	virtual void ReceiveDrawHUD(int32 SizeX, int32 SizeY) override;
 	/* signal for menu item interaction*/
@@ -132,4 +138,6 @@ private:
 	ASpaceExplorerPawn* GetSpaceExplorerPawn();
 
 	bool IsHoveringOverHitbox();
+
+	void DrawHUDBars();
 };
