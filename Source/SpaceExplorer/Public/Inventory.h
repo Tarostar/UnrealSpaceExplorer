@@ -17,47 +17,68 @@ class SPACEEXPLORER_API AInventory : public AActor
 	GENERATED_UCLASS_BODY()
 
 public:	
-	// texture background
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-	UTexture *m_texture;
+	/** PUBLIC FUNCTIONS */
 
-	// texture background when selected
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-	UTexture *m_textureSelected;
-
-	/* flag whether inventory is open */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
-	bool m_bInvOpen;
-
+	/* Reference to spawning HUD, reference to any action bar (optional - for draw positioning), size of slot, size of border */
 	void Init(ACustomHUD * pHUD, AActionBar * pActionBar, float fSlotSize = 64.f, float fInventoryBorder = 0.f);
 
+	/* Is the inventory open */
 	bool IsInvOpen();
 
+	/* Draws the inventory */
 	void DrawInventory();
 
+	/* Update position of inventory by calling SetStartPosition and SetHitBoxPositionArray*/
 	void UpdatePositions();
 
+	/* Methods for opening, closing and moving inventories */
 	void ToggleInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory);
 	void CloseInventory();
 	void OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInventory* pPreviousInventory);
 	void Move(bool bInGroup, AInventory* pPreviousInventory);
 	
+	/* Unique ID for this inventory */
 	int32 GetID();
 
+	/* Pick up an item to drag it, or drop a dragged item */
 	bool ItemDrag(bool bPickup, class DragObject& item);
+
+	/* Check if mouse over an inventory hitbox slot */
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
+	/* Invoke action for inventory in the current slot being hovered over*/
 	bool InvokeAction();
+
+	/* Check if this inventory has a slot being hovered over */
 	bool ActiveHitbox();
 
+	/** PUBLIC VARIABLES */
+
+	/* Texture background */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	UTexture *m_texture;
+
+	/* Texture background when selected */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	UTexture *m_textureSelected;
+
+	/* Flag whether inventory is open */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_Inventory)
+	bool m_bInvOpen;
+
 private:
+	/** PRIVATE FUNCTIONS */
+
+	void SetStartPosition();
+	void SetHitBoxPositionArray();
+
+	/** PRIVATE VARIABLES */
+
 	UPROPERTY()
 	ACustomHUD * m_pHUD;
 
-	// pointer to action bar for relative positioning when action bar is visible
-	// TODO: adding UProperty here causes CustomHUD to fail compiling?!?!?...?
-	//UPROPERTY()
-	AActionBar * m_ActionBar;
+	UPROPERTY()
+	AActionBar * m_actionBar;
 
 	UPROPERTY()
 	FVector2D m_vInvStartpos;
@@ -82,6 +103,7 @@ private:
 	int32 m_nHoverIndex;
 
 	// true if several inventories drawn after each other
+	UPROPERTY()
 	bool m_bInGroup;
 
 	UPROPERTY()
@@ -90,8 +112,4 @@ private:
 	// optional pointer to previously drawn inventory for calculating position
 	UPROPERTY()
 	AInventory* m_pPreviousInventory;
-
-private:
-	void SetStartPosition();
-	void SetHitBoxPositionArray();
 };

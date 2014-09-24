@@ -28,20 +28,7 @@ class SPACEEXPLORER_API AActionBar : public AActor
 	GENERATED_UCLASS_BODY()
 
 public:
-	// colour of action bar text
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
-	FLinearColor m_textColour;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
-	FLinearColor m_textColourSelected;
-
-	// texture background for action bar
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
-	UTexture *m_texture;
-
-	// texture background for action bar when selected
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
-	UTexture *m_textureSelected;
+	/** PUBLIC FUNCTIONS */
 
 	bool SetSlotAction(int32 nIndex, class DragObject& object);
 
@@ -74,7 +61,33 @@ public:
 	bool DragDrop(bool bDelete, class DragObject& item);
 	bool CheckMouseOver(const FName BoxName, bool bBegin);
 
+	/** PUBLIC VARIABLES */
+
+	/* Colour of action bar text */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
+	FLinearColor m_textColour;
+
+	/* Colour of action bar text when selected (i.e. mouse hover) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
+	FLinearColor m_textColourSelected;
+
+	/* Texture background for action bar */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
+	UTexture *m_texture;
+
+	/* Texture background for action bar when selected */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD_ActionBar)
+	UTexture *m_textureSelected;
+
 private:
+	/** PRIVATE FUNCTIONS */
+
+	/* Called by UpdatePositions */
+	void SetStartPosition();
+	void SetHitBoxPositionArray();
+
+	/** PRIVATE VARIABLES */
+
 	// flag whether action bar is shown
 	UPROPERTY()
 	bool m_bShowActionBar;
@@ -114,8 +127,4 @@ private:
 	// index of item being dragged (we don't remove from inventory, but stop drawing it until reset, moved or dropped into world)
 	UPROPERTY()
 	int32 m_nDraggingItemIndex;
-
-	/* Called by UpdatePositions */
-	void SetStartPosition();
-	void SetHitBoxPositionArray();
 };

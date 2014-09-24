@@ -92,7 +92,11 @@ void AActionBar::Draw()
 				AUsableObject * pItem = pSourceInventory->GetItem(m_actionSlots[i].m_object.GetSlotIndex());
 				if (pItem)
 				{
-					m_pHUD->DrawTextureSimple(pItem->m_inventoryTexture, m_actionSlots[i].m_hitBoxPosition.X, m_actionSlots[i].m_hitBoxPosition.Y, m_pHUD->GetCurrentRatio());
+					// scale down any item that is unusually tall or wide
+					// TODO: center when not square
+					float nScale = m_pHUD->GetCurrentRatio();
+					nScale /= pItem->m_nInvHeight > pItem->m_nInvWidth ? pItem->m_nInvHeight : pItem->m_nInvWidth;
+					m_pHUD->DrawTextureSimple(pItem->m_inventoryTexture, m_actionSlots[i].m_hitBoxPosition.X, m_actionSlots[i].m_hitBoxPosition.Y, nScale);
 				}
 			}
 		}

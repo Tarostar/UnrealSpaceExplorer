@@ -431,22 +431,22 @@ bool ACustomHUD::IsDragging()
 	return m_draggedItem.IsDragging();
 }
 
-FString ACustomHUD::GetLabel()
+FString ACustomHUD::GetDraggedItemLabel()
 {
 	return m_draggedItem.GetLabel();
 }
 
-EActionType::Type ACustomHUD::GetType()
+EActionType::Type ACustomHUD::GetDraggedItemType()
 {
 	return m_draggedItem.GetType();
 }
 
-int32 ACustomHUD::GetSlotIndex()
+int32 ACustomHUD::GetDraggedItemSlotIndex()
 {
 	return m_draggedItem.GetSlotIndex();
 }
 
-int32 ACustomHUD::GetInventoryID()
+int32 ACustomHUD::GetDraggedItemInventoryID()
 {
 	return m_draggedItem.GetInventoryID();
 }
@@ -606,6 +606,8 @@ void ACustomHUD::DrawHUDBars()
 	{
 		return;
 	}
+
+	// TODO: this is currently done in blueprint, but could (should?) be done here.
 
 	// speed bar object... dynamic material instance
 	

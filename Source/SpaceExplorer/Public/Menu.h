@@ -91,6 +91,8 @@ private:
 	};
 
 public:
+	/** PUBLIC FUNCTIONS */
+
 	void Init(ACustomHUD * pHUD);
 
 	/* Creates the default main menu */
@@ -109,14 +111,20 @@ public:
 	// void AddMainButton(FVector2D location, const FString& text, const FName& hitboxName, UTexture * textureNormal, UTexture * textureHover, UTexture * texturePressed, UFont* font, FVector2D size, Func& f);
 
 private:
-	TArray<FButtonData> m_mainMenuButtons;
+	/** PRIVATE FUNCTIONS */
 
-	ACustomHUD * m_pHUD;
-
-private:
+	/* Button draw routine */
 	void DrawButton(const FButtonData& button);
 
 	/* Button actions*/
 	void Resume();
 	void Quit();
+
+	/** PRIVATE VARIABLES */
+
+	/* Array holding menu buttons to be drawn, states and hitboxes */
+	TArray<FButtonData> m_mainMenuButtons;
+
+	/* Reference to HUD */
+	ACustomHUD* m_pHUD;
 };

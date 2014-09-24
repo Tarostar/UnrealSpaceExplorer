@@ -10,7 +10,7 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
 	m_bInvOpen = false;
-	m_ActionBar = nullptr;
+	m_actionBar = nullptr;
 	m_pHUD = nullptr;
 
 	m_nWidthCount = -1;
@@ -40,7 +40,7 @@ AInventory::AInventory(const class FPostConstructInitializeProperties& PCIP)
 void AInventory::Init(ACustomHUD * pHUD, AActionBar * pActionBar, float fSlotSize, float fInventoryBorder)
 {
 	m_pHUD = pHUD;
-	m_ActionBar = pActionBar;
+	m_actionBar = pActionBar;
 	m_fSlotSize = fSlotSize;
 	m_fInventoryBorder = fInventoryBorder;
 }
@@ -132,7 +132,7 @@ void AInventory::DrawInventory()
 		
 		if (m_pInventory->HasItem(i))
 		{
-			if (m_pHUD->IsDragging() && m_pHUD->GetInventoryID() == m_pInventory->GetID() && m_pHUD->GetSlotIndex() == i)
+			if (m_pHUD->IsDragging() && m_pHUD->GetDraggedItemInventoryID() == m_pInventory->GetID() && m_pHUD->GetDraggedItemSlotIndex() == i)
 			{
 				// this item is currently being dragged so don't draw
 				continue;
@@ -186,10 +186,10 @@ void AInventory::SetStartPosition()
 
 		x = m_pHUD->VScreenDimensions.X - fInvWidth - fMargin;
 
-		if (m_ActionBar && m_ActionBar->IsVisible())
+		if (m_actionBar && m_actionBar->IsVisible())
 		{
 			// inventory position above action bar
-			y = m_ActionBar->GetStartPos().Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
+			y = m_actionBar->GetStartPos().Y - m_fSlotSize * m_pHUD->GetCurrentRatio() * m_nHeightCount;
 		}
 		else
 		{
