@@ -85,14 +85,18 @@ void Menu::AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UT
 	// TODO: this needs to be written in more elegant and robust code
 	// this list determines names and number of buttons
 	TArray<FString> texts;
-	texts.SetNum(2);
+	texts.SetNum(4);
 	texts[0] = "Resume";
-	texts[1] = "Quit";
+	texts[1] = "Save";
+	texts[2] = "Load";
+	texts[3] = "Quit";
 
 	TArray<Func> funcs;
-	funcs.SetNum(2);
+	funcs.SetNum(4);
 	funcs[0] = &Menu::Resume;
-	funcs[1] = &Menu::Quit;
+	funcs[1] = &Menu::Save;
+	funcs[2] = &Menu::Load;
+	funcs[3] = &Menu::Quit;
 
 	// init main menu button number to text labels
 	m_mainMenuButtons.Empty();
@@ -116,7 +120,8 @@ void Menu::AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UT
 		// override for each button
 
 		// arrange vertically, with half the space of a button between each button
-		button.m_location.Y += size.Y * 1.5f * i;
+		button.m_location.Y = location.Y + size.Y * 1.5f * i;;
+		GEngine->AddOnScreenDebugMessage(-1, 200.f, FColor::Yellow, TEXT("Location: ") + FString::FromInt((int32)button.m_location.Y));
 		button.m_text = texts[i];
 		button.m_hitboxName = FName(*texts[i]);
 		button.ButtonFunc = funcs[i];
@@ -195,6 +200,26 @@ void Menu::Resume()
 
 	AGameMode* const GameMode = m_pHUD->GetWorld()->GetAuthGameMode();
 	GameMode->ClearPause();
+}
+
+void Menu::Save()
+{
+	if (m_pHUD == nullptr)
+	{
+		return;
+	}
+	
+	// TODO: save
+}
+
+void Menu::Load()
+{
+	if (m_pHUD == nullptr)
+	{
+		return;
+	}
+
+	// TODO: load
 }
 
 void Menu::Quit()

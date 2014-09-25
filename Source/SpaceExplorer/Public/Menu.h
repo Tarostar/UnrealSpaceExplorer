@@ -118,6 +118,8 @@ private:
 
 	/* Button actions*/
 	void Resume();
+	void Save();
+	void Load();
 	void Quit();
 
 	/** PRIVATE VARIABLES */
