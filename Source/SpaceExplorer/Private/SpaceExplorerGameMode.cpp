@@ -28,6 +28,22 @@ ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitial
 		HUDClass = (UClass*)TheHUDOb.Object->GeneratedClass;
 	}
 
+	// controller
+	static ConstructorHelpers::FObjectFinder<UBlueprint> CustomControllerOb(TEXT("Blueprint'/Game/Blueprints/BP_CustomController.BP_CustomController'"));
+	if (CustomControllerOb.Object != nullptr)
+	{
+		PlayerControllerClass = (UClass*)CustomControllerOb.Object->GeneratedClass;
+	}
+
+	// game state
+	static ConstructorHelpers::FObjectFinder<UBlueprint> CustomGameStateOb(TEXT("Blueprint'/Game/Blueprints/BP_CustomGameState.BP_CustomGameState'"));
+	if (CustomGameStateOb.Object != nullptr)
+	{
+		GameStateClass = (UClass*)CustomGameStateOb.Object->GeneratedClass;
+	}
+
+	/*Cast<AMyWorldSettings>(GetWorld()->GetWorldSettings())->GetMyVar();*/
+
 	// m_nNextObjectID = 0;
 }
 

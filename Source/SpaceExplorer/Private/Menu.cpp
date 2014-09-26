@@ -121,7 +121,6 @@ void Menu::AutoGenerateMainMenu(FVector2D location, UTexture * textureNormal, UT
 
 		// arrange vertically, with half the space of a button between each button
 		button.m_location.Y = location.Y + size.Y * 1.5f * i;;
-		GEngine->AddOnScreenDebugMessage(-1, 200.f, FColor::Yellow, TEXT("Location: ") + FString::FromInt((int32)button.m_location.Y));
 		button.m_text = texts[i];
 		button.m_hitboxName = FName(*texts[i]);
 		button.ButtonFunc = funcs[i];

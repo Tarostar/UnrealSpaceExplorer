@@ -37,6 +37,7 @@ private:
 
 	struct FButtonData
 	{
+		// TODO: figure out how to use FText to support localization		
 		// displayed button text (would have preferred FText, but GetTextSize, etc. all expect FString)
 		FString m_text;
 
