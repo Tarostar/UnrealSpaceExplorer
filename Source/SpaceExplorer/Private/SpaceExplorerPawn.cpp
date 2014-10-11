@@ -6,6 +6,7 @@
 #include "CustomHUD.h"
 #include "InventoryObject.h"
 #include "SpaceExplorerPawn.h"
+#include "CustomController.h"
 
 ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializeProperties& PCIP)
 : Super(PCIP)
@@ -463,11 +464,17 @@ void ASpaceExplorerPawn::ToggleAllInventory()
 		return;
 	}
 
-	APlayerController* pc = Cast<APlayerController>(Controller);
+	ACustomController* pc = Cast<ACustomController>(Controller);
 	if (!pc)
 	{
 		return;
 	}
+
+	int32 nTest = -1;
+	pc->LoadGameDataFromFileCompressed("G:\\UESaveTest\\test.sav", nTest);
+	pc->m_nTest = nTest;
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Restored from file:") + FString::FromInt(nTest));
 
 	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
 	if (pHUD)
@@ -484,11 +491,17 @@ bool ASpaceExplorerPawn::ToggleInventory(int32 nIndex)
 		return false;
 	}
 
-	APlayerController* pc = Cast<APlayerController>(Controller);
+	ACustomController* pc = Cast<ACustomController>(Controller);
 	if (pc == nullptr)
 	{
 		return false;
 	}
+
+	pc->m_nTest = nIndex;
+
+	pc->SaveGameDataToFile("G:\\UESaveTest\\test.sav");
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Saved to file:") + FString::FromInt(nIndex));
 
 	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
 	if (pHUD == nullptr)
