@@ -11,10 +11,14 @@ class ASpaceExplorerPawn : public APawn
 {
 public:
 	GENERATED_UCLASS_BODY()
-	
-	/** PUBLIC FUNCTIONS */
+
+		/** PUBLIC FUNCTIONS */
 
 	// INVENTORY OBJECTS and ITEMS
+
+	/* Add new inventory object - returns index */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	int32 AddInventory(int32 Width, int32 Height);
 
 	/* Add an item to the inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -162,6 +166,8 @@ private:
 	void Fire();
 	void LMBPressed();
 	void LMBRelease();
+	void QuickSave();
+	void QuickLoad();
 
 	/* check with HUD if interacting with an item - otherwise interact with world */
 	void Interact();

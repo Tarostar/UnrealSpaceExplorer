@@ -5,7 +5,7 @@
 class AActionBar;
 class AInventory;
 class AInventoryObject;
-class ASpaceExplorerPawn;
+class ACustomController;
 
 #include "DragObject.h"
 #include "Menu.h"
@@ -77,6 +77,12 @@ public:
 	/* Blueprint implementable function to do any extra handling once HUD, action bars and inventories have been drawn */
 	UFUNCTION(BlueprintImplementableEvent, Category = HUD)
 	void HUDDrawCompleted();
+
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+	void Save();
+
+	UFUNCTION(BlueprintCallable, Category = HUD_Menu)
+	void Load();
 	
 	/* Drag and Drop */
 	AInventoryObject* GetSourceInventoryObjectFromID(int32 nID);
@@ -130,9 +136,6 @@ private:
 	/* On game start */
 	virtual void BeginPlay() override;
 
-	/* Get player reference */
-	ASpaceExplorerPawn* GetSpaceExplorerPawn();
-
 	/* Checks action bar and inventories if mouse hovering over a hitbox */
 	bool IsHoveringOverHitbox();
 
@@ -146,8 +149,4 @@ private:
 
 	/* Item being dragged */
 	class DragObject m_draggedItem;
-
-	/* Note: always use GetSpaceExplorerPawn()
-	 * Holds the pawn for this HUD to avoid making repeated calls to retrieve it */
-	ASpaceExplorerPawn* m_pSpaceExplorerPawn;
 };

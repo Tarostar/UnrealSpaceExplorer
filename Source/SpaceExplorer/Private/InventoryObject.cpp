@@ -10,6 +10,9 @@ AInventoryObject::AInventoryObject(const class FPostConstructInitializePropertie
 	m_nInvWidthCount = 10;
 	m_nInvHeightCount = 5;
 	m_ID = -1;
+
+	// bReplicates flag set to true:
+	bReplicates = true;
 }
 
 void AInventoryObject::Init(int32 id, int32 nWidth, int32 nHeight)
@@ -340,3 +343,9 @@ int32 AInventoryObject::GetID()
 	return m_ID;
 }
 
+void AInventoryObject::Serialize(FArchive& Ar)
+{
+	Ar << m_ID;
+	Ar << m_nInvWidthCount;
+	Ar << m_nInvHeightCount;
+}

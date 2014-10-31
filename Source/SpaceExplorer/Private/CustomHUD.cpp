@@ -1,9 +1,10 @@
 
 
 #include "SpaceExplorer.h"
+#include "SpaceExplorerPawn.h"
 #include "InventoryObject.h"
 #include "CustomHUD.h"
-#include "SpaceExplorerPawn.h"
+#include "CustomController.h"
 #include "ActionBar.h"
 #include "Inventory.h"
 
@@ -21,8 +22,6 @@ ACustomHUD::ACustomHUD(const class FPostConstructInitializeProperties& PCIP)
 	VScreenDimensions.Set(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 
 	m_actionBar = nullptr;
-
-	m_pSpaceExplorerPawn = nullptr;
 }
 
 void ACustomHUD::PostInitializeComponents()
@@ -332,10 +331,10 @@ void ACustomHUD::ToggleAllInventory()
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = Instigator;
 	
-	ASpaceExplorerPawn* pPawn = GetSpaceExplorerPawn();
-	if (pPawn)
+	ACustomController* const pController = Cast<ACustomController>(PlayerOwner);
+	if (pController)
 	{
-		m_inventories.SetNum(pPawn->GetInventoryObjectCount());
+		m_inventories.SetNum(pController->GetInventoryObjectCount());
 
 		for (int i = 0; i < m_inventories.Num(); i++)
 		{
@@ -343,7 +342,7 @@ void ACustomHUD::ToggleAllInventory()
 			if (m_inventories[i])
 			{
 				m_inventories[i]->Init(this, m_actionBar);
-				m_inventories[i]->OpenInventory(pPawn->GetInventoryObjectFromIndex(i), m_inventories.Num() > 1, i == 0 ? nullptr : m_inventories[i - 1]);
+				m_inventories[i]->OpenInventory(pController->GetInventoryObjectFromIndex(i), m_inventories.Num() > 1, i == 0 ? nullptr : m_inventories[i - 1]);
 			}
 		}
 	}
@@ -377,8 +376,8 @@ void ACustomHUD::ToggleInventory(int32 nID)
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = Instigator;
 
-	ASpaceExplorerPawn* pPawn = GetSpaceExplorerPawn();
-	if (pPawn)
+	ACustomController* const pController = Cast<ACustomController>(PlayerOwner);
+	if (pController)
 	{
 		AInventory* newInventory = World->SpawnActor<AInventory>(SpawnParams);
 		if (newInventory == nullptr)
@@ -391,7 +390,7 @@ void ACustomHUD::ToggleInventory(int32 nID)
 
 		// handle positioning if other inventories already open
 		bool bExisting = m_inventories.Num() > 0;
-		newInventory->OpenInventory(pPawn->GetInventoryObjectFromID(nID), bExisting, bExisting ? m_inventories[m_inventories.Num() - 1] : nullptr);
+		newInventory->OpenInventory(pController->GetInventoryObjectFromID(nID), bExisting, bExisting ? m_inventories[m_inventories.Num() - 1] : nullptr);
 
 		// add to array of open inventories
 		m_inventories.Add(newInventory);
@@ -453,32 +452,13 @@ int32 ACustomHUD::GetDraggedItemInventoryID()
 
 AInventoryObject* ACustomHUD::GetSourceInventoryObjectFromID(int32 nID)
 {
-	ASpaceExplorerPawn* const pPawn = GetSpaceExplorerPawn();
-	if (pPawn)
+	ACustomController* const pController = Cast<ACustomController>(PlayerOwner);
+	if (pController)
 	{
-		return pPawn->GetInventoryObjectFromID(nID);
+		return pController->GetInventoryObjectFromID(nID);
 	}
 
 	return nullptr;
-}
-
-ASpaceExplorerPawn* ACustomHUD::GetSpaceExplorerPawn()
-{
-	if (m_pSpaceExplorerPawn != nullptr)
-	{
-		// use existing pointer
-		return m_pSpaceExplorerPawn;
-	}
-
-	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
-	if (controller == nullptr)
-	{
-		return nullptr;
-	}
-
-	// remember for next time
-	m_pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(controller->GetPawn());
-	return m_pSpaceExplorerPawn;
 }
 
 void ACustomHUD::Delete()
@@ -494,10 +474,10 @@ void ACustomHUD::Delete()
 
 void ACustomHUD::InvokeAction(class DragObject& item)
 {
-	ASpaceExplorerPawn* const pPawn = GetSpaceExplorerPawn();
-	if (pPawn)
+	ACustomController* const pController = Cast<ACustomController>(PlayerOwner);
+	if (pController)
 	{
-		pPawn->InvokeAction(item);
+		pController->InvokeAction(item);
 	}
 }
 
@@ -601,11 +581,11 @@ void ACustomHUD::DrawHUDBars()
 		}
 	}
 
-	ASpaceExplorerPawn* const pPawn = GetSpaceExplorerPawn();
-	if (pPawn == nullptr)
+	/*ACustomController* const pController = Cast<ACustomController>(PlayerOwner);
+	if (pController == nullptr)
 	{
 		return;
-	}
+	}*/
 
 	// TODO: this is currently done in blueprint, but could (should?) be done here.
 
@@ -616,4 +596,26 @@ void ACustomHUD::DrawHUDBars()
 
 	DoDrawHUD();
 
+}
+
+void ACustomHUD::Save()
+{
+	/*
+	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
+	if (controller)
+	{
+		// TODO: SaveGame responsible for getting save data from its pawn, etc.
+		controller->SaveGame();
+	}*/
+}
+
+void ACustomHUD::Load()
+{
+	/*
+	APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
+	if (controller)
+	{
+		
+		controller->LoadGame();
+	}*/
 }

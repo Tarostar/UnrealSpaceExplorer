@@ -208,7 +208,9 @@ void Menu::Save()
 		return;
 	}
 	
-	// TODO: save
+	m_pHUD->Save();
+
+	Resume();
 }
 
 void Menu::Load()
@@ -218,7 +220,9 @@ void Menu::Load()
 		return;
 	}
 
-	// TODO: load
+	m_pHUD->Load();
+
+	Resume();
 }
 
 void Menu::Quit()

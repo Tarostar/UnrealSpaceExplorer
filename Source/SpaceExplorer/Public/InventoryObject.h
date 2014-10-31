@@ -77,6 +77,8 @@ public:
 	// if found return true and upperLeft index
 	bool GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex);
 
+	void Serialize(FArchive& Ar) override;
+
 private:
 	// unique ID
 	int32 m_ID;

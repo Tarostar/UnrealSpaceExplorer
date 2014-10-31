@@ -77,42 +77,26 @@ void ASpaceExplorerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AddInventory(10, 10);
+	AddInventory(10, 5);
+	AddInventory(5, 5);
+
+}
+
+int32 ASpaceExplorerPawn::AddInventory(int32 Width, int32 Height)
+{
 	UWorld* const World = GetWorld();
 	if (World)
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.Instigator = Instigator;
-
-		//AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(SpawnParams);
 		AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
-		
 		if (invObject)
 		{
-			invObject->Init(AssignUniqueInventoryID(), 5, 5);
-			invObject->m_inventorySlots.SetNum(invObject->m_nInvHeightCount * invObject->m_nInvWidthCount);
-			m_inventoryObjects.Add(invObject);
+			invObject->Init(AssignUniqueInventoryID(), Width, Height);
+			return m_inventoryObjects.Add(invObject);
 		}
-
-		AInventoryObject * invObject2 = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
-
-		if (invObject2)
-		{
-			invObject2->Init(AssignUniqueInventoryID(), 10, 10);
-			invObject2->m_inventorySlots.SetNum(invObject2->m_nInvHeightCount * invObject2->m_nInvWidthCount);
-			m_inventoryObjects.Add(invObject2);
-		}
-
-		AInventoryObject * invObject3 = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
-
-		if (invObject3)
-		{
-			invObject3->Init(AssignUniqueInventoryID(), 10, 5);
-			invObject3->m_inventorySlots.SetNum(invObject3->m_nInvHeightCount * invObject3->m_nInvWidthCount);
-			m_inventoryObjects.Add(invObject3);
-		}	
 	}
 
+	return -1;
 }
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
@@ -269,6 +253,9 @@ void ASpaceExplorerPawn::SetupPlayerInputComponent(class UInputComponent* InputC
 	// TODO: this should be interact, pick up or similar instead
 	InputComponent->BindAction("LMButton", IE_Pressed, this, &ASpaceExplorerPawn::LMBPressed);
 	InputComponent->BindAction("LMButton", IE_Released, this, &ASpaceExplorerPawn::LMBRelease);
+
+	InputComponent->BindAction("QuickSave", IE_Pressed, this, &ASpaceExplorerPawn::QuickSave);
+	InputComponent->BindAction("QuickLoad", IE_Pressed, this, &ASpaceExplorerPawn::QuickLoad);
 }
 
 void ASpaceExplorerPawn::ZoomIn()
@@ -470,12 +457,6 @@ void ASpaceExplorerPawn::ToggleAllInventory()
 		return;
 	}
 
-	int32 nTest = -1;
-	pc->LoadGameDataFromFileCompressed("G:\\UESaveTest\\test.sav", nTest);
-	pc->m_nTest = nTest;
-
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Restored from file:") + FString::FromInt(nTest));
-
 	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
 	if (pHUD)
 	{
@@ -496,12 +477,6 @@ bool ASpaceExplorerPawn::ToggleInventory(int32 nIndex)
 	{
 		return false;
 	}
-
-	pc->m_nTest = nIndex;
-
-	pc->SaveGameDataToFile("G:\\UESaveTest\\test.sav");
-
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Saved to file:") + FString::FromInt(nIndex));
 
 	ACustomHUD* pHUD = Cast<ACustomHUD>(pc->GetHUD());
 	if (pHUD == nullptr)
@@ -736,4 +711,52 @@ void ASpaceExplorerPawn::LMBRelease()
 	}
 
 	// interact with world
+}
+
+void ASpaceExplorerPawn::QuickSave()
+{
+	if (!Controller)
+	{
+		//UE_LOG(Pawn, Error, TEXT("ToggleInventoryOne Failed because missing controller or index is invalid"));
+		return;
+	}
+
+	ACustomController* pc = Cast<ACustomController>(Controller);
+	if (pc)
+	{
+		pc->SaveGameDataToFile("G:\\UESaveTest\\quicksave.sav", GetActorLocation(), GetActorRotation(), m_inventoryObjects);
+	}
+}
+
+void ASpaceExplorerPawn::QuickLoad()
+{
+	if (!Controller)
+	{
+		//UE_LOG(Pawn, Error, TEXT("ToggleInventoryOne Failed because missing controller or index is invalid"));
+		return;
+	}
+
+	ACustomController* pc = Cast<ACustomController>(Controller);
+	if (pc == nullptr)
+	{
+		return;
+	}
+
+	m_inventoryObjects.Empty();
+
+	FVector playerLocation;
+	FRotator playerRotation;
+	pc->LoadGameDataFromFileCompressed("G:\\UESaveTest\\quicksave.sav", playerLocation, playerRotation, m_inventoryObjects);
+
+	SetActorLocation(playerLocation);
+	SetActorRotation(playerRotation);
+
+	GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Inventories: ") + FString::FromInt(m_inventoryObjects.Num()));
+
+	for (int i = 0; i < m_inventoryObjects.Num(); i++)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Inv Width: ") + FString::FromInt(m_inventoryObjects[i]->m_nInvWidthCount) + TEXT(" Height: ") + FString::FromInt(m_inventoryObjects[i]->m_nInvHeightCount));
+	}
+
+	
 }

@@ -16,20 +16,41 @@ class SPACEEXPLORER_API ACustomController : public APlayerController
 	GENERATED_UCLASS_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GameController)
-	int32 m_nTest;
 
-public:
+	/** PUBLIC FUNCTIONS */
 
-	bool SaveGameDataToFile(const FString& FullFilePathy);
+	// LOAD AND SAVE
 
-
-	bool LoadGameDataFromFileCompressed(const FString& FullFilePath, int32& SaveDataInt32);
+	bool SaveGameDataToFile(const FString& FullFilePathy, FVector playerLocation, FRotator playerRotation, TArray<AInventoryObject*>& inventoryObjects);
+	bool LoadGameDataFromFileCompressed(const FString& FullFilePath, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects);
 	/*bool SaveGameDataToFileCompressed(const FString& FullFilePath, int32& SaveDataInt32, FVector& SaveDataVector, TArray<FRotator>& SaveDataRotatorArray);*/
 
+	// INVENTORY OBJECTS and ITEMS
+
+	/* Get an inventory based on its index */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	AInventoryObject* GetInventoryObjectFromIndex(int32 index);
+
+	/* Get an inventory based on its ID */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	AInventoryObject* GetInventoryObjectFromID(int32 nID);
+
+	/* Get number of inventories owned by this player */
+	int32 GetInventoryObjectCount();
+
+	/* invoke an action (item optional) */
+	void InvokeAction(class DragObject& item);
+
+	/** PUBLIC VARIABLES */
+
+
 private:
+	/** PRIVATE FUNCTIONS */
+
 	// FArchive is shared base class for FBufferArchive and FMemoryReader
-	void SaveLoadData(FArchive& Ar, int32& SaveDataInt32);
+	void SaveLoadData(bool bLoading, FArchive& Ar, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects);
+
+	/** PRIVATE VARIABLES */
 };
 
 

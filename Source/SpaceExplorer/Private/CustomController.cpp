@@ -1,24 +1,103 @@
 
 
-
 #include "SpaceExplorer.h"
+#include "InventoryObject.h"
+#include "SpaceExplorerPawn.h"
 #include "CustomController.h"
-
 
 ACustomController::ACustomController(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	m_nTest = 10;
 }
 
-bool ACustomController::SaveGameDataToFile(const FString& FullFilePath)
+// TODO: investigate and potentially implement
+/*
+bool ACustomController::SaveGameDataToFileCompressed(const FString& FullFilePath, int32& SaveDataInt32, FVector& SaveDataVector, TArray<FRotator>& SaveDataRotatorArray)
+{
+FBufferArchive ToBinary;
+SaveLoadData(ToBinary, NumGemsCollected, PlayerLocation, ArrayOfRotationsOfTheStars);
+
+//Pre Compressed Size
+ClientMessage("~ PreCompressed Size ~");
+ClientMessage(FString::FromInt(ToBinary.Num()));
+
+//
+
+// Compress File
+//tmp compressed data array
+TArray<uint8> CompressedData;
+FArchiveSaveCompressedProxy Compressor =
+FArchiveSaveCompressedProxy(CompressedData, ECompressionFlags::COMPRESS_ZLIB);
+
+//Send entire binary array/archive to compressor
+Compressor << ToBinary;
+
+//send archive serialized data to binary array
+Compressor.Flush();
+
+//
+
+//Compressed Size
+ClientMessage("~ Compressed Size ~");
+ClientMessage(FString::FromInt(CompressedData.Num()));
+
+
+if (!FPlatformFileManager) return false;
+
+//vibes to file, return successful or not
+if (FFileHelper::SaveArrayToFile(CompressedData, *FullFilePath))
+{
+// Free Binary Arrays
+Compressor.FlushCache();
+CompressedData.Empty();
+
+ToBinary.FlushCache();
+ToBinary.Empty();
+
+// Close Buffer
+ToBinary.Close();
+
+ClientMessage("File Save Success!");
+
+return true;
+//
+}
+else
+{
+// Free Binary Arrays
+Compressor.FlushCache();
+CompressedData.Empty();
+
+ToBinary.FlushCache();
+ToBinary.Empty();
+
+// Close Buffer
+ToBinary.Close();
+
+ClientMessage("File Could Not Be Saved!");
+
+return false;
+//
+}
+}
+
+*/
+
+bool ACustomController::SaveGameDataToFile(const FString& FullFilePath, FVector playerLocation, FRotator playerRotation, TArray<AInventoryObject*>& inventoryObjects)
 {
 	//note that the supplied FString must be the entire Filepath
-	
+
+	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
+	if (!pSpaceExplorerPawn)
+	{
+		// no player pawn - abort
+		return false;
+	}
+
 	// Step 1: Variable Data -> Binary
 
 	FBufferArchive ToBinary;
-	SaveLoadData(ToBinary, m_nTest);
+	SaveLoadData(false, ToBinary, playerLocation, playerRotation, inventoryObjects);
 
 	// No Data
 	if (ToBinary.Num() <= 0) 
@@ -44,7 +123,7 @@ bool ACustomController::SaveGameDataToFile(const FString& FullFilePath)
 	return false;
 }
 
-bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePath, int32& SaveDataInt32)//, FVector& SaveDataVector, TArray<FRotator>& SaveDataRotatorArray)
+bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePath, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects)
 {
 	// Load Compressed data array
 	TArray<uint8> TheBinaryArray;
@@ -66,8 +145,8 @@ bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePa
 
 	FMemoryReader FromBinary = FMemoryReader(TheBinaryArray, true); //true, free data after done
 	FromBinary.Seek(0);
-	SaveLoadData(FromBinary, SaveDataInt32);
-
+	SaveLoadData(true, FromBinary, playerLocation, playerRotation, inventoryObjects);
+	
 	/* Clean up */
 	
 	FromBinary.FlushCache();
@@ -79,80 +158,93 @@ bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePa
 	return true;
 }
 
-// TODO: investigate and potentially implement
-/*
-bool ACustomController::SaveGameDataToFileCompressed(const FString& FullFilePath, int32& SaveDataInt32, FVector& SaveDataVector, TArray<FRotator>& SaveDataRotatorArray)
+void ACustomController::SaveLoadData(bool bLoading, FArchive& Ar, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects)
 {
-	FBufferArchive ToBinary;
-	SaveLoadData(ToBinary, NumGemsCollected, PlayerLocation, ArrayOfRotationsOfTheStars);
-
-	//Pre Compressed Size
-	ClientMessage("~ PreCompressed Size ~");
-	ClientMessage(FString::FromInt(ToBinary.Num()));
-
-	//
-
-	// Compress File 
-	//tmp compressed data array
-	TArray<uint8> CompressedData;
-	FArchiveSaveCompressedProxy Compressor =
-		FArchiveSaveCompressedProxy(CompressedData, ECompressionFlags::COMPRESS_ZLIB);
-
-	//Send entire binary array/archive to compressor
-	Compressor << ToBinary;
-
-	//send archive serialized data to binary array
-	Compressor.Flush();
-
-	//
-
-	//Compressed Size
-	ClientMessage("~ Compressed Size ~");
-	ClientMessage(FString::FromInt(CompressedData.Num()));
-
-
-	if (!FPlatformFileManager) return false;
-
-	//vibes to file, return successful or not
-	if (FFileHelper::SaveArrayToFile(CompressedData, *FullFilePath))
+	// Saving/Loading player location and rotation
+	Ar << playerLocation;
+	Ar << playerRotation;
+	
+	// Saving/Loading number of inventory objects
+	int32 InventoryCount = inventoryObjects.Num();
+	Ar << InventoryCount;
+	
+	// Can't really write code that is ambivalent about saving or loading an array of objects... so this cludge is used.
+	if (bLoading)
 	{
-		// Free Binary Arrays 
-		Compressor.FlushCache();
-		CompressedData.Empty();
+		UWorld* const World = GetWorld();
+		if (!World)
+		{
+			return;
+		}
 
-		ToBinary.FlushCache();
-		ToBinary.Empty();
+		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Loading...") +  FString::FromInt(InventoryCount));
+		for (int i = 0; i < InventoryCount; i++)
+		{
+			int Width, Height;
+			Ar << Width;
+			Ar << Height;
+			
+			AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
 
-		// Close Buffer 
-		ToBinary.Close();
+			if (invObject)
+			{
+				invObject->Init(0, Width, Height);
+				invObject->m_inventorySlots.SetNum(invObject->m_nInvHeightCount * invObject->m_nInvWidthCount);
+				inventoryObjects.Add(invObject);
 
-		ClientMessage("File Save Success!");
-
-		return true;
-		//
+				GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Added object: ") + FString::FromInt(i) + TEXT(" Array: ") + FString::FromInt(inventoryObjects.Num()));
+			}
+		}
 	}
 	else
 	{
-		// Free Binary Arrays 
-		Compressor.FlushCache();
-		CompressedData.Empty();
+		for (int i = 0; i < InventoryCount; i++)
+		{
 
-		ToBinary.FlushCache();
-		ToBinary.Empty();
-
-		// Close Buffer 
-		ToBinary.Close();
-
-		ClientMessage("File Could Not Be Saved!");
-
-		return false;
-		//
+			Ar << inventoryObjects[i]->m_nInvWidthCount;
+			Ar << inventoryObjects[i]->m_nInvHeightCount;
+			GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Inv Width: ") + FString::FromInt(inventoryObjects[i]->m_nInvWidthCount) + TEXT(" Height: ") + FString::FromInt(inventoryObjects[i]->m_nInvHeightCount));
+		}
 	}
 }
 
-*/
-
-void ACustomController::SaveLoadData(FArchive& Ar, int32& SaveDataInt32)
+int32 ACustomController::GetInventoryObjectCount()
 {
-	Ar << SaveDataInt32;
+	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
+	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
+	if (pSpaceExplorerPawn)
+		return pSpaceExplorerPawn->GetInventoryObjectCount();
+
+	// no inventory
+	return 0;
+}
+
+AInventoryObject* ACustomController::GetInventoryObjectFromID(int32 nID)
+{
+	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
+	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
+	if (pSpaceExplorerPawn)
+		return pSpaceExplorerPawn->GetInventoryObjectFromID(nID);
+	
+	// does not exist
+	return nullptr;
+}
+
+AInventoryObject* ACustomController::GetInventoryObjectFromIndex(int32 nIndex)
+{
+	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
+	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
+	if (pSpaceExplorerPawn)
+		return pSpaceExplorerPawn->GetInventoryObjectFromIndex(nIndex);
+
+	// does not exist
+	return nullptr;
+}
+
+void ACustomController::InvokeAction(class DragObject& item)
+{
+	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
+	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
+	if (pSpaceExplorerPawn)
+		return pSpaceExplorerPawn->InvokeAction(item);
 }

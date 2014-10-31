@@ -34,10 +34,10 @@ public:
 	
 protected:
 	/* Overrides */
-	virtual void ReceiveBeginPlay() OVERRIDE;
+	virtual void ReceiveBeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	/* Tick */
-	virtual void Tick(float DeltaSeconds) OVERRIDE;
+	virtual void Tick(float DeltaSeconds) override;
 
 };
