@@ -42,7 +42,7 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	// Create camera component 
 	m_camera = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("Camera0"));
 	m_camera->AttachTo(m_springArm, USpringArmComponent::SocketName);
-	m_camera->bUseControllerViewRotation = false; // Don't rotate camera with controller
+	m_camera->bUsePawnControlRotation = false; // Don't rotate camera with controller
 
 	// Set handling parameters
 	m_fAcceleration = 1000.f;
@@ -149,7 +149,7 @@ void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 	// Rotate plane
 	AddActorLocalRotation(fDeltaRotation);
 
-	if (!m_bFreeMouseLook && !m_bFirstPersonView && !m_springArm->bUseControllerViewRotation)
+	if (!m_bFreeMouseLook && !m_bFirstPersonView && !m_springArm->bUsePawnControlRotation)
 	{
 		// user is not rotating camera in third person view, smoothly interpolate to target position
 
@@ -162,7 +162,7 @@ void ASpaceExplorerPawn::Tick(float DeltaSeconds)
 			m_springArm->SetWorldRotation(FMath::RInterpTo(currentSpringRotation, targetRot, GetWorld()->GetDeltaSeconds(), 2.f));
 		}
 	}
-	else if (!m_bFreeMouseLook && m_bFirstPersonView && !m_camera->bUseControllerViewRotation)
+	else if (!m_bFreeMouseLook && m_bFirstPersonView && !m_camera->bUsePawnControlRotation)
 	{
 		// user is not rotating camera in first person view, smoothly interpolate to target position
 
@@ -304,13 +304,13 @@ void ASpaceExplorerPawn::SetMouseLook(bool bMouseLook)
 	{
 		// set camera to current arm position
 		ClientSetRotation(m_camera->GetComponentRotation());
-		m_camera->bUseControllerViewRotation = bMouseLook;
+		m_camera->bUsePawnControlRotation = bMouseLook;
 	}
 	else
 	{
 		// set controller to current arm position
 		ClientSetRotation(m_springArm->GetComponentRotation());
-		m_springArm->bUseControllerViewRotation = bMouseLook;
+		m_springArm->bUsePawnControlRotation = bMouseLook;
 	}
 }
 
@@ -342,13 +342,13 @@ void ASpaceExplorerPawn::Zoom(float Val)
 
 void ASpaceExplorerPawn::AddControllerYawInput(float Val)
 {
-	if (m_springArm->bUseControllerViewRotation || m_camera->bUseControllerViewRotation)
+	if (m_springArm->bUsePawnControlRotation || m_camera->bUsePawnControlRotation)
 		Super::AddControllerYawInput(Val);
 }
 
 void ASpaceExplorerPawn::AddControllerPitchInput(float Val)
 {
-	if (m_springArm->bUseControllerViewRotation || m_camera->bUseControllerViewRotation)
+	if (m_springArm->bUsePawnControlRotation || m_camera->bUsePawnControlRotation)
 		Super::AddControllerPitchInput(Val);
 }
 
