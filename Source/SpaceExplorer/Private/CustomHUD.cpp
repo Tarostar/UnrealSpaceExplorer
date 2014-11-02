@@ -416,7 +416,7 @@ void ACustomHUD::DrawDraggedItem()
 	AInventoryObject* const pInventory = GetSourceInventoryObjectFromID(m_draggedItem.GetInventoryID());		
 	if (pInventory)
 	{
-		DrawTextureSimple(pInventory->m_inventorySlots[m_draggedItem.GetSlotIndex()]->m_inventoryTexture, x, y, GetCurrentRatio());
+		DrawTextureSimple(pInventory->InventorySlots[m_draggedItem.GetSlotIndex()]->m_inventoryTexture, x, y, GetCurrentRatio());
 	}
 }
 
@@ -530,7 +530,7 @@ bool ACustomHUD::LMBRelease()
 		if (pInventory)
 		{
 			// drop back into world
-			pInventory->m_inventorySlots[m_draggedItem.GetSlotIndex()]->Drop();
+			pInventory->InventorySlots[m_draggedItem.GetSlotIndex()]->Drop();
 
 			// remove from inventory
 			// TODO: do nothing with returned pointer as it still exists in world and in any case the UProperty garbage collection should deal with it

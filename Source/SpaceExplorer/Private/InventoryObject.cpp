@@ -7,31 +7,34 @@
 AInventoryObject::AInventoryObject(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	m_nInvWidthCount = 10;
-	m_nInvHeightCount = 5;
-	m_ID = -1;
+	InvWidthCount = 10;
+	InvHeightCount = 5;
+	ID = -1;
 
 	// bReplicates flag set to true:
 	bReplicates = true;
 }
 
-void AInventoryObject::Init(int32 id, int32 nWidth, int32 nHeight)
+void AInventoryObject::Init(int32 Id, int32 Width, int32 Height)
 {
-	m_ID = id;
-	m_nInvWidthCount = nWidth;
-	m_nInvHeightCount = nHeight;
+	ID = Id;
+	InvWidthCount = Width;
+	InvHeightCount = Height;
+	ResetSlots();
+}
 
-	// TODO: can we just zero it instead?
-	m_inventorySlots.Reset(nWidth * nHeight);
-	for (int i = 0; i < m_inventorySlots.Num(); i++)
+void AInventoryObject::ResetSlots()
+{
+	InventorySlots.SetNum(InvWidthCount * InvHeightCount);
+	for (int i = 0; i < InventorySlots.Num(); i++)
 	{
-		m_inventorySlots[i] = nullptr;
+		InventorySlots[i] = nullptr;
 	}
 }
 
 bool AInventoryObject::AddItemFirstAvailableSlot(AUsableObject* pItem)
 {
-	for (int i = 0; i < m_inventorySlots.Num(); i++)
+	for (int i = 0; i < InventorySlots.Num(); i++)
 	{
 		if (AddItem(i, pItem))
 		{
@@ -81,13 +84,13 @@ AUsableObject* AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem)
 
 bool AInventoryObject::HasItem(int32 nIndex)
 {
-	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
 		// invalid index
 		return false;
 	}
 
-	if (m_inventorySlots[nIndex] == nullptr)
+	if (InventorySlots[nIndex] == nullptr)
 	{
 		return false;
 	}
@@ -109,15 +112,15 @@ AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex, int32& nUpperLeft)
 		return nullptr;
 	}
 
-	AUsableObject * pItem = m_inventorySlots[nUpperLeft];
+	AUsableObject * pItem = InventorySlots[nUpperLeft];
 	for (int nRow = 0; nRow < pItem->m_nInvHeight; nRow++)
 	{
 		// get start index for each row
-		int nCurIndex = nUpperLeft + nRow * m_nInvWidthCount;
+		int nCurIndex = nUpperLeft + nRow * InvWidthCount;
 		for (int nCol = 0; nCol < pItem->m_nInvWidth; nCol++)
 		{
 			nCurIndex += nCol;
-			if (nCurIndex >= m_inventorySlots.Num())
+			if (nCurIndex >= InventorySlots.Num())
 			{
 				// error - went off screen, abort!
 				GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, TEXT("Error - RetrieveItem: Item index is outside inventory array"));
@@ -125,7 +128,7 @@ AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex, int32& nUpperLeft)
 			}
 
 			// set slot to empty
-			m_inventorySlots[nCurIndex] = nullptr;
+			InventorySlots[nCurIndex] = nullptr;
 		}
 	}
 
@@ -135,27 +138,27 @@ AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex, int32& nUpperLeft)
 
 AUsableObject* AInventoryObject::CloneItem(int32 nIndex)
 {
-	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
 		// invalid index
 		return false;
 	}
 
 	// create a copy and return it
-	return new AUsableObject(*m_inventorySlots[nIndex]);
+	return new AUsableObject(*InventorySlots[nIndex]);
 
 }
 
 AUsableObject* AInventoryObject::GetItem(int32 nIndex)
 {
-	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
 		// invalid index
 		return false;
 	}
 
 	// return pointer
-	return m_inventorySlots[nIndex];
+	return InventorySlots[nIndex];
 
 }
 
@@ -240,14 +243,14 @@ bool AInventoryObject::DestroyItem(int32 nIndex)
 
 bool AInventoryObject::GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex)
 {
-	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
 		// invalid index
 		return false;
 	}
 
 	// get item to check for when looking for upper left
-	AUsableObject * pItem = m_inventorySlots[nIndex];
+	AUsableObject * pItem = InventorySlots[nIndex];
 
 	if (pItem == nullptr)
 	{
@@ -265,17 +268,17 @@ bool AInventoryObject::GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex)
 	}
 
 	// find leftmost column (if item spans several columns)
-	while (nUpperLeftIndex > 0 && pItem->m_nInvWidth > 1 && m_inventorySlots[nUpperLeftIndex - 1] == pItem)
+	while (nUpperLeftIndex > 0 && pItem->m_nInvWidth > 1 && InventorySlots[nUpperLeftIndex - 1] == pItem)
 	{
 		// go left
 		nUpperLeftIndex--;
 	}
 
 	// we know we are in leftmost column, so go up rows (if item spans several rows)	
-	while (nUpperLeftIndex - m_nInvWidthCount >= 0 && pItem->m_nInvHeight > 1 && m_inventorySlots[nUpperLeftIndex - m_nInvWidthCount] == pItem)
+	while (nUpperLeftIndex - InvWidthCount >= 0 && pItem->m_nInvHeight > 1 && InventorySlots[nUpperLeftIndex - InvWidthCount] == pItem)
 	{
 		// go up one row
-		nUpperLeftIndex -= m_nInvWidthCount;
+		nUpperLeftIndex -= InvWidthCount;
 	}
 
 	return true;
@@ -283,7 +286,7 @@ bool AInventoryObject::GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex)
 
 bool AInventoryObject::CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth)
 {
-	if (nIndex < 0 || nIndex >= m_inventorySlots.Num())
+	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
 		// invalid index - this is not an error, but means item cannot be added to inventory
 		return false;
@@ -294,17 +297,17 @@ bool AInventoryObject::CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth)
 	for (int nRow = 0; nRow < nHeight; nRow++)
 	{
 		// get start index for each row
-		int nCurIndex = nIndex + nRow * m_nInvWidthCount;
+		int nCurIndex = nIndex + nRow * InvWidthCount;
 		for (int nCol = 0; nCol < nWidth; nCol++)
 		{
 			nCurIndex += nCol;
-			if (nCurIndex >= m_inventorySlots.Num())
+			if (nCurIndex >= InventorySlots.Num())
 			{
 				// invalid index - this is not an error, but means item cannot be added to inventory
 				return false;
 			}
 
-			if (m_inventorySlots[nCurIndex] != nullptr)
+			if (InventorySlots[nCurIndex] != nullptr)
 			{
 				// not enough empty slots
 				return false;
@@ -321,17 +324,17 @@ bool AInventoryObject::InsertItem(int32 nIndex, AUsableObject* pItem)
 	for (int nRow = 0; nRow < pItem->m_nInvHeight; nRow++)
 	{
 		// get start index for each row
-		int nCurIndex = nIndex + nRow * m_nInvWidthCount;
+		int nCurIndex = nIndex + nRow * InvWidthCount;
 		for (int nCol = 0; nCol < pItem->m_nInvWidth; nCol++)
 		{
 			nCurIndex += nCol;
-			if (nCurIndex >= m_inventorySlots.Num())
+			if (nCurIndex >= InventorySlots.Num())
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, TEXT("Error - InsertItem: Item index is outside inventory array!"));
 				return false;
 			}
 
-			m_inventorySlots[nCurIndex] = pItem;
+			InventorySlots[nCurIndex] = pItem;
 		}
 	}
 
@@ -340,12 +343,12 @@ bool AInventoryObject::InsertItem(int32 nIndex, AUsableObject* pItem)
 
 int32 AInventoryObject::GetID()
 {
-	return m_ID;
+	return ID;
 }
 
 void AInventoryObject::Serialize(FArchive& Ar)
 {
-	Ar << m_ID;
-	Ar << m_nInvWidthCount;
-	Ar << m_nInvHeightCount;
+	Ar << ID;
+	Ar << InvWidthCount;
+	Ar << InvHeightCount;
 }

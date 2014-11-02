@@ -16,19 +16,23 @@ class SPACEEXPLORER_API AInventoryObject : public AActor
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
-	int32 m_nInvWidthCount;
+	int32 InvWidthCount;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
-	int32 m_nInvHeightCount;
+	int32 InvHeightCount;
 
 	// the array which represents the slots of the inventory (use a single dimension, and then width and height to derive actual layout and positions)
 	// each slot points to an item, and an item that can take up multiple slots will have multiple slots pointing to that same item
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
-	TArray<AUsableObject*> m_inventorySlots;
+	TArray<AUsableObject*> InventorySlots;
 
-	/* Initialise inventory with ID and number of slots wide and high*/
+	/* Initialise inventory with ID and number of slots wide and high */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void Init(int32 id, int32 nWidth, int32 nHeight);
+	void Init(int32 Id, int32 Width, int32 Height);
+
+	/* Resets inventory slot array size and pointers */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	void ResetSlots();
 
 	/* Add item to first available slot */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -81,7 +85,7 @@ public:
 
 private:
 	// unique ID
-	int32 m_ID;
+	int32 ID;
 
 	bool CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth);
 	bool InsertItem(int32 nIndex, AUsableObject* pItem);

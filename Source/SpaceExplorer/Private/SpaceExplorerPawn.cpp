@@ -750,13 +750,5 @@ void ASpaceExplorerPawn::QuickLoad()
 
 	SetActorLocation(playerLocation);
 	SetActorRotation(playerRotation);
-
-	GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Inventories: ") + FString::FromInt(m_inventoryObjects.Num()));
-
-	for (int i = 0; i < m_inventoryObjects.Num(); i++)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Inv Width: ") + FString::FromInt(m_inventoryObjects[i]->m_nInvWidthCount) + TEXT(" Height: ") + FString::FromInt(m_inventoryObjects[i]->m_nInvHeightCount));
-	}
-
 	
 }

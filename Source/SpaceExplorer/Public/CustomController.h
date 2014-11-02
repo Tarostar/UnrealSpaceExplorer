@@ -48,7 +48,7 @@ private:
 	/** PRIVATE FUNCTIONS */
 
 	// FArchive is shared base class for FBufferArchive and FMemoryReader
-	void SaveLoadData(bool bLoading, FArchive& Ar, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects);
+	void SaveLoadData(bool bLoading, FArchive& Ar, FVector& PlayerLocation, FRotator& PlayerRotation, TArray<AInventoryObject*>& InventoryObjects);
 
 	/** PRIVATE VARIABLES */
 };

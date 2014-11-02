@@ -158,41 +158,31 @@ bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePa
 	return true;
 }
 
-void ACustomController::SaveLoadData(bool bLoading, FArchive& Ar, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects)
+void ACustomController::SaveLoadData(bool bLoading, FArchive& Ar, FVector& PlayerLocation, FRotator& PlayerRotation, TArray<AInventoryObject*>& InventoryObjects)
 {
 	// Saving/Loading player location and rotation
-	Ar << playerLocation;
-	Ar << playerRotation;
+	Ar << PlayerLocation;
+	Ar << PlayerRotation;
 	
 	// Saving/Loading number of inventory objects
-	int32 InventoryCount = inventoryObjects.Num();
+	int32 InventoryCount = InventoryObjects.Num();
 	Ar << InventoryCount;
 	
 	// Can't really write code that is ambivalent about saving or loading an array of objects... so this cludge is used.
 	if (bLoading)
 	{
 		UWorld* const World = GetWorld();
-		if (!World)
+		if (World)
 		{
-			return;
-		}
-
-		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Loading...") +  FString::FromInt(InventoryCount));
-		for (int i = 0; i < InventoryCount; i++)
-		{
-			int Width, Height;
-			Ar << Width;
-			Ar << Height;
-			
-			AInventoryObject * invObject = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
-
-			if (invObject)
+			for (int i = 0; i < InventoryCount; i++)
 			{
-				invObject->Init(0, Width, Height);
-				invObject->m_inventorySlots.SetNum(invObject->m_nInvHeightCount * invObject->m_nInvWidthCount);
-				inventoryObjects.Add(invObject);
-
-				GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Added object: ") + FString::FromInt(i) + TEXT(" Array: ") + FString::FromInt(inventoryObjects.Num()));
+				AInventoryObject * InvObject = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
+				if (InvObject)
+				{
+					InvObject->Serialize(Ar);
+					InvObject->ResetSlots();
+					InventoryObjects.Add(InvObject);
+				}
 			}
 		}
 	}
@@ -200,10 +190,7 @@ void ACustomController::SaveLoadData(bool bLoading, FArchive& Ar, FVector& playe
 	{
 		for (int i = 0; i < InventoryCount; i++)
 		{
-
-			Ar << inventoryObjects[i]->m_nInvWidthCount;
-			Ar << inventoryObjects[i]->m_nInvHeightCount;
-			GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Yellow, TEXT("Inv Width: ") + FString::FromInt(inventoryObjects[i]->m_nInvWidthCount) + TEXT(" Height: ") + FString::FromInt(inventoryObjects[i]->m_nInvHeightCount));
+			InventoryObjects[i]->Serialize(Ar);
 		}
 	}
 }

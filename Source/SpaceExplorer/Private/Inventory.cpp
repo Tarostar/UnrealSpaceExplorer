@@ -79,11 +79,11 @@ void AInventory::OpenInventory(AInventoryObject* pInventory, bool bInGroup, AInv
 		
 	m_pInventory = pInventory;
 
-	if (m_bInGroup != bInGroup || pInventory->m_nInvWidthCount != m_nWidthCount || pInventory->m_nInvHeightCount != m_nHeightCount)
+	if (m_bInGroup != bInGroup || pInventory->InvWidthCount != m_nWidthCount || pInventory->InvHeightCount != m_nHeightCount)
 	{
 		// inventory group, width or height has changed
-		m_nWidthCount = pInventory->m_nInvWidthCount;
-		m_nHeightCount = pInventory->m_nInvHeightCount;
+		m_nWidthCount = pInventory->InvWidthCount;
+		m_nHeightCount = pInventory->InvHeightCount;
 		m_bInGroup = bInGroup;
 
 		m_vaInvHitBoxPositions.SetNum(m_nWidthCount * m_nHeightCount);
@@ -139,7 +139,7 @@ void AInventory::DrawInventory()
 			}
 
 			// check if item spans multiple slots and scale accordingly
-			if (m_pInventory->m_inventorySlots[i]->GetItemWidth() > 1 || m_pInventory->m_inventorySlots[i]->GetItemHeight() > 1)
+			if (m_pInventory->InventorySlots[i]->GetItemWidth() > 1 || m_pInventory->InventorySlots[i]->GetItemHeight() > 1)
 			{
 				// only draw for the upper, left index
 				int32 nUpperLeftIndex;
@@ -147,13 +147,13 @@ void AInventory::DrawInventory()
 				if (nUpperLeftIndex == i)
 				{
 					// texture must be correctly sized to cover the right number of slots (i.e. 128 pixels per slot)
-					m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
+					m_pHUD->DrawTextureSimple(m_pInventory->InventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
 				}
 			}
 			else
 			{
 				// at the moment 128 pixels is the size of one slot for inventory items
-				m_pHUD->DrawTextureSimple(m_pInventory->m_inventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
+				m_pHUD->DrawTextureSimple(m_pInventory->InventorySlots[i]->m_inventoryTexture, m_vaInvHitBoxPositions[i].X, m_vaInvHitBoxPositions[i].Y, 0.5f * m_pHUD->GetCurrentRatio());
 			}
 		}
 	}
