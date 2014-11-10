@@ -2,6 +2,7 @@
 
 #pragma once
 
+class ACustomPawn;
 #include "GameFramework/PlayerController.h"
 #include "CustomController.generated.h"
 
@@ -21,8 +22,8 @@ public:
 
 	// LOAD AND SAVE
 
-	bool SaveGameDataToFile(const FString& FullFilePathy, FVector playerLocation, FRotator playerRotation, TArray<AInventoryObject*>& inventoryObjects);
-	bool LoadGameDataFromFileCompressed(const FString& FullFilePath, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects);
+	bool SaveGameDataToFile(const FString& FullFilePathy, ACustomPawn * PlayerPawn);
+	bool LoadGameDataFromFileCompressed(const FString& FullFilePath, ACustomPawn * PlayerPawn);
 	/*bool SaveGameDataToFileCompressed(const FString& FullFilePath, int32& SaveDataInt32, FVector& SaveDataVector, TArray<FRotator>& SaveDataRotatorArray);*/
 
 	// INVENTORY OBJECTS and ITEMS
@@ -48,7 +49,7 @@ private:
 	/** PRIVATE FUNCTIONS */
 
 	// FArchive is shared base class for FBufferArchive and FMemoryReader
-	void SaveLoadData(bool bLoading, FArchive& Ar, FVector& PlayerLocation, FRotator& PlayerRotation, TArray<AInventoryObject*>& InventoryObjects);
+	void SaveLoadData(FArchive& Ar, ACustomPawn * PlayerPawn);
 
 	/** PRIVATE VARIABLES */
 };

@@ -346,9 +346,37 @@ int32 AInventoryObject::GetID()
 	return ID;
 }
 
-void AInventoryObject::Serialize(FArchive& Ar)
+void AInventoryObject::SaveLoad(FArchive& Ar)
 {
 	Ar << ID;
 	Ar << InvWidthCount;
 	Ar << InvHeightCount;
+
+	if (Ar.IsLoading())
+	{
+		// If loading reset slots to be empty before loading items
+		ResetSlots();
+
+	}
+
+	// Save/load items in inventory
+	for (int i = 0; i < InventorySlots.Num(); i++)
+	{
+		if (Ar.IsLoading())
+		{
+			ResetSlots();
+
+		}
+		else
+		{
+			if (InventorySlots[i])
+			{
+				InventorySlots[i].SaveLoad();
+			}
+			else
+			{
+				Ar << false;
+			}
+		}
+	}
 }

@@ -39,9 +39,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	UTexture2D * m_inventoryTexture;
 
-	// mesh when in the world
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item)
-	TSubobjectPtr<class UStaticMeshComponent> m_mesh;
+	// DEFUNCT: mesh when in the world
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item)
+	TSubobjectPtr<class UStaticMeshComponent> m_mesh;*/
 
 	UFUNCTION(BlueprintCallable, Category = Item)
 	void InitMesh();
@@ -75,10 +75,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	bool EndFocusItem();
 
+	void SaveLoad(FArchive& Ar);
+
+	/* get unique ID for item */
+	UFUNCTION(BlueprintCallable, Category = Inventory)
+	int32 GetID();
+
 private:
 	// TODO: this is just temporary until I figure out how to set a world owner when item dropped
 	AActor* m_worldOwner;
 
-	// TODO: do we want to use a unique identifier for items or can we rely on pointer address to uniquely identify (i.e. separate) item instances... needs research
-	// int32 m_ID;
+	int32 ID;
+
+	int32 Type;
 };

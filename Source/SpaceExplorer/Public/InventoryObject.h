@@ -81,7 +81,7 @@ public:
 	// if found return true and upperLeft index
 	bool GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex);
 
-	void Serialize(FArchive& Ar) override;
+	void SaveLoad(FArchive& Ar);
 
 private:
 	// unique ID

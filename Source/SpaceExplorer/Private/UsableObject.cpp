@@ -117,3 +117,18 @@ int32 AUsableObject::GetItemHeight()
 {
 	return m_nInvHeight;
 }
+
+void AUsableObject::SaveLoad(FArchive& Ar)
+{
+	// remember m_worldOwner (AActor)
+	Ar << m_name;
+	Ar << m_nInvWidth;
+	Ar << m_nInvHeight;
+	Ar << m_bIsStackable;
+	Ar << m_nCount;
+	// does this work with UTexture2D?
+	Ar << m_inventoryTexture;
+	// UStaticMeshComponent - how to store...
+	// Ar << m_mesh;
+
+}

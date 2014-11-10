@@ -1,6 +1,7 @@
 
 
 #include "SpaceExplorer.h"
+#include "CustomPawn.h"
 #include "InventoryObject.h"
 #include "SpaceExplorerPawn.h"
 #include "CustomController.h"
@@ -83,7 +84,7 @@ return false;
 
 */
 
-bool ACustomController::SaveGameDataToFile(const FString& FullFilePath, FVector playerLocation, FRotator playerRotation, TArray<AInventoryObject*>& inventoryObjects)
+bool ACustomController::SaveGameDataToFile(const FString& FullFilePath, ACustomPawn * PlayerPawn)
 {
 	//note that the supplied FString must be the entire Filepath
 
@@ -97,7 +98,7 @@ bool ACustomController::SaveGameDataToFile(const FString& FullFilePath, FVector 
 	// Step 1: Variable Data -> Binary
 
 	FBufferArchive ToBinary;
-	SaveLoadData(false, ToBinary, playerLocation, playerRotation, inventoryObjects);
+	SaveLoadData(ToBinary, PlayerPawn);
 
 	// No Data
 	if (ToBinary.Num() <= 0) 
@@ -123,7 +124,7 @@ bool ACustomController::SaveGameDataToFile(const FString& FullFilePath, FVector 
 	return false;
 }
 
-bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePath, FVector& playerLocation, FRotator& playerRotation, TArray<AInventoryObject*>& inventoryObjects)
+bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePath, ACustomPawn * PlayerPawn)
 {
 	// Load Compressed data array
 	TArray<uint8> TheBinaryArray;
@@ -145,7 +146,7 @@ bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePa
 
 	FMemoryReader FromBinary = FMemoryReader(TheBinaryArray, true); //true, free data after done
 	FromBinary.Seek(0);
-	SaveLoadData(true, FromBinary, playerLocation, playerRotation, inventoryObjects);
+	SaveLoadData(FromBinary, PlayerPawn);
 	
 	/* Clean up */
 	
@@ -158,40 +159,11 @@ bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePa
 	return true;
 }
 
-void ACustomController::SaveLoadData(bool bLoading, FArchive& Ar, FVector& PlayerLocation, FRotator& PlayerRotation, TArray<AInventoryObject*>& InventoryObjects)
+void ACustomController::SaveLoadData(FArchive& Ar, ACustomPawn * PlayerPawn)
 {
-	// Saving/Loading player location and rotation
-	Ar << PlayerLocation;
-	Ar << PlayerRotation;
-	
-	// Saving/Loading number of inventory objects
-	int32 InventoryCount = InventoryObjects.Num();
-	Ar << InventoryCount;
-	
-	// Can't really write code that is ambivalent about saving or loading an array of objects... so this cludge is used.
-	if (bLoading)
+	if (PlayerPawn)
 	{
-		UWorld* const World = GetWorld();
-		if (World)
-		{
-			for (int i = 0; i < InventoryCount; i++)
-			{
-				AInventoryObject * InvObject = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
-				if (InvObject)
-				{
-					InvObject->Serialize(Ar);
-					InvObject->ResetSlots();
-					InventoryObjects.Add(InvObject);
-				}
-			}
-		}
-	}
-	else
-	{
-		for (int i = 0; i < InventoryCount; i++)
-		{
-			InventoryObjects[i]->Serialize(Ar);
-		}
+		PlayerPawn->SaveLoad(Ar);
 	}
 }
 
