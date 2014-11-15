@@ -1,8 +1,7 @@
 
 #include "SpaceExplorer.h"
-#include "Net/UnrealNetwork.h"
 #include "UsableObject.h"
-
+#include "Net/UnrealNetwork.h"
 
 AUsableObject::AUsableObject(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
@@ -16,7 +15,7 @@ AUsableObject::AUsableObject(const class FPostConstructInitializeProperties& PCI
 	// ideally this should generate a unique identifier
 	// m_ID = -1;
 	
-	// TODO: proper default texture
+	// TODO: proper default texture placeholder (texture should always be set in blueprints)
 	static ConstructorHelpers::FObjectFinder<UTexture2D> ItemTextureSelOb(TEXT("/Game/Textures/redThing_128_transparent"));
 	m_inventoryTexture = ItemTextureSelOb.Object;
 
@@ -25,6 +24,8 @@ AUsableObject::AUsableObject(const class FPostConstructInitializeProperties& PCI
 	RootComponent = m_mesh;
 
 	m_worldOwner = nullptr;
+
+	bReplicates = true;
 }
 
 void AUsableObject::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -120,15 +121,15 @@ int32 AUsableObject::GetItemHeight()
 
 void AUsableObject::SaveLoad(FArchive& Ar)
 {
+	Super::SaveLoad(Ar);
+
 	// remember m_worldOwner (AActor)
 	Ar << m_name;
 	Ar << m_nInvWidth;
 	Ar << m_nInvHeight;
 	Ar << m_bIsStackable;
 	Ar << m_nCount;
-	// does this work with UTexture2D?
+	// does this work with UTexture2D and more importantly do we need to store it...?
 	Ar << m_inventoryTexture;
-	// UStaticMeshComponent - how to store...
-	// Ar << m_mesh;
 
 }

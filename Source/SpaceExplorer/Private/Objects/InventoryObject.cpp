@@ -348,7 +348,6 @@ int32 AInventoryObject::GetID()
 
 void AInventoryObject::SaveLoad(FArchive& Ar)
 {
-	Ar << ID;
 	Ar << InvWidthCount;
 	Ar << InvHeightCount;
 
@@ -358,24 +357,23 @@ void AInventoryObject::SaveLoad(FArchive& Ar)
 		ResetSlots();
 
 	}
-
+	
 	// Save/load items in inventory
 	for (int i = 0; i < InventorySlots.Num(); i++)
 	{
 		if (Ar.IsLoading())
 		{
-			ResetSlots();
-
+			
 		}
 		else
 		{
 			if (InventorySlots[i])
 			{
-				InventorySlots[i].SaveLoad();
+				InventorySlots[i]->SaveLoad(Ar);
 			}
 			else
 			{
-				Ar << false;
+				Ar << nullptr;
 			}
 		}
 	}

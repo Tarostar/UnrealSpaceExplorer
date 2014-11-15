@@ -8,8 +8,7 @@ class ACustomPawn;
 
 /**
  * Custom controller for custom player handling
- * Initial save system created from Rama's "Custom Save System To Binary Files" tutorial. Thanks!!!
- * This alpha version is just for testing, and simply saves / loads an integer for proof of concept.
+ *
  */
 UCLASS()
 class SPACEEXPLORER_API ACustomController : public APlayerController
