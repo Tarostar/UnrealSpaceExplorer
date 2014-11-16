@@ -1,6 +1,5 @@
 #include "SpaceExplorer.h"
 #include "SpaceHUD.h"
-#include "SpaceExplorerPawn.h"
 
 #define BUTTONTYPE_UNDEFINED 0
 #define BUTTONTYPE_MAIN_RESTART 1
@@ -510,9 +509,9 @@ void ASpaceHUD::DrawHUD()
 void ASpaceHUD::DrawActiveHud()
 {
 	// proof of concept code...
-	/*ASpaceExplorerPawn *pawn = Cast<ASpaceExplorerPawn>(GetOwningPlayerController()->GetControlledPawn());
-	if (pawn && GEngine)
-	GEngine->AddOnScreenDebugMessage(-1, 60.f, FColor::Blue, TEXT("Cur Speed: ") + FString::SanitizeFloat(pawn->CurrentForwardSpeed));*/
+	/*ACustomPawn* PlayerPawn = Cast<ACustomPawn>(GetPawn());
+	if (PlayerPawn && GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 60.f, FColor::Blue, TEXT("Cur Speed: ") + FString::SanitizeFloat(pawn->CurrentForwardSpeed));*/
 
 	for (int32 b = 0; b < ButtonsHud.Num(); b++)
 	{

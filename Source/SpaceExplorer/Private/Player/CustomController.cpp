@@ -87,14 +87,7 @@ return false;
 bool ACustomController::SaveGameDataToFile(const FString& FullFilePath, ACustomPawn * PlayerPawn)
 {
 	//note that the supplied FString must be the entire Filepath
-
-	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
-	if (!pSpaceExplorerPawn)
-	{
-		// no player pawn - abort
-		return false;
-	}
-
+	
 	// Step 1: Variable Data -> Binary
 
 	FBufferArchive ToBinary;
@@ -161,6 +154,8 @@ bool ACustomController::LoadGameDataFromFileCompressed(const FString& FullFilePa
 
 void ACustomController::SaveLoadData(FArchive& Ar, ACustomPawn * PlayerPawn)
 {
+	// TODO: we actually need to save/load the object derived from CustomPawn... then reset everything and load... hmmm
+
 	if (PlayerPawn)
 	{
 		PlayerPawn->SaveLoad(Ar);
@@ -170,9 +165,9 @@ void ACustomController::SaveLoadData(FArchive& Ar, ACustomPawn * PlayerPawn)
 int32 ACustomController::GetInventoryObjectCount()
 {
 	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
-	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
-	if (pSpaceExplorerPawn)
-		return pSpaceExplorerPawn->GetInventoryObjectCount();
+	ACustomPawn* PlayerPawn = Cast<ACustomPawn>(GetPawn());
+	if (PlayerPawn)
+		return PlayerPawn->GetInventoryObjectCount();
 
 	// no inventory
 	return 0;
@@ -181,9 +176,9 @@ int32 ACustomController::GetInventoryObjectCount()
 AInventoryObject* ACustomController::GetInventoryObjectFromID(int32 nID)
 {
 	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
-	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
-	if (pSpaceExplorerPawn)
-		return pSpaceExplorerPawn->GetInventoryObjectFromID(nID);
+	ACustomPawn* PlayerPawn = Cast<ACustomPawn>(GetPawn());
+	if (PlayerPawn)
+		return PlayerPawn->GetInventoryObjectFromID(nID);
 	
 	// does not exist
 	return nullptr;
@@ -192,9 +187,9 @@ AInventoryObject* ACustomController::GetInventoryObjectFromID(int32 nID)
 AInventoryObject* ACustomController::GetInventoryObjectFromIndex(int32 nIndex)
 {
 	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
-	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
-	if (pSpaceExplorerPawn)
-		return pSpaceExplorerPawn->GetInventoryObjectFromIndex(nIndex);
+	ACustomPawn* PlayerPawn = Cast<ACustomPawn>(GetPawn());
+	if (PlayerPawn)
+		return PlayerPawn->GetInventoryObjectFromIndex(nIndex);
 
 	// does not exist
 	return nullptr;
@@ -203,7 +198,7 @@ AInventoryObject* ACustomController::GetInventoryObjectFromIndex(int32 nIndex)
 void ACustomController::InvokeAction(class DragObject& item)
 {
 	// TODO: this should work with any pawn - potentially we need to create a pawn class hierarchy
-	ASpaceExplorerPawn* pSpaceExplorerPawn = Cast<ASpaceExplorerPawn>(GetPawn());
-	if (pSpaceExplorerPawn)
-		return pSpaceExplorerPawn->InvokeAction(item);
+	ACustomPawn* PlayerPawn = Cast<ACustomPawn>(GetPawn());
+	if (PlayerPawn)
+		return PlayerPawn->InvokeAction(item);
 }

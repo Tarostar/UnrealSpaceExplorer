@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "UsableObject.h"
+#include "Item.h"
 #include "GameFramework/Actor.h"
 #include "InventoryObject.generated.h"
 
@@ -24,7 +24,7 @@ public:
 	// the array which represents the slots of the inventory (use a single dimension, and then width and height to derive actual layout and positions)
 	// each slot points to an item, and an item that can take up multiple slots will have multiple slots pointing to that same item
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
-	TArray<AUsableObject*> InventorySlots;
+	TArray<AItem*> InventorySlots;
 
 	/* Initialise inventory with ID and number of slots wide and high */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -36,15 +36,15 @@ public:
 
 	/* Add item to first available slot */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	bool AddItemFirstAvailableSlot(AUsableObject* pItem);
+	bool AddItemFirstAvailableSlot(AItem* pItem);
 
 	/* Add item to specified index if fits - otherwise return false*/
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	bool AddItem(int32 nIndex, AUsableObject* pItem);
+	bool AddItem(int32 nIndex, AItem* pItem);
 
 	/* insert item in target index if fits and return any item which was there - otherwise return false*/
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject* ReplaceItem(int32 nIndex, AUsableObject* pItem);
+	AItem* ReplaceItem(int32 nIndex, AItem* pItem);
 
 	/* check if slot has an item */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -52,18 +52,18 @@ public:
 	
 	/* remove and return item from inventory, and update index to point to upper, left corner of any object spanning multiple slots*/
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject* RetrieveItem(int32 nIndex, int32& nUpperLeft);
+	AItem* RetrieveItem(int32 nIndex, int32& nUpperLeft);
 
 	// UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject* RetrieveItem(int32 nIndex);
+	AItem* RetrieveItem(int32 nIndex);
 
 	/* make a copy of item from inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject* CloneItem(int32 nIndex);
+	AItem* CloneItem(int32 nIndex);
 
 	/* get a pointer to item in inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	AUsableObject* GetItem(int32 nIndex);
+	AItem* GetItem(int32 nIndex);
 
 	/* move item from one slot position to another (if fits) - also move target item if swapping (and fits), if not swapping delete any item at target index */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -78,8 +78,8 @@ public:
 	int32 GetID();
 
 	// start at index and find upper, left index
-	// if found return true and upperLeft index
-	bool GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex);
+	// if not found return -1
+	int32 GetUpperLeft(int32 nIndex);
 
 	void SaveLoad(FArchive& Ar);
 
@@ -88,5 +88,5 @@ private:
 	int32 ID;
 
 	bool CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth);
-	bool InsertItem(int32 nIndex, AUsableObject* pItem);
+	bool InsertItem(int32 nIndex, AItem* pItem);
 };

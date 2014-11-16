@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "ObjectTemplate.generated.h"
+#include "CustomObject.generated.h"
 
 // TODO: meshes for physical representation of objects set in specific child objects, and probably in blueprints only?
 
@@ -11,11 +11,19 @@
  * The base template from which all objects in the world are created
  */
 UCLASS()
-class SPACEEXPLORER_API AObjectTemplate : public AActor
+class SPACEEXPLORER_API ACustomObject : public AActor
 {
 	GENERATED_UCLASS_BODY()
 
 protected:
+	// descriptive name
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Object)
+	FName Name;
+
+	// major object type
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Object)
+	FName Type;
+
 	// notify factions when in player's possession and they can notice
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Object)
 	bool bNotifyFactions;
@@ -24,10 +32,6 @@ protected:
 	// and when that matches or exceeds ProductionCost item is ready to be deployed.
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Object)
 	int32 ProductionCost;
-
-	// major object type
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Object)
-	FName Type;
 
 	void SaveLoad(FArchive& Ar);
 };

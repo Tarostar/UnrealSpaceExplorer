@@ -1,7 +1,7 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
 
-// class AUsableObject;
+// class AItem;
 //#include "ItemFactory.h";
 #include "SpaceExplorerGameMode.generated.h"
 
@@ -14,7 +14,7 @@ public:
 	// TODO: this should probably move to GameState
 	// TODO: review
 	/* temporary method to create a new item with an unique ID */
-	// AUsableObject* CreateItem();
+	// AItem* CreateItem();
 
 private:
 	// TODO: this should probably move to GameState

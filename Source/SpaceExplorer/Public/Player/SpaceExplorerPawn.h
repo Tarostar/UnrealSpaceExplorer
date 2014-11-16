@@ -15,7 +15,7 @@ public:
 		
 	/* StaticMesh component that will be the visuals for our flying pawn */
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-	TSubobjectPtr<class UStaticMeshComponent> m_planeMesh;
+	TSubobjectPtr<class UStaticMeshComponent> Mesh;
 
 private:
 	/** PRIVATE FUNCTIONS */

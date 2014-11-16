@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ObjectTemplate.h"
+#include "CustomObject.h"
 #include "GameFramework/Actor.h"
 #include "FactoryMachine.generated.h"
 
@@ -14,7 +14,7 @@ struct FProductPriority
 	GENERATED_USTRUCT_BODY()
 
 	int32 Priority;
-	TArray<TSubclassOf<class AObjectTemplate> > AvailableTypes;
+	TArray<TSubclassOf<class ACustomObject> > AvailableTypes;
 
 	// Generate random number from 0 to priority total of all ProductionPlan items
 	// This priorities [a] 10, [b] 1000, [c] 50 generates a random number from 0-1060
@@ -50,7 +50,7 @@ protected:
 	int32 MinimumProduction;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Factory)
-	TArray<AObjectTemplate*> ProductionQueue;
+	TArray<ACustomObject*> ProductionQueue;
 
 	// plan for what to add to the ProductionQueue
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Factory)

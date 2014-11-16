@@ -142,8 +142,7 @@ void AInventory::DrawInventory()
 			if (m_pInventory->InventorySlots[i]->GetItemWidth() > 1 || m_pInventory->InventorySlots[i]->GetItemHeight() > 1)
 			{
 				// only draw for the upper, left index
-				int32 nUpperLeftIndex;
-				m_pInventory->GetUpperLeft(i, nUpperLeftIndex);
+				int32 nUpperLeftIndex = m_pInventory->GetUpperLeft(i);
 				if (nUpperLeftIndex == i)
 				{
 					// texture must be correctly sized to cover the right number of slots (i.e. 128 pixels per slot)
@@ -281,7 +280,7 @@ bool AInventory::ItemDrag(bool bPickup, class DragObject& item)
 				return true;
 			}
 
-			AUsableObject * pItem = pSourceInventory->RetrieveItem(item.GetSlotIndex());
+			AItem * pItem = pSourceInventory->RetrieveItem(item.GetSlotIndex());
 			if (pItem)
 			{
 				// we have an item to move - attempt to add it

@@ -1,12 +1,11 @@
 
 #include "SpaceExplorer.h"
-#include "UsableObject.h"
+#include "Item.h"
 #include "Net/UnrealNetwork.h"
 
-AUsableObject::AUsableObject(const class FPostConstructInitializeProperties& PCIP)
+AItem::AItem(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	m_name = "none";
 	m_nInvWidth = 1;
 	m_nInvHeight = 1;
 	m_bIsStackable = false;
@@ -28,27 +27,26 @@ AUsableObject::AUsableObject(const class FPostConstructInitializeProperties& PCI
 	bReplicates = true;
 }
 
-void AUsableObject::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+void AItem::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	// Replicate to everyone
-	DOREPLIFETIME(AUsableObject, m_name);
-	DOREPLIFETIME(AUsableObject, m_nInvWidth);
-	DOREPLIFETIME(AUsableObject, m_nInvHeight);
-	DOREPLIFETIME(AUsableObject, m_bIsStackable);
-	DOREPLIFETIME(AUsableObject, m_nCount);
+	DOREPLIFETIME(AItem, m_nInvWidth);
+	DOREPLIFETIME(AItem, m_nInvHeight);
+	DOREPLIFETIME(AItem, m_bIsStackable);
+	DOREPLIFETIME(AItem, m_nCount);
 }
 
 
-void AUsableObject::InitMesh()
+void AItem::InitMesh()
 {
 	// TODO: is this how we want to do it?
 	m_mesh->SetSimulatePhysics(true);
 	m_mesh->WakeRigidBody();
 }
 
-void AUsableObject::Collect(AActor * pNewOwner)
+void AItem::Collect(AActor * pNewOwner)
 {
 	// grab item and put in inventory (unregister component)
 	
@@ -63,7 +61,7 @@ void AUsableObject::Collect(AActor * pNewOwner)
 	}
 }
 
-void AUsableObject::Drop()
+void AItem::Drop()
 {
 	// put item back into world (register component and set location in world)
 
@@ -95,13 +93,13 @@ void AUsableObject::Drop()
 	}
 }
 
-bool AUsableObject::IsVisibleInWorld()
+bool AItem::IsVisibleInWorld()
 {
 	return m_mesh->IsRegistered();
 }
 
 
-bool AUsableObject::InvokeAction()
+bool AItem::InvokeAction()
 {
 	// this should most likely be just a baseclass placeholder and then children of usable object implement the actual action invoked
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Action invoked on usable object."));
@@ -109,27 +107,26 @@ bool AUsableObject::InvokeAction()
 	return true;
 }
 
-int32 AUsableObject::GetItemWidth()
+int32 AItem::GetItemWidth()
 {
 	return m_nInvWidth;
 }
 
-int32 AUsableObject::GetItemHeight()
+int32 AItem::GetItemHeight()
 {
 	return m_nInvHeight;
 }
 
-void AUsableObject::SaveLoad(FArchive& Ar)
+void AItem::SaveLoad(FArchive& Ar)
 {
 	Super::SaveLoad(Ar);
 
-	// remember m_worldOwner (AActor)
-	Ar << m_name;
+	// remember m_worldOwner (AActor)?
 	Ar << m_nInvWidth;
 	Ar << m_nInvHeight;
 	Ar << m_bIsStackable;
 	Ar << m_nCount;
-	// does this work with UTexture2D and more importantly do we need to store it...?
-	Ar << m_inventoryTexture;
+	// we need a way to retrieve relevant texture and mesh...
+	//Ar << m_inventoryTexture;
 
 }

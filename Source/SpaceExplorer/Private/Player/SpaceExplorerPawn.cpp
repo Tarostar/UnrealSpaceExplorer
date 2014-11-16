@@ -17,9 +17,9 @@ ASpaceExplorerPawn::ASpaceExplorerPawn(const class FPostConstructInitializePrope
 	static FConstructorStatics ConstructorStatics;
 
 	// Create static mesh component
-	m_planeMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("PlaneMesh0"));
-	m_planeMesh->SetStaticMesh(ConstructorStatics.planeMesh.Get());
-	RootComponent = m_planeMesh;
+	Mesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("Mesh0"));
+	Mesh->SetStaticMesh(ConstructorStatics.planeMesh.Get());
+	RootComponent = Mesh;
 }
 
 void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
@@ -37,17 +37,17 @@ void ASpaceExplorerPawn::OnConstruction(const FTransform& Transform)
 void ASpaceExplorerPawn::SetPawnVisibility(bool bVisible)
 {
 	// cheating...
-	m_planeMesh->SetVisibility(bVisible);
+	Mesh->SetVisibility(bVisible);
 
 	// TODO: this does not work
-	//m_planeMesh->SetHiddenInGame
+	//Mesh->SetHiddenInGame
 }
 
 void ASpaceExplorerPawn::AttachCamera(TSubobjectPtr<class UCameraComponent> Camera)
 {
 	if (Camera)
 	{
-		Camera->AttachTo(m_planeMesh);
+		Camera->AttachTo(Mesh);
 	}
 }
 
@@ -55,6 +55,6 @@ void ASpaceExplorerPawn::AttachSpringArm(TSubobjectPtr<class USpringArmComponent
 {
 	if (SpringArm)
 	{
-		SpringArm->AttachTo(m_planeMesh);
+		SpringArm->AttachTo(Mesh);
 	}
 }

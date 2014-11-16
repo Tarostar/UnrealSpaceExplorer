@@ -4,7 +4,7 @@
 
 #include "FactoryMachine.h"
 #include "FactoryPortal.h"
-#include "ObjectTemplate.h"
+#include "CustomObject.h"
 #include "GameFramework/Actor.h"
 #include "ObjectFactory.generated.h"
 

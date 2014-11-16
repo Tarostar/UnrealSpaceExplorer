@@ -3,7 +3,7 @@
 #include "SpaceExplorer.h"
 #include "CustomPawn.h"
 #include "Net/UnrealNetwork.h"
-#include "UsableObject.h"
+#include "Item.h"
 #include "CustomHUD.h"
 #include "InventoryObject.h"
 #include "CustomController.h"
@@ -461,10 +461,11 @@ void ACustomPawn::ToggleInventoryThree()
 	ToggleInventory(2);
 }
 
-bool ACustomPawn::AddItem(AUsableObject * pItem)
+bool ACustomPawn::AddItem(AItem * pItem)
 {
 	for (int i = 0; i < m_inventoryObjects.Num(); i++)
 	{
+		check(m_inventoryObjects[i]);
 		if (m_inventoryObjects[i]->AddItemFirstAvailableSlot(pItem))
 		{
 			// successfully added item
@@ -590,7 +591,7 @@ void ACustomPawn::UseItem_Implementation(int32 nInventoryID, int32 nSlotIndex)
 		return;
 	}
 
-	AUsableObject* pObject = pInventoryObject->GetItem(nSlotIndex);
+	AItem* pObject = pInventoryObject->GetItem(nSlotIndex);
 	if (pObject == nullptr)
 	{
 		return;
@@ -694,11 +695,9 @@ void ACustomPawn::SaveLoad(FArchive& Ar)
 			for (int i = 0; i < InventoryCount; i++)
 			{
 				AInventoryObject * InvObject = World->SpawnActor<AInventoryObject>(AInventoryObject::StaticClass());
-				if (InvObject)
-				{
-					InvObject->SaveLoad(Ar);
-					m_inventoryObjects.Add(InvObject);
-				}
+				check(InvObject);
+				InvObject->SaveLoad(Ar);
+				m_inventoryObjects.Add(InvObject);
 			}
 		}
 	}
@@ -706,6 +705,7 @@ void ACustomPawn::SaveLoad(FArchive& Ar)
 	{
 		for (int i = 0; i < InventoryCount; i++)
 		{
+			check(m_inventoryObjects[i]);
 			m_inventoryObjects[i]->SaveLoad(Ar);
 		}
 	}

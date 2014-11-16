@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "ObjectTemplate.h"
-#include "UsableObject.generated.h"
+#include "CustomObject.h"
+#include "Item.generated.h"
 
 /**
  * Base item class for all objects in the world and inventory
@@ -15,14 +15,11 @@
  * - Does setting FTransform on AActor also set the component location?
  */
 UCLASS()
-class SPACEEXPLORER_API AUsableObject : public AObjectTemplate
+class SPACEEXPLORER_API AItem : public ACustomObject
 {
 	GENERATED_UCLASS_BODY()
 
 public:
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Object)
-	FName m_name;
-
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Object)
 	int32 m_nInvWidth;
 
@@ -38,6 +35,10 @@ public:
 	// texture in inventory
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Object)
 	UTexture2D * m_inventoryTexture;
+
+	// DEFUNCT: mesh when in the world
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Object)
+	TSubobjectPtr<class UStaticMeshComponent> m_mesh;
 	
 	UFUNCTION(BlueprintCallable, Category = Object)
 	void InitMesh();
@@ -61,6 +62,9 @@ public:
 	int32 GetItemHeight();
 	
 	void SaveLoad(FArchive& Ar);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	bool OnUsed(APawn* character);
 	
 private:
 	// TODO: this is just temporary until I figure out how to set a world owner when item dropped

@@ -2,7 +2,7 @@
 
 #include "SpaceExplorer.h"
 #include "InventoryObject.h"
-#include "UsableObject.h"
+#include "Item.h"
 
 AInventoryObject::AInventoryObject(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
@@ -32,8 +32,13 @@ void AInventoryObject::ResetSlots()
 	}
 }
 
-bool AInventoryObject::AddItemFirstAvailableSlot(AUsableObject* pItem)
+bool AInventoryObject::AddItemFirstAvailableSlot(AItem* pItem)
 {
+	if (pItem == nullptr)
+	{
+		return false;
+	}
+
 	for (int i = 0; i < InventorySlots.Num(); i++)
 	{
 		if (AddItem(i, pItem))
@@ -47,7 +52,7 @@ bool AInventoryObject::AddItemFirstAvailableSlot(AUsableObject* pItem)
 	return false;
 }
 
-bool AInventoryObject::AddItem(int32 nIndex, AUsableObject* pItem)
+bool AInventoryObject::AddItem(int32 nIndex, AItem* pItem)
 {
 	if (CheckItemFits(nIndex, pItem->m_nInvHeight, pItem->m_nInvWidth))
 	{
@@ -59,11 +64,11 @@ bool AInventoryObject::AddItem(int32 nIndex, AUsableObject* pItem)
 	return false;
 }
 
-AUsableObject* AInventoryObject::ReplaceItem(int32 nIndex, AUsableObject* pItem)
+AItem* AInventoryObject::ReplaceItem(int32 nIndex, AItem* pItem)
 {
 	// retrieve any item in target slot which will set the slots to nullptr
 	int32 nUpperLeft;
-	AUsableObject * pTargetItem = RetrieveItem(nIndex, nUpperLeft);
+	AItem * pTargetItem = RetrieveItem(nIndex, nUpperLeft);
 	
 	// insert new item
 	if (!AddItem(nIndex, pItem))
@@ -98,21 +103,22 @@ bool AInventoryObject::HasItem(int32 nIndex)
 	return true;
 }
 
-AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex)
+AItem* AInventoryObject::RetrieveItem(int32 nIndex)
 {
 	int32 nUpperLeft;
 	return RetrieveItem(nIndex, nUpperLeft);
 }
 
-AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex, int32& nUpperLeft)
-{
-	if (!GetUpperLeft(nIndex, nUpperLeft))
+AItem* AInventoryObject::RetrieveItem(int32 nIndex, int32& nUpperLeft)
+{	
+	nUpperLeft = GetUpperLeft(nIndex);
+	if (nUpperLeft == -1)
 	{
 		// no item selected (or invalid index)
 		return nullptr;
 	}
 
-	AUsableObject * pItem = InventorySlots[nUpperLeft];
+	AItem * pItem = InventorySlots[nUpperLeft];
 	for (int nRow = 0; nRow < pItem->m_nInvHeight; nRow++)
 	{
 		// get start index for each row
@@ -136,7 +142,7 @@ AUsableObject* AInventoryObject::RetrieveItem(int32 nIndex, int32& nUpperLeft)
 	return pItem;
 }
 
-AUsableObject* AInventoryObject::CloneItem(int32 nIndex)
+AItem* AInventoryObject::CloneItem(int32 nIndex)
 {
 	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
@@ -145,11 +151,11 @@ AUsableObject* AInventoryObject::CloneItem(int32 nIndex)
 	}
 
 	// create a copy and return it
-	return new AUsableObject(*InventorySlots[nIndex]);
+	return new AItem(*InventorySlots[nIndex]);
 
 }
 
-AUsableObject* AInventoryObject::GetItem(int32 nIndex)
+AItem* AInventoryObject::GetItem(int32 nIndex)
 {
 	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
@@ -166,7 +172,7 @@ bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 {
 	// retrieve item which will set the slots to nullptr
 	int32 nFromUpperLeft;
-	AUsableObject * pSourceItem = RetrieveItem(nFrom, nFromUpperLeft);
+	AItem * pSourceItem = RetrieveItem(nFrom, nFromUpperLeft);
 	if (pSourceItem == nullptr)
 	{
 		// no item found
@@ -175,7 +181,7 @@ bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 
 	// retrieve any item in target slot which will set the slots to nullptr
 	int32 nToUpperLeft;
-	AUsableObject * pTargetItem = RetrieveItem(nTo, nToUpperLeft);
+	AItem * pTargetItem = RetrieveItem(nTo, nToUpperLeft);
 	if (bSwap && pTargetItem != nullptr)
 	{
 		// put target item in source item position
@@ -228,7 +234,7 @@ bool AInventoryObject::MoveItem(int32 nFrom, int32 nTo, bool bSwap)
 bool AInventoryObject::DestroyItem(int32 nIndex)
 {
 	// retrieve item which will set the slots to nullptr
-	AUsableObject * pItem = RetrieveItem(nIndex);
+	AItem * pItem = RetrieveItem(nIndex);
 	if (pItem == nullptr)
 	{
 		// no item found
@@ -241,31 +247,31 @@ bool AInventoryObject::DestroyItem(int32 nIndex)
 	return true;
 }
 
-bool AInventoryObject::GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex)
+int32 AInventoryObject::GetUpperLeft(int32 nIndex)
 {
 	if (nIndex < 0 || nIndex >= InventorySlots.Num())
 	{
 		// invalid index
-		return false;
+		return -1;
 	}
 
 	// get item to check for when looking for upper left
-	AUsableObject * pItem = InventorySlots[nIndex];
+	AItem * pItem = InventorySlots[nIndex];
 
 	if (pItem == nullptr)
 	{
 		// no item selected
-		return false;
+		return -1;
 	}
-
-	// start on selected index
-	nUpperLeftIndex = nIndex;
 
 	if (pItem->m_nInvWidth == 1 && pItem->m_nInvHeight == 1)
 	{
 		// exactly one slot - so done
-		return true;
+		return nIndex;
 	}
+
+	// multi-slot item, so start on selected index and iterate
+	int32 nUpperLeftIndex = nIndex;
 
 	// find leftmost column (if item spans several columns)
 	while (nUpperLeftIndex > 0 && pItem->m_nInvWidth > 1 && InventorySlots[nUpperLeftIndex - 1] == pItem)
@@ -281,7 +287,7 @@ bool AInventoryObject::GetUpperLeft(int32 nIndex, int32& nUpperLeftIndex)
 		nUpperLeftIndex -= InvWidthCount;
 	}
 
-	return true;
+	return nUpperLeftIndex;
 }
 
 bool AInventoryObject::CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth)
@@ -319,7 +325,7 @@ bool AInventoryObject::CheckItemFits(int32 nIndex, int32 nHeight, int32 nWidth)
 	return true;
 }
 
-bool AInventoryObject::InsertItem(int32 nIndex, AUsableObject* pItem)
+bool AInventoryObject::InsertItem(int32 nIndex, AItem* pItem)
 {
 	for (int nRow = 0; nRow < pItem->m_nInvHeight; nRow++)
 	{
@@ -348,6 +354,7 @@ int32 AInventoryObject::GetID()
 
 void AInventoryObject::SaveLoad(FArchive& Ar)
 {
+	
 	Ar << InvWidthCount;
 	Ar << InvHeightCount;
 
@@ -361,19 +368,44 @@ void AInventoryObject::SaveLoad(FArchive& Ar)
 	// Save/load items in inventory
 	for (int i = 0; i < InventorySlots.Num(); i++)
 	{
+		// track if there is something in the inventory slot
+		bool bSlot = false;
 		if (Ar.IsLoading())
 		{
-			
-		}
+			Ar << bSlot;
+			if (bSlot)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Loading existing slot: ") + FString::FromInt(i));
+
+				// load a new item into the world
+				UWorld* const World = GetWorld();
+				check(World);
+				AItem * Item = World->SpawnActor<AItem>(AItem::StaticClass());
+				check(Item);
+				Item->SaveLoad(Ar);
+				// add item back in - will fill all relevant slots
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Add Item: ") + FString::FromInt(i));
+				AddItem(i, Item);
+			}
+		}	
 		else
 		{
-			if (InventorySlots[i])
+			// saving - update is slot exists and is root index of item (i.e. upper left) as we only save an item once for root index
+			bSlot = HasItem(i) && GetUpperLeft(i) == i;
+			if (bSlot)
 			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("HasItem: ") + FString::FromInt(i));
+
+				check(InventorySlots[i]);
+				// root index of item in inventory - save this
+				Ar << bSlot;
 				InventorySlots[i]->SaveLoad(Ar);
 			}
 			else
 			{
-				Ar << nullptr;
+				
+				// store that this slot is empty (or not root index of item)
+				Ar << bSlot;
 			}
 		}
 	}

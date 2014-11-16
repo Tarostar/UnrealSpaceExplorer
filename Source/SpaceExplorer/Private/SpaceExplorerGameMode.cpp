@@ -4,7 +4,7 @@
 #include "SpaceExplorerGameMode.h"
 #include "SpaceExplorerPawn.h"
 //#include "ItemFactory.h";
-// #include "UsableObject.h"
+// #include "Item.h"
 #include "SpaceHUD.h"
 
 ASpaceExplorerGameMode::ASpaceExplorerGameMode(const class FPostConstructInitializeProperties& PCIP)
@@ -62,7 +62,7 @@ void ASpaceExplorerGameMode::InitGame(const FString& MapName, const FString& Opt
 
 // TODO: review
 /*
-AUsableObject* ASpaceExplorerGameMode::CreateItem()
+AItem* ASpaceExplorerGameMode::CreateItem()
 {
 	UWorld* const World = GetWorld();
 	if (World)
@@ -71,7 +71,7 @@ AUsableObject* ASpaceExplorerGameMode::CreateItem()
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
 
-		AUsableObject * object = World->SpawnActor<AUsableObject>(AUsableObject::StaticClass());
+		AItem * object = World->SpawnActor<AItem>(AItem::StaticClass());
 
 		if (object)
 		{

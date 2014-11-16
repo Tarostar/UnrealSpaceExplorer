@@ -89,7 +89,7 @@ void AActionBar::Draw()
 			if (pSourceInventory)
 			{
 
-				AUsableObject * pItem = pSourceInventory->GetItem(m_actionSlots[i].m_object.GetSlotIndex());
+				AItem * pItem = pSourceInventory->GetItem(m_actionSlots[i].m_object.GetSlotIndex());
 				if (pItem)
 				{
 					// scale down any item that is unusually tall or wide

@@ -53,10 +53,10 @@ void ACustomHUD::BeginPlay()
 			APlayerController* const controller = Cast<APlayerController>(PlayerOwner);
 			if (controller)
 			{
-				ASpaceExplorerPawn* const pawn = Cast<ASpaceExplorerPawn>(controller->GetPawn());
-				if (pawn)
+				ACustomPawn* PlayerPawn = Cast<ACustomPawn>(GetPawn());
+				if (PlayerPawn)
 				{
-					pHotbarObjects = pawn->GetHotbarObjects();
+					pHotbarObjects = PlayerPawn->GetHotbarObjects();
 				}
 			}*/
 

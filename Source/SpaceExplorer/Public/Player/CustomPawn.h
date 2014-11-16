@@ -2,7 +2,7 @@
 
 #pragma once
 
-class AUsableObject;
+class AItem;
 #include "InventoryObject.h"
 #include "GameFramework/Pawn.h"
 #include "CustomPawn.generated.h"
@@ -28,7 +28,7 @@ public:
 
 	/* Add an item to the inventory */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	bool AddItem(AUsableObject * pItem);
+	bool AddItem(AItem * pItem);
 
 	/* Get an inventory based on its index */
 	UFUNCTION(BlueprintCallable, Category = Inventory)
@@ -44,7 +44,7 @@ public:
 	/* invoke an action (item optional) */
 	void InvokeAction(class DragObject& item);
 
-	/* Runs on Server. Perform "OnUsed" on currently viewed UsableObject if implemented. */
+	/* Runs on Server. Perform "OnUsed" on currently viewed Item if implemented. */
 	UFUNCTION(BlueprintCallable, WithValidation, Server, Reliable, Category = Inventory)
 	virtual void UseItem(int32 nInventoryID, int32 nSlotIndex);
 
